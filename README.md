@@ -87,6 +87,8 @@ In-Memory (window._ks) → Cookie → localStorage
 
 Auf Android wird zusätzlich `CookieManager.flush()` über `visibilitychange`/`pagehide` ausgelöst.
 
+**Anki Desktop:** Qt's WebEngine nutzt ein Off-The-Record-Profil — Cookies und localStorage werden bei jedem Neustart gelöscht. Das mitgelieferte **Add-on** löst dieses Problem: es speichert die Settings als JSON-Datei und stellt sie beim nächsten Start automatisch wieder her.
+
 ---
 
 ## Plattform-Kompatibilität
@@ -128,9 +130,14 @@ Templates/
 │   ├── FrontTemplate.html   ← Erkennungskarte: Anzeige + Settings
 │   └── BackTemplate.html    ← Erkennungskarte Rückseite: Farben + Info-Modal
 └── Styling.css              ← Gemeinsames Stylesheet (Dark/Light, Responsive, Animationen)
+
+Addon/
+├── __init__.py              ← Desktop-Add-on: Settings über Neustarts hinweg speichern
+└── manifest.json            ← Add-on-Metadaten
 ```
 
-Jede Datei wird in Anki direkt als Template-Inhalt eingefügt — **keine Plugins, keine externen Abhängigkeiten**.
+Jede Template-Datei wird in Anki direkt als Template-Inhalt eingefügt — **keine Plugins, keine externen Abhängigkeiten**.
+Das Add-on ist **optional** und nur für Anki Desktop relevant (AnkiDroid/AnkiMobile speichern Cookies nativ).
 
 ---
 
@@ -144,6 +151,15 @@ Jede Datei wird in Anki direkt als Template-Inhalt eingefügt — **keine Plugin
    - **Card 2 Vorderseite** → Inhalt von `Templates/Card-2/FrontTemplate.html`
    - **Card 2 Rückseite** → Inhalt von `Templates/Card-2/BackTemplate.html`
    - **Styling** → Inhalt von `Templates/Styling.css`
+
+### Desktop-Add-on (optional)
+
+Das Add-on sorgt dafür, dass Einstellungen auf **Anki Desktop** über Neustarts hinweg erhalten bleiben.
+
+1. Den Ordner `Addon/` nach `~/.local/share/Anki2/addons21/kanji_draw_persistence/` kopieren (Linux) bzw. `%APPDATA%\Anki2\addons21\kanji_draw_persistence\` (Windows) bzw. `~/Library/Application Support/Anki2/addons21/kanji_draw_persistence/` (macOS)
+2. Anki neu starten
+
+Das Template funktioniert auch **ohne** das Add-on — Einstellungen werden dann lediglich bei jedem Neustart auf die Standardwerte zurückgesetzt.
 
 ---
 
