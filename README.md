@@ -120,11 +120,14 @@ Auf Android wird zusätzlich `CookieManager.flush()` über `visibilitychange`/`p
 ---
 
 ## Dateistruktur
-FrontTemplate-Card-1.html   ← Schreibkarte: Zeichenfläche + Erkennung + Settings
-FrontTemplate-Card-2.html   ← Erkennungskarte: Anzeige + Settings
-BackTemplate-Card-1.html    ← Schreibkarte Rückseite: Ergebnis + Info-Modal
-BackTemplate-Card-2.html    ← Erkennungskarte Rückseite: Farben + Info-Modal
-Styling.css                 ← Gemeinsames Stylesheet (Dark/Light, Responsive, Animationen)
+Templates/
+├── Card-1/
+│   ├── FrontTemplate.html   ← Schreibkarte: Zeichenfläche + Erkennung + Settings
+│   └── BackTemplate.html    ← Schreibkarte Rückseite: Ergebnis + Info-Modal
+├── Card-2/
+│   ├── FrontTemplate.html   ← Erkennungskarte: Anzeige + Settings
+│   └── BackTemplate.html    ← Erkennungskarte Rückseite: Farben + Info-Modal
+└── Styling.css              ← Gemeinsames Stylesheet (Dark/Light, Responsive, Animationen)
 ```
 
 Jede Datei wird in Anki direkt als Template-Inhalt eingefügt — **keine Plugins, keine externen Abhängigkeiten**.
