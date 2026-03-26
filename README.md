@@ -109,13 +109,13 @@ Auf Android wird zusätzlich `CookieManager.flush()` über `visibilitychange`/`p
 |------|:-------:|-------------|
 | `Kanji` | ✓ | Das Schriftzeichen |
 | `Bedeutung` | ✓ | Deutsche Übersetzung |
-| `SVG-Pfade` | ✓ | SVG-`<path>`-Elemente für jeden Strich |
+| `SVGPfade` | ✓ | SVG-`<path>`-Elemente für jeden Strich |
 | `JLPT` | — | JLPT-Stufe (N5–N1) |
-| `Frequenz` | — | Häufigkeitsrang |
-| `Radikalbaum` | — | Zerlegung in Radikale/Primitive |
-| `Geschichte` | — | Eselsbrücke / Merkhilfe |
-| `VisuellHinweis` | — | Visueller Hinweis zur Eselsbrücke |
-| `HinweisWort` | — | Wortbeispiele mit Furigana |
+| `Häufigkeit` | — | Häufigkeitsrang |
+| `Radikale` | — | Zerlegung in Radikale/Primitive |
+| `Eselsbrücke` | — | Merkhilfe / Eselsbrücke |
+| `Merkhilfe` | — | Visueller Hinweis zur Eselsbrücke |
+| `Wortbeispiel` | — | Wortbeispiele mit Furigana |
 | `Onyomi` | — | ON-Lesung (Katakana) |
 | `Kunyomi` | — | KUN-Lesung (Hiragana) |
 

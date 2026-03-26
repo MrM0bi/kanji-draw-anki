@@ -106,7 +106,7 @@
                 {{JLPT}}
             </span>
             {{/JLPT}}
-            {{#Frequenz}}
+            {{#Häufigkeit}}
             <span class="info-tag tag-frequency">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -114,20 +114,20 @@
                     <line x1="12" y1="20" x2="12" y2="4" />
                     <line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
-                {{Frequenz}}
+                {{Häufigkeit}}
             </span>
-            {{/Frequenz}}
+            {{/Häufigkeit}}
         </div>
 
-        {{#Radikalbaum}}
-        <script id="raw-tree-data" type="text/plain">{{Radikalbaum}}</script>
+        {{#Radikale}}
+        <script id="raw-tree-data" type="text/plain">{{Radikale}}</script>
         <div class="tree-container custom-tree-box">
             <div class="tree-root-kanji">{{Kanji}}</div>
             <div class="tree-children" id="tree-render-target"></div>
         </div>
-        {{/Radikalbaum}}
+        {{/Radikale}}
 
-        {{#Geschichte}}
+        {{#Eselsbrücke}}
         <div class="info-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -138,24 +138,24 @@
             </svg>
             Eselsbrücke
         </div>
-        {{/Geschichte}}
+        {{/Eselsbrücke}}
 
-        {{#VisuellHinweis}}
+        {{#Merkhilfe}}
         <div class="visuell-hinweis">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
             </svg>
-            {{VisuellHinweis}}
+            {{Merkhilfe}}
         </div>
-        {{/VisuellHinweis}}
+        {{/Merkhilfe}}
 
-        {{#Geschichte}}
-        <p class="info-text-story">{{Geschichte}}</p>
-        {{/Geschichte}}
+        {{#Eselsbrücke}}
+        <p class="info-text-story">{{Eselsbrücke}}</p>
+        {{/Eselsbrücke}}
 
-        {{#HinweisWort}}
+        {{#Wortbeispiel}}
         <div class="info-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -165,10 +165,10 @@
             Wortbeispiele
         </div>
         <div class="hint-word-box">
-            <div id="raw-hint-words" style="display:none;">{{furigana:HinweisWort}}</div>
+            <div id="raw-hint-words" style="display:none;">{{furigana:Wortbeispiel}}</div>
             <div id="formatted-hint-words" class="word-example-list"></div>
         </div>
-        {{/HinweisWort}}
+        {{/Wortbeispiel}}
 
         <div class="info-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
