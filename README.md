@@ -152,3 +152,28 @@ Jede Datei wird in Anki direkt als Template-Inhalt eingefügt — **keine Plugin
 - **Fréchet-Distanz** — mathematisch fundierte Kurvensimilarität (iteratives DP mit Float64Array)
 - **Web Animations API** — Celebration-Effekte ohne requestAnimationFrame-Loops
 - **Mustache-safe** — keine `{{…}}`-Syntax in JS/CSS-Kommentaren (Ankis Template-Engine)
+
+---
+
+## Datenquellen & Attribution
+
+- **Strichpfade (SVG):** [KanjiVG](https://github.com/KanjiVG/kanjivg) von Ulrich Apel — lizenziert unter [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Farbige Strichreihenfolge-Diagramme generiert mit [Kanji Colorizer](https://github.com/cayennes/kanji-colorize) von cayennes.
+- **Kanji-Bedeutungen:** Basierend auf gängigen deutschen Übersetzungen. Lernreihenfolge inspiriert von James W. Heisig / Robert Rauther, *„Die Kanji lernen und behalten"*.
+- **Eselsbrücken & Geschichten:** Erstellt von [PawMethod](https://github.com/PawMethod) unter Verwendung von KI-Sprachmodellen. Konzept, Prompt-Design, Kuration und Redaktion: PawMethod.
+
+---
+
+## Lizenz
+
+Der **eigene Quellcode** dieses Projekts (Templates, Add-on, Erkennungsalgorithmus) steht unter der [MIT-Lizenz](LICENSE).
+
+Drittinhalte und eingebettete Daten behalten ihre jeweilige Lizenz:
+
+| Bestandteil | Lizenz | Rechteinhaber |
+|---|---|---|
+| KanjiVG SVG-Strichpfade | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Ulrich Apel |
+| Migaku SVG-Zerlegung | [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html) | Migaku |
+| Kanji-Reihenfolge, Schlüsselwörter & Primitivnamen | Alle Rechte vorbehalten | James W. Heisig / Robert Rauther / Klostermann-Verlag |
+| Eselsbrücken | [MIT](LICENSE) | PawMethod |
+
+Siehe [LICENSE](LICENSE) für den vollständigen Lizenztext.
