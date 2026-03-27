@@ -198,8 +198,8 @@
         </div>
         <div class="link-grid">
             <a class="link-btn" href="https://jisho.org/search/{{Kanji}}%20%23kanji" target="_blank">
-                Jisho <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; opacity:0.6;">
+                Jisho <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:14px; height:14px; opacity:0.6;">
                     <line x1="7" y1="17" x2="17" y2="7" />
                     <polyline points="7 7 17 7 17 17" />
                 </svg>
@@ -429,12 +429,16 @@
                     colorCSS += '#svg-bg path:nth-child(' + (index + 1) + '){stroke:' + pathColor + ' !important} ';
                 }
             });
-            // 2. Update anti-flicker stylesheet FIRST (triggers style recalc)
-            if (afEl) {
-                if (!afEl._baseCSS) afEl._baseCSS = afEl.textContent.replace(/#svg-bg path:nth-child\(\d+\)\{stroke:[^}]+\}\s*/g, '');
-                afEl.textContent = afEl._baseCSS + colorCSS;
+            // 2. Update stroke colors via a SEPARATE style element (preserves anti-flicker rules)
+            let colorStyle = document.getElementById('kanji-stroke-colors');
+            if (!colorStyle) {
+                colorStyle = document.createElement('style');
+                colorStyle.id = 'kanji-stroke-colors';
+                if (afEl) afEl.parentNode.insertBefore(colorStyle, afEl.nextSibling);
+                else document.head.appendChild(colorStyle);
             }
-            // 3. Set inline styles AFTER (reliably override the stylesheet)
+            colorStyle.textContent = colorCSS;
+            // 3. Set inline styles (reliably override the stylesheet)
             paths.forEach((path, index) => {
                 path.style.setProperty('stroke', pathColors[index], 'important');
             });
@@ -579,5 +583,4 @@
         }, { passive: false });
         link.addEventListener('click', function (e) { e.preventDefault(); handleLinkActivation.call(this, e); });
     });
-
 </script>

@@ -396,6 +396,8 @@
         if (_af) _af.remove();
     }
 
+    document.body.classList.add('no-scroll');
+
     // Reset previous card's error data (Card 2 has no drawing,
     // so stale stroke errors from Card 1 must not carry over)
     (function () {
@@ -690,19 +692,6 @@
     window.addEventListener('resize', window.kanjiResizeHandlerC2);
 
     // --- Button Feedback & Stylus Fixes ---
-
-    // Click-flash feedback for action buttons
-    (function () {
-        var ab = document.querySelector('.action-buttons');
-        if (!ab) return;
-        ab.addEventListener('click', function (e) {
-            var btn = e.target.closest('button');
-            if (!btn) return;
-            btn.classList.remove('btn-flash');
-            void btn.offsetWidth;
-            btn.classList.add('btn-flash');
-        });
-    })();
 
     // Stylus fix: Apple Pencil / S-Pen don't reliably fire onclick
     (function () {

@@ -817,29 +817,28 @@
             const svg = document.getElementById('svg-bg');
             if (!c) { resolve(); return; }
 
-            // Glow + Bounce via WAAPI (CSS @keyframes don't render filter on WKWebView GPU layers)
+            // Glow + Bounce via WAAPI (box-shadow instead of drop-shadow to avoid expensive SVG re-rasterization)
             c.classList.add('celebration');
             c.animate([
-                { filter: 'drop-shadow(0 0 0px rgba(255,210,50,0))' },
-                { filter: 'drop-shadow(0 0 18px rgba(255,210,50,0.75)) drop-shadow(0 0 42px rgba(255,210,50,0.3))', offset: 0.35 },
-                { filter: 'drop-shadow(0 0 0px rgba(255,210,50,0))' }
+                { boxShadow: '0 4px 12px rgba(0,0,0,0.06), 0 0 0px rgba(255,210,50,0)' },
+                { boxShadow: '0 0 28px rgba(255,210,50,0.9), 0 0 60px rgba(255,210,50,0.35)', offset: 0.35 },
+                { boxShadow: '0 4px 12px rgba(0,0,0,0.06), 0 0 0px rgba(255,210,50,0)' }
             ], { duration: 850, easing: 'ease-out' });
             c.animate([
                 { transform: 'scale(1)' },
-                { transform: 'scale(1.055)', offset: 0.2 },
-                { transform: 'scale(0.985)', offset: 0.45 },
-                { transform: 'scale(1.01)', offset: 0.7 },
+                { transform: 'scale(1.08)', offset: 0.2 },
+                { transform: 'scale(0.975)', offset: 0.45 },
+                { transform: 'scale(1.015)', offset: 0.7 },
                 { transform: 'scale(1)' }
             ], { duration: 700, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
 
-            // Stroke-Shine via WAAPI
-            if (svg) svg.querySelectorAll('.stroke-complete').forEach(p => {
-                p.animate([
-                    { filter: 'none' },
-                    { filter: 'drop-shadow(0 0 8px #FFD700) brightness(1.55)', offset: 0.35 },
-                    { filter: 'none' }
-                ], { duration: 700, easing: 'ease-out' });
-            });
+            // Stroke-Shine via WAAPI (unified flash on entire SVG – avoids
+            // overlap artifacts at stroke crossings and is GPU-friendly)
+            if (svg) svg.animate([
+                { opacity: 1, transform: 'scale(1)' },
+                { opacity: 0.2, transform: 'scale(1.04)', offset: 0.25 },
+                { opacity: 1, transform: 'scale(1)' }
+            ], { duration: 600, easing: 'ease-in-out' });
 
             const rect = c.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
