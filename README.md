@@ -177,6 +177,7 @@ Das Template funktioniert auch **ohne** das Add-on — Einstellungen werden dann
 ## Datenquellen & Attribution
 
 - **Strichpfade (SVG):** [KanjiVG](https://github.com/KanjiVG/kanjivg) von Ulrich Apel — lizenziert unter [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Farbige Strichreihenfolge-Diagramme generiert mit [Kanji Colorizer](https://github.com/cayennes/kanji-colorize) von cayennes.
+- **Radikale & SVG-Zerlegung:** Extrahiert aus [Migaku Kanji God](https://github.com/migaku-official/Migaku-Kanji-Addon) von Migaku.
 - **Kanji-Bedeutungen:** Basierend auf gängigen deutschen Übersetzungen. Lernreihenfolge inspiriert von James W. Heisig / Robert Rauther, *„Die Kanji lernen und behalten"*.
 - **Eselsbrücken & Geschichten:** Erstellt von [PawMethod](https://github.com/PawMethod) unter Verwendung von KI-Sprachmodellen. Konzept, Prompt-Design, Kuration und Redaktion: PawMethod.
 
