@@ -8,6 +8,7 @@ Desktop.ini
 # Anki exports
 *.apkg
 *.colpkg
+*.ankiaddon
 
 # Backups
 Backup/
