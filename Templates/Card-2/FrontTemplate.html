@@ -390,7 +390,7 @@
     // Persistence + grid rendering identical to Card 1
     // =======================================================================
 
-    // --- AnkiWeb / Browser Detection ---
+    // --- AnkiWeb / Browser Detection [SHARED with c1-front] ---
     if (location.protocol === 'https:' && typeof pycmd === 'undefined' && typeof AnkiDroidJS === 'undefined') {
         document.documentElement.classList.add('is-ankiweb');
         var _awH = window.innerHeight;
@@ -407,7 +407,7 @@
         if (_ib) _ib.style.width = _awPx;
     }
 
-    // --- Anti-Flicker ---
+    // --- Anti-Flicker [SHARED with c1-front] ---
     // Remove back-side CSS injection when we're on the front side
     if (!document.getElementById('is-back-side-marker')) {
         var _af = document.getElementById('kanji-anti-flicker');
@@ -427,7 +427,7 @@
         window._kanjiCurrentStroke = 0;
     })();
 
-    // --- Persistence Layer ---
+    // --- Persistence Layer [SHARED with c1-front] ---
 
     var _cookieCache = null, _cookieCacheRaw = null;
     function _parseCookies() {
@@ -485,7 +485,7 @@
         path.classList.add('stroke-complete');
     });
 
-    // --- Settings UI ---
+    // --- Settings UI [SHARED with c1-front] ---
 
     var _hostCard = 'c2', _activeTab = 'c2';
 
@@ -567,7 +567,7 @@
         return _cachedGlobalConf;
     }
 
-    // --- Grid Rendering ---
+    // --- Grid Rendering [SHARED with c1-front] ---
 
     function updateGridDisplay() {
         const globalConf = getGlobalConfig();
@@ -658,7 +658,7 @@
     // Run synchronously to prevent flicker on card load
     updateGridDisplay();
 
-    // --- Scroll Lock & iOS Detection ---
+    // --- Scroll Lock & iOS Detection [SHARED with c1-front] ---
 
     if (window.kanjiTouchMoveModalHandlerC2) document.removeEventListener('touchmove', window.kanjiTouchMoveModalHandlerC2, { passive: false });
     window.kanjiTouchMoveModalHandlerC2 = function (e) {
@@ -715,7 +715,7 @@
     window.kanjiResizeHandlerC2 = checkScrollability;
     window.addEventListener('resize', window.kanjiResizeHandlerC2);
 
-    // --- Button Feedback & Stylus Fixes ---
+    // --- Button Feedback & Stylus Fixes [SHARED with c1-front] ---
 
     // Stylus fix: Apple Pencil / S-Pen don't reliably fire onclick
     (function () {
@@ -736,7 +736,7 @@
         });
     })();
 
-    // --- Scroll Guards ---
+    // --- Scroll Guards [SHARED with c1-front] ---
 
     // Register modal scroll guards synchronously to prevent flicker
     document.querySelectorAll('.settings-modal, .info-modal').forEach(modal => { if (modal._kanjiScrollGuarded) return; modal._kanjiScrollGuarded = true; modal.addEventListener('touchmove', function (e) { if (this.scrollHeight <= this.clientHeight) e.preventDefault(); }, { passive: false }); });

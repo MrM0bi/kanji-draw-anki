@@ -270,7 +270,7 @@
         ol.classList.remove('active');
     }
 
-    // --- Radical Tree Renderer ---
+    // --- Radical Tree Renderer [SHARED with c1-back] ---
 
     (() => {
         const rawDataEl = document.getElementById('raw-tree-data');
@@ -358,7 +358,7 @@
         document.addEventListener('click', window.kanjiHideTooltipHandlerC2);
     })();
 
-    // --- Word Examples (furigana toggle) ---
+    // --- Word Examples (furigana toggle) [SHARED with c1-back] ---
 
     (() => {
         const rawWordsEl = document.getElementById('raw-hint-words');
@@ -387,7 +387,7 @@
         }
     })();
 
-    // --- Hide "Lesungen" if no readings exist ---
+    // --- Hide "Lesungen" if no readings exist [SHARED with c1-back] ---
     (() => {
         const rc = document.querySelector('.readings-container--backside');
         if (rc && !rc.querySelector('.reading-row')) {
@@ -523,7 +523,7 @@
         window.kanjiSettingsGlobalHandlerC2 = applyBackFeatures;
     })();
 
-    // --- Cross-Platform Fixes ---
+    // --- Cross-Platform Fixes [SHARED with c1-back] ---
 
     // Clean up sparkle particles in case of rapid card transition
     if (window._kanjiSparkleCleanup) { window._kanjiSparkleCleanup(); window._kanjiSparkleCleanup = null; }

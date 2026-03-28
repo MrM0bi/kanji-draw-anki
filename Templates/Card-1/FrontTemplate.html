@@ -425,7 +425,7 @@
     // Platforms:   Anki Desktop, AnkiDroid, AnkiMobile (WKWebView)
     // =======================================================================
 
-    // --- AnkiWeb / Browser Detection ---
+    // --- AnkiWeb / Browser Detection [SHARED with c2-front] ---
     // AnkiWeb wraps cards in its own chrome (header ~50px + answer bar ~80px)
     // that reduces usable viewport height; flag it for CSS overrides.
     // Detection: HTTPS protocol + no native Anki bridge = browser review.
@@ -445,7 +445,7 @@
         if (_ib) _ib.style.width = _awPx;
     }
 
-    // --- Anti-Flicker ---
+    // --- Anti-Flicker [SHARED with c2-front] ---
     // Remove back-side CSS injection when we're on the front side
     if (!document.getElementById('is-back-side-marker')) {
         var _af = document.getElementById('kanji-anti-flicker');
@@ -454,7 +454,7 @@
 
     document.body.classList.add('no-scroll');
 
-    // --- Persistence Layer ---
+    // --- Persistence Layer [SHARED with c2-front] ---
 
     var _cookieCache = null, _cookieCacheRaw = null;
     function _parseCookies() {
@@ -511,7 +511,7 @@
         path.setAttribute('pathLength', '100');
     });
 
-    // --- Settings UI ---
+    // --- Settings UI [SHARED with c2-front] ---
 
     var _hostCard = 'c1', _activeTab = 'c1';
 
@@ -593,7 +593,7 @@
         return _cachedGlobalConf;
     }
 
-    // --- Grid Rendering ---
+    // --- Grid Rendering [SHARED with c2-front] ---
 
     function updateGridDisplay() {
         const globalConf = getGlobalConfig();
@@ -684,7 +684,7 @@
     // Run synchronously to prevent flicker on card load
     updateGridDisplay();
 
-    // --- Scroll Lock & iOS Detection ---
+    // --- Scroll Lock & iOS Detection [SHARED with c2-front] ---
 
     if (window.kanjiTouchMoveModalHandler) document.removeEventListener('touchmove', window.kanjiTouchMoveModalHandler, { passive: false });
     window.kanjiTouchMoveModalHandler = function (e) {
@@ -749,6 +749,8 @@
         const drawLayer = document.getElementById('draw-layer');
         if (!drawLayer) return;
 
+        // ···· State & Initialization ····
+
         const cachedGlobalConf = getGlobalConfig();
         let problemStrokes = new Array(document.querySelectorAll('.svg-stroke').length).fill(0);
 
@@ -777,6 +779,8 @@
         let currentStroke = 0, mistakes = 0, isDrawing = false, userPoints = [];
         let currentSVGPath = null, dString = "", errorTimeout = null, fadeTimeout = null, skipTimeouts = [];
 
+        // ···· Save & Auto-Flip ····
+
         const saveState = () => {
             window._kanjiProblemStrokes = problemStrokes;
             window._kanjiCurrentStroke = currentStroke;
@@ -793,6 +797,8 @@
             else if (typeof window.showAnswer === "function" && typeof window.require === "undefined") { try { window.showAnswer(); } catch (e) { } }
             else { const fakeBack = document.getElementById("answer-fallback"); if (fakeBack) fakeBack.style.display = "block"; }
         };
+
+        // ···· Draw Helpers & Pointer Handlers ····
 
         const clearDrawLayer = () => { drawLayer.innerHTML = ''; currentSVGPath = null; };
 
@@ -837,6 +843,8 @@
             dString += ` L ${pos.x} ${pos.y}`;
             if (currentSVGPath) currentSVGPath.setAttribute("d", dString);
         };
+
+        // ···· Completion Animation (WAAPI) ····
 
         const playCompletionAnimation = () => new Promise(resolve => {
             if (hostGet('kanjiOptCelebration', cachedGlobalConf.celebration) !== 'on') { resolve(); return; }
@@ -911,6 +919,8 @@
             window._kanjiSparkleCleanup = () => { cleanup.forEach(p => { try { if (p.parentNode) p.parentNode.removeChild(p); } catch (e) { } }); };
         });
 
+        // ···· Scoring Algorithms ····
+
         // Resample a polyline to N equidistant points (normalizes drawing speed)
         const resamplePoints = (pts, n) => {
             if (pts.length < 2) return pts.slice();
@@ -976,6 +986,8 @@
             out.push(pts[pts.length - 1]);
             return out;
         };
+
+        // ···· Stroke Evaluation ····
 
         const evaluateStroke = () => {
             if (userPoints.length === 0) { clearDrawLayer(); return; }
@@ -1094,6 +1106,8 @@
             isDrawing = false; evaluateStroke();
         };
 
+        // ···· Event Wiring ····
+
         const kanjiContainer = document.querySelector('.kanji-container');
         if (kanjiContainer) {
             const blockAppGestures = (e) => {
@@ -1123,6 +1137,8 @@
             drawLayer.addEventListener('touchmove', (e) => { if (e.cancelable) e.preventDefault(); draw(e); }, { passive: false });
             document.addEventListener('mouseup', window.kanjiStopDrawingHandler); document.addEventListener('touchend', window.kanjiStopDrawingHandler); document.addEventListener('touchcancel', window.kanjiStopDrawingHandler);
         }
+
+        // ···· Button Actions (Reveal / Reset / Skip) ····
 
         var _revealFn = () => { document.getElementById('svg-guide').classList.toggle('is-visible'); };
         document.getElementById('button-reveal').addEventListener('click', _revealFn);
@@ -1170,7 +1186,7 @@
         document.getElementById('button-skip')._kanjiAction = _skipFn;
     })();
 
-    // --- Button Feedback & Stylus Fixes ---
+    // --- Button Feedback & Stylus Fixes [SHARED with c2-front] ---
 
     // Click-flash feedback for action buttons
     (function () {
@@ -1217,7 +1233,7 @@
         addPenHandler(document.getElementById('button-reset'), 'btn');
     })();
 
-    // --- Scroll Guards ---
+    // --- Scroll Guards [SHARED with c2-front] ---
 
     // Register modal scroll guards synchronously to prevent flicker
     document.querySelectorAll('.settings-modal, .info-modal').forEach(modal => { if (modal._kanjiScrollGuarded) return; modal._kanjiScrollGuarded = true; modal.addEventListener('touchmove', function (e) { if (this.scrollHeight <= this.clientHeight) e.preventDefault(); }, { passive: false }); });
