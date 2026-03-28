@@ -8,6 +8,23 @@ Interaktives Anki-Template zum Erlernen der japanischen Kanji-Schriftzeichen —
 
 ---
 
+## Vorschau
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="Media/demo1.gif" width="200" alt="Kanji zeichnen – Proviant"><br><sub>Strich-Erkennung</sub></td>
+    <td align="center"><img src="Media/demo2.gif" width="200" alt="Kanji zeichnen – Liebe"><br><sub>Hilfslinien-Raster</sub></td>
+    <td align="center"><img src="Media/demo3.gif" width="200" alt="Echtzeit-Feedback – drücken"><br><sub>Echtzeit-Feedback</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="Media/demo4.gif" width="200" alt="Rückseite mit Strichnummern – vier"><br><sub>Benutzeroberfläche</sub></td>
+    <td align="center"><img src="Media/demo5.gif" width="200" alt="Kanji-Ergebnis – 成"><br><sub>Ergebnis-Ansicht</sub></td>
+    <td align="center"><img src="Media/demo6.gif" width="200" alt="Kanji zeichnen – raten"><br><sub>Hilfslinien</sub></td>
+  </tr>
+</table>
+
+---
+
 ## Übersicht
 
 Das Template erzeugt **zwei Kartentypen** aus einem einzigen Notiztyp:
