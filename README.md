@@ -205,9 +205,10 @@ Das Template funktioniert auch **ohne** das Add-on — Einstellungen werden dann
 
 ## Datenquellen & Attribution
 
-- **Strichpfade (SVG):** [KanjiVG](https://github.com/KanjiVG/kanjivg) von Ulrich Apel — lizenziert unter [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Farbige Strichreihenfolge-Diagramme generiert mit [Kanji Colorizer](https://github.com/cayennes/kanji-colorize) von cayennes.
-- **Radikale & SVG-Zerlegung:** Extrahiert aus [Migaku Kanji God](https://github.com/migaku-official/Migaku-Kanji-Addon) von Migaku.
-- **Kanji-Bedeutungen:** Basierend auf gängigen deutschen Übersetzungen. Lernreihenfolge inspiriert von James W. Heisig / Robert Rauther, *„Die Kanji lernen und behalten"*.
+- **Strichpfade (SVG):** [KanjiVG](https://github.com/KanjiVG/kanjivg) von Ulrich Apel — lizenziert unter [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- **Kanji-Reihenfolge, Bedeutungen & Primitivnamen:** Entnommen aus James W. Heisig / Robert Rauther, *„Die Kanji lernen und behalten"* (Klostermann-Verlag). Die Lernreihenfolge, die deutschen Schlüsselwörter sowie die Primitivbezeichnungen (z. B. „Zauberstab", „Eingepfercht", „Tierbeine") sind geistiges Eigentum der Autoren bzw. des Verlags.
+- **SVG-Zerlegung nach Primitiven:** Die Zuordnung einzelner SVG-Strichpfade zu ihren Kanji-Komponenten wurde aus [Migaku Kanji God](https://github.com/migaku-official/Migaku-Kanji-Addon) von Migaku extrahiert — lizenziert unter [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html).
+- **Farbige Strichreihenfolge:** Inspiriert von [Kanji Colorizer](https://github.com/cayennes/kanji-colorize) von cayennes (Code: [AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html), SVGs: [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)).
 - **Eselsbrücken & Geschichten:** Erstellt von [PawMethod](https://github.com/PawMethod) unter Verwendung von KI-Sprachmodellen. Konzept, Prompt-Design, Kuration und Redaktion: PawMethod.
 
 ---
