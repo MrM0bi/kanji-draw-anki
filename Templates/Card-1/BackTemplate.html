@@ -926,10 +926,11 @@
                         const needsTransparent = curView === 'handwriting' || sbsEnabled;
 
                         // Tear down previous view
-                        cont.querySelectorAll('.handwriting-overlay').forEach(el => el.remove());
+                        cont.querySelectorAll('.handwriting-overlay, .excess-strokes-overlay').forEach(el => el.remove());
                         cont.classList.remove('show-handwriting');
                         const oldSbs = cont.parentNode ? cont.parentNode.querySelector('.side-by-side-wrapper') : null;
                         if (oldSbs) oldSbs.remove();
+                        if (cont.parentNode) cont.parentNode.querySelectorAll('.excess-strokes-badge').forEach(el => el.remove());
                         cont.style.removeProperty('display');
                         if (!needsTransparent) {
                             refPaths.forEach(p => p.style.removeProperty('stroke'));
@@ -986,6 +987,30 @@
                         } else if (!sbsEnabled) {
                             // ── SVG-PFADE VIEW (no SBS) ──
                             applyBackFeatures();
+
+                            // Show excess user strokes as dashed overlay
+                            const extraStrokes = ev.orderedStrokes.filter(e => e.type === 'extra');
+                            if (extraStrokes.length > 0) {
+                                const overlaySvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                overlaySvg.setAttribute('viewBox', '0 0 109 109');
+                                overlaySvg.classList.add('excess-strokes-overlay');
+
+                                extraStrokes.forEach(entry => {
+                                    const stroke = entry.stroke;
+                                    if (!stroke.d) return;
+                                    const p = makeStrokePath(stroke.d, '3', isColorBack ? 'var(--stroke-err)' : 'var(--text-muted)');
+                                    p.setAttribute('stroke-dasharray', '3 3');
+                                    p.style.opacity = '0.5';
+                                    overlaySvg.appendChild(p);
+                                });
+
+                                cont.appendChild(overlaySvg);
+
+                                const badge = document.createElement('div');
+                                badge.className = 'excess-strokes-badge';
+                                badge.textContent = '+' + extraStrokes.length + ' Strich' + (extraStrokes.length > 1 ? 'e' : '') + ' zu viel';
+                                cont.parentNode.insertBefore(badge, cont.nextSibling);
+                            }
                         } else {
                             // ── SIDE-BY-SIDE ──
                             hideRefPaths();

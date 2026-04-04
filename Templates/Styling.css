@@ -92,6 +92,7 @@
     --stroke-warn1: #e5a821;
     --stroke-warn2: #e87c2a;
     --stroke-err: #d4483b;
+    --stroke-hint: #56a83a;
 
     /* Tags */
     --tag-on-bg: #f0f0ed;
@@ -186,6 +187,7 @@ html.is-ankiweb .info-modal {
     --stroke-warn1: #f0c040;
     --stroke-warn2: #f09840;
     --stroke-err: #e85450;
+    --stroke-hint: #6abe4e;
     --tag-on-bg: #333330;
     --tag-on-text: #d0d0cc;
     --tag-kun-bg: #1e3318;
@@ -1226,9 +1228,9 @@ html.ipad .info-modal {
     transition: stroke-dashoffset 0.7s ease-in-out !important;
 }
 
-/* Auto-draw hint always uses the error color */
+/* Auto-draw hint uses the hint color (green) */
 .hint-active {
-    stroke: var(--stroke-err) !important;
+    stroke: var(--stroke-hint) !important;
     stroke-dashoffset: 0 !important;
     transition: stroke-dashoffset 0.7s ease-in-out !important;
 }
@@ -1896,6 +1898,31 @@ ruby rt {
 .free-canvas-mode #svg-bg path {
     stroke: transparent !important;
     transition: none !important;
+}
+
+/* Excess strokes overlay (SVG-Pfade view, free mode) */
+.excess-strokes-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: var(--border-rad-main);
+    fill: none;
+    background: transparent;
+}
+
+/* Badge for excess strokes */
+.excess-strokes-badge {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stroke-err);
+    opacity: 0;
+    animation: fadeInNumbers 0.4s ease-out 0.3s forwards;
 }
 
 /* Hide guided-only settings in free mode */

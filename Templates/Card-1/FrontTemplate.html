@@ -1443,7 +1443,7 @@
     // --- Cleanup stale DOM (runs unconditionally, front + back via {{FrontSide}}) ---
     // On back side this is a no-op: SBS/sparkles haven't been created yet.
     // On front side this removes stale back-side artifacts from editor toggling.
-    document.querySelectorAll('.side-by-side-wrapper, .completion-sparkle, .handwriting-overlay').forEach(function (el) { el.remove(); });
+    document.querySelectorAll('.side-by-side-wrapper, .completion-sparkle, .handwriting-overlay, .excess-strokes-overlay, .excess-strokes-badge').forEach(function (el) { el.remove(); });
     document.querySelectorAll('.kanji-container').forEach(function (c) { c.style.removeProperty('display'); c.classList.remove('show-handwriting'); });
     if (window._kanjiSparkleCleanup) { window._kanjiSparkleCleanup(); window._kanjiSparkleCleanup = null; }
     window.kanjiSettingsGlobalHandler = null;
