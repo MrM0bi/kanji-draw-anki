@@ -491,7 +491,9 @@ svg#svg-guide path,
     -webkit-appearance: none;
     appearance: none;
     transform: translateZ(0);
-}@media (hover: hover) {
+}
+
+@media (hover: hover) {
     .gear-btn:hover {
         background: var(--surface);
         color: var(--accent);
@@ -991,7 +993,9 @@ html.ipad .info-modal {
     background: #af52de;
 }
 
-.category-icon.cat-theme     { background: #ff2d55; }
+.category-icon.cat-theme {
+    background: #ff2d55;
+}
 
 .category-info {
     flex: 1;
@@ -1047,7 +1051,7 @@ html.ipad .info-modal {
     display: none;
 }
 
-.accent-options-grid label input[type="radio"]:checked + .accent-option {
+.accent-options-grid label input[type="radio"]:checked+.accent-option {
     border-color: var(--active-tab-color, var(--accent));
     background: var(--surface);
     box-shadow: var(--shadow-soft);
@@ -1086,7 +1090,7 @@ html.ipad .info-modal {
     transition: color 0.15s ease;
 }
 
-.accent-options-grid label input[type="radio"]:checked + .accent-option span {
+.accent-options-grid label input[type="radio"]:checked+.accent-option span {
     color: var(--active-tab-color, var(--accent));
 }
 
@@ -1808,6 +1812,7 @@ ruby rt {
 .info-modal {
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
+
 .nightMode .settings-modal,
 .nightMode .info-modal,
 .night_mode .settings-modal,
@@ -1966,69 +1971,252 @@ ruby rt {
    -------------------------------------------------------------------------- */
 
 /* --- Small (×0.875) --- */
-html.font-small .card { font-size: 14px; }
-html.font-small .card-title { font-size: 23px; }
-html.font-small .info-modal-header { font-size: 16px; }
-html.font-small .info-modal-title { font-size: 11px; }
-html.font-small .info-modal-meaning { font-size: 12px; }
-html.font-small .info-section-title { font-size: 11px; }
-html.font-small .info-text-story { font-size: 13px; }
-html.font-small .visuell-hinweis { font-size: 12px; }
-html.font-small .word-jp { font-size: 18px; }
-html.font-small .word-de { font-size: 11px; }
-html.font-small .reading-row { font-size: 14px; }
-html.font-small .reading-label { font-size: 10px; }
-html.font-small .info-btn { font-size: 13px; }
-html.font-small .info-tag { font-size: 10px; }
-html.font-small .link-btn { font-size: 12px; }
-html.font-small .tree-root-kanji { font-size: 32px; }
-html.font-small .tree-node-char { font-size: 24px; }
-html.font-small .tree-node-tooltip { font-size: 11px; }
-html.font-small .no-tree-data { font-size: 11px; }
-html.font-small .side-by-side-label { font-size: 10px; }
-html.font-small .setting-group-title { font-size: 10px; }
-html.font-small .segment-btn { font-size: 10px; }
-html.font-small .category-name { font-size: 13px; }
-html.font-small .category-desc { font-size: 10px; }
-html.font-small .subpage-header h3 { font-size: 14px; }
-html.font-small .settings-main-title { font-size: 14px; }
-html.font-small .setting-section-title { font-size: 11px; }
-html.font-small .visual-option span { font-size: 10px; }
-html.font-small .accent-option span { font-size: 9px; }
-html.font-small .close-settings { font-size: 12px; }
+html.font-small .card {
+    font-size: 14px;
+}
+
+html.font-small .card-title {
+    font-size: 23px;
+}
+
+html.font-small .info-modal-header {
+    font-size: 16px;
+}
+
+html.font-small .info-modal-title {
+    font-size: 11px;
+}
+
+html.font-small .info-modal-meaning {
+    font-size: 12px;
+}
+
+html.font-small .info-section-title {
+    font-size: 11px;
+}
+
+html.font-small .info-text-story {
+    font-size: 13px;
+}
+
+html.font-small .visuell-hinweis {
+    font-size: 12px;
+}
+
+html.font-small .word-jp {
+    font-size: 18px;
+}
+
+html.font-small .word-de {
+    font-size: 11px;
+}
+
+html.font-small .reading-row {
+    font-size: 14px;
+}
+
+html.font-small .reading-label {
+    font-size: 10px;
+}
+
+html.font-small .info-btn {
+    font-size: 13px;
+}
+
+html.font-small .info-tag {
+    font-size: 10px;
+}
+
+html.font-small .link-btn {
+    font-size: 12px;
+}
+
+html.font-small .tree-root-kanji {
+    font-size: 32px;
+}
+
+html.font-small .tree-node-char {
+    font-size: 24px;
+}
+
+html.font-small .tree-node-tooltip {
+    font-size: 11px;
+}
+
+html.font-small .no-tree-data {
+    font-size: 11px;
+}
+
+html.font-small .side-by-side-label {
+    font-size: 10px;
+}
+
+html.font-small .setting-group-title {
+    font-size: 10px;
+}
+
+html.font-small .segment-btn {
+    font-size: 10px;
+}
+
+html.font-small .category-name {
+    font-size: 13px;
+}
+
+html.font-small .category-desc {
+    font-size: 10px;
+}
+
+html.font-small .subpage-header h3 {
+    font-size: 14px;
+}
+
+html.font-small .settings-main-title {
+    font-size: 14px;
+}
+
+html.font-small .setting-section-title {
+    font-size: 11px;
+}
+
+html.font-small .visual-option span {
+    font-size: 10px;
+}
+
+html.font-small .accent-option span {
+    font-size: 9px;
+}
+
+html.font-small .close-settings {
+    font-size: 12px;
+}
 
 /* --- Large (×1.125) --- */
-html.font-large .card { font-size: 18px; }
-html.font-large .card-title { font-size: 29px; }
-html.font-large .info-modal-header { font-size: 20px; }
-html.font-large .info-modal-title { font-size: 15px; }
-html.font-large .info-modal-meaning { font-size: 16px; }
-html.font-large .info-section-title { font-size: 15px; }
-html.font-large .info-text-story { font-size: 17px; }
-html.font-large .visuell-hinweis { font-size: 16px; }
-html.font-large .word-jp { font-size: 22px; }
-html.font-large .word-de { font-size: 15px; }
-html.font-large .reading-row { font-size: 18px; }
-html.font-large .reading-label { font-size: 12px; }
-html.font-large .info-btn { font-size: 17px; }
-html.font-large .info-tag { font-size: 14px; }
-html.font-large .link-btn { font-size: 16px; }
-html.font-large .tree-root-kanji { font-size: 40px; }
-html.font-large .tree-node-char { font-size: 32px; }
-html.font-large .tree-node-tooltip { font-size: 15px; }
-html.font-large .no-tree-data { font-size: 15px; }
-html.font-large .side-by-side-label { font-size: 12px; }
-html.font-large .setting-group-title { font-size: 12px; }
-html.font-large .segment-btn { font-size: 14px; }
-html.font-large .category-name { font-size: 17px; }
-html.font-large .category-desc { font-size: 12px; }
-html.font-large .subpage-header h3 { font-size: 18px; }
-html.font-large .settings-main-title { font-size: 18px; }
-html.font-large .setting-section-title { font-size: 15px; }
-html.font-large .visual-option span { font-size: 12px; }
-html.font-large .accent-option span { font-size: 11px; }
-html.font-large .close-settings { font-size: 16px; }
+html.font-large .card {
+    font-size: 18px;
+}
+
+html.font-large .card-title {
+    font-size: 29px;
+}
+
+html.font-large .info-modal-header {
+    font-size: 20px;
+}
+
+html.font-large .info-modal-title {
+    font-size: 15px;
+}
+
+html.font-large .info-modal-meaning {
+    font-size: 16px;
+}
+
+html.font-large .info-section-title {
+    font-size: 15px;
+}
+
+html.font-large .info-text-story {
+    font-size: 17px;
+}
+
+html.font-large .visuell-hinweis {
+    font-size: 16px;
+}
+
+html.font-large .word-jp {
+    font-size: 22px;
+}
+
+html.font-large .word-de {
+    font-size: 15px;
+}
+
+html.font-large .reading-row {
+    font-size: 18px;
+}
+
+html.font-large .reading-label {
+    font-size: 12px;
+}
+
+html.font-large .info-btn {
+    font-size: 17px;
+}
+
+html.font-large .info-tag {
+    font-size: 14px;
+}
+
+html.font-large .link-btn {
+    font-size: 16px;
+}
+
+html.font-large .tree-root-kanji {
+    font-size: 40px;
+}
+
+html.font-large .tree-node-char {
+    font-size: 32px;
+}
+
+html.font-large .tree-node-tooltip {
+    font-size: 15px;
+}
+
+html.font-large .no-tree-data {
+    font-size: 15px;
+}
+
+html.font-large .side-by-side-label {
+    font-size: 12px;
+}
+
+html.font-large .setting-group-title {
+    font-size: 12px;
+}
+
+html.font-large .segment-btn {
+    font-size: 14px;
+}
+
+html.font-large .category-name {
+    font-size: 17px;
+}
+
+html.font-large .category-desc {
+    font-size: 12px;
+}
+
+html.font-large .subpage-header h3 {
+    font-size: 18px;
+}
+
+html.font-large .settings-main-title {
+    font-size: 18px;
+}
+
+html.font-large .setting-section-title {
+    font-size: 15px;
+}
+
+html.font-large .visual-option span {
+    font-size: 12px;
+}
+
+html.font-large .accent-option span {
+    font-size: 11px;
+}
+
+html.font-large .close-settings {
+    font-size: 16px;
+}
 
 /* AnkiWeb card-title has different base size */
-html.font-small.is-ankiweb .card-title { font-size: 19px; }
-html.font-large.is-ankiweb .card-title { font-size: 25px; }
+html.font-small.is-ankiweb .card-title {
+    font-size: 19px;
+}
+
+html.font-large.is-ankiweb .card-title {
+    font-size: 25px;
+}

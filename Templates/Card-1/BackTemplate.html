@@ -270,19 +270,19 @@
             var _dynEl = document.getElementById(_dynFontId);
             if (_dynEl) _dynEl.parentNode.removeChild(_dynEl);
             var _fsMap = {
-                '.card':[16,14,18],'.card-title':[26,23,29],'.info-modal-header':[18,16,20],
-                '.info-modal-title':[13,11,15],'.info-modal-meaning':[14,12,16],
-                '.info-section-title':[13,11,15],'.info-text-story':[15,13,17],
-                '.visuell-hinweis':[14,12,16],'.word-jp':[20,18,22],'.word-de':[13,11,15],
-                '.reading-row':[16,14,18],'.reading-label':[11,10,12],'.info-btn':[15,13,17],
-                '.info-tag':[12,10,14],'.link-btn':[14,12,16],'.tree-root-kanji':[36,32,40],
-                '.tree-node-char':[28,24,32],'.tree-node-tooltip':[13,11,15],
-                '.no-tree-data':[13,11,15],'.side-by-side-label':[11,10,12],
-                '.setting-group-title':[11,10,12],'.segment-btn':[12,10,14],
-                '.category-name':[15,13,17],'.category-desc':[11,10,12],
-                '.subpage-header h3':[16,14,18],'.settings-main-title':[16,14,18],
-                '.setting-section-title':[13,11,15],'.visual-option span':[11,10,12],
-                '.accent-option span':[10,9,11],'.close-settings':[14,12,16]
+                '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
+                '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
+                '.info-section-title': [13, 11, 15], '.info-text-story': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
+                '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
+                '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
+                '.tree-node-char': [28, 24, 32], '.tree-node-tooltip': [13, 11, 15],
+                '.no-tree-data': [13, 11, 15], '.side-by-side-label': [11, 10, 12],
+                '.setting-group-title': [11, 10, 12], '.segment-btn': [12, 10, 14],
+                '.category-name': [15, 13, 17], '.category-desc': [11, 10, 12],
+                '.subpage-header h3': [16, 14, 18], '.settings-main-title': [16, 14, 18],
+                '.setting-section-title': [13, 11, 15], '.visual-option span': [11, 10, 12],
+                '.accent-option span': [10, 9, 11], '.close-settings': [14, 12, 16]
             };
             var _fsIdx = fs === 'small' ? 1 : fs === 'large' ? 2 : 0;
             var _cssRules = '';
@@ -1158,25 +1158,25 @@
     // --- Global S-Pen defense ---
     if (!window._kanjiGlobalPenDefenseAdded) {
         window._kanjiGlobalPenDefenseAdded = true;
-    if (typeof PointerEvent !== 'undefined') {
-        ['pointerdown', 'pointerup', 'click'].forEach(function (evtName) {
-            document.addEventListener(evtName, function (e) {
-                if (e.pointerType !== undefined && e.pointerType !== 'pen') return;
-                if (evtName === 'click' && !e._penOrigin) return;
-                var active = document.querySelector('.settings-overlay.active, .info-overlay.active');
-                if (!active) return;
-                if (active.contains(e.target)) return;
-                e.stopImmediatePropagation();
-                e.preventDefault();
+        if (typeof PointerEvent !== 'undefined') {
+            ['pointerdown', 'pointerup', 'click'].forEach(function (evtName) {
+                document.addEventListener(evtName, function (e) {
+                    if (e.pointerType !== undefined && e.pointerType !== 'pen') return;
+                    if (evtName === 'click' && !e._penOrigin) return;
+                    var active = document.querySelector('.settings-overlay.active, .info-overlay.active');
+                    if (!active) return;
+                    if (active.contains(e.target)) return;
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                }, true);
+            });
+            document.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var mark = function (ev) { ev._penOrigin = true; document.removeEventListener('click', mark, true); };
+                document.addEventListener('click', mark, true);
+                setTimeout(function () { document.removeEventListener('click', mark, true); }, 600);
             }, true);
-        });
-        document.addEventListener('pointerup', function (e) {
-            if (e.pointerType !== 'pen') return;
-            var mark = function (ev) { ev._penOrigin = true; document.removeEventListener('click', mark, true); };
-            document.addEventListener('click', mark, true);
-            setTimeout(function () { document.removeEventListener('click', mark, true); }, 600);
-        }, true);
-    }
+        }
     } // end guard
 
     // Link fix: force 1-tap activation on iOS/AnkiDroid (Apple Pencil + finger)

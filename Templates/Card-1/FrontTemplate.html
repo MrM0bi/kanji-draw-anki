@@ -584,7 +584,9 @@
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="20" cy="20" r="6"></circle>
-                            <path d="M20 8v-2M20 34v-2M8 20H6M34 20h-2M11.8 11.8l-1.4-1.4M29.6 29.6l-1.4-1.4M28.2 11.8l1.4-1.4M10.4 29.6l1.4-1.4"></path>
+                            <path
+                                d="M20 8v-2M20 34v-2M8 20H6M34 20h-2M11.8 11.8l-1.4-1.4M29.6 29.6l-1.4-1.4M28.2 11.8l1.4-1.4M10.4 29.6l1.4-1.4">
+                            </path>
                         </svg>
                         <span>Hell</span>
                     </div>
@@ -652,7 +654,8 @@
                     <div class="visual-option">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <text x="20" y="26" text-anchor="middle" fill="currentColor" stroke="none" font-size="14" font-weight="700">Aa</text>
+                            <text x="20" y="26" text-anchor="middle" fill="currentColor" stroke="none" font-size="14"
+                                font-weight="700">Aa</text>
                         </svg>
                         <span>Klein</span>
                     </div>
@@ -662,7 +665,8 @@
                     <div class="visual-option">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <text x="20" y="27" text-anchor="middle" fill="currentColor" stroke="none" font-size="18" font-weight="700">Aa</text>
+                            <text x="20" y="27" text-anchor="middle" fill="currentColor" stroke="none" font-size="18"
+                                font-weight="700">Aa</text>
                         </svg>
                         <span>Normal</span>
                     </div>
@@ -672,7 +676,8 @@
                     <div class="visual-option">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <text x="20" y="28" text-anchor="middle" fill="currentColor" stroke="none" font-size="22" font-weight="700">Aa</text>
+                            <text x="20" y="28" text-anchor="middle" fill="currentColor" stroke="none" font-size="22"
+                                font-weight="700">Aa</text>
                         </svg>
                         <span>Groß</span>
                     </div>
@@ -1001,18 +1006,30 @@
 
     // --- Theme: Accent color definitions ---
     var _accentColors = {
-        green:  { accent: '#56a83a', hover: '#4a9432', bg: '#f0f7ec', c1: '#56a83a', c2: '#3a98a8',
-                  dark: { accent: '#6abe4e', hover: '#5cac40', bg: '#1e3315', c1: '#6abe4e', c2: '#4ec4b8' } },
-        blue:   { accent: '#3478f6', hover: '#2a65d4', bg: '#eaf1fe', c1: '#3478f6', c2: '#5856d6',
-                  dark: { accent: '#5a9cf8', hover: '#4a8cf0', bg: '#162040', c1: '#5a9cf8', c2: '#7a78e8' } },
-        purple: { accent: '#8944ab', hover: '#753a95', bg: '#f3ecf7', c1: '#8944ab', c2: '#c44dba',
-                  dark: { accent: '#a866c8', hover: '#9656b8', bg: '#2a1838', c1: '#a866c8', c2: '#d870ce' } },
-        orange: { accent: '#e87c2a', hover: '#d06c20', bg: '#fef3ea', c1: '#e87c2a', c2: '#e5a821',
-                  dark: { accent: '#f09840', hover: '#e08830', bg: '#3a2010', c1: '#f09840', c2: '#f0c040' } },
-        red:    { accent: '#d4483b', hover: '#bc3c30', bg: '#fcedec', c1: '#d4483b', c2: '#e87c2a',
-                  dark: { accent: '#e85450', hover: '#d84540', bg: '#381512', c1: '#e85450', c2: '#f09840' } },
-        teal:   { accent: '#2aabb8', hover: '#2295a0', bg: '#e8f6f8', c1: '#2aabb8', c2: '#34c759',
-                  dark: { accent: '#4ec4b8', hover: '#3cb4a8', bg: '#102a2c', c1: '#4ec4b8', c2: '#50d070' } }
+        green: {
+            accent: '#56a83a', hover: '#4a9432', bg: '#f0f7ec', c1: '#56a83a', c2: '#3a98a8',
+            dark: { accent: '#6abe4e', hover: '#5cac40', bg: '#1e3315', c1: '#6abe4e', c2: '#4ec4b8' }
+        },
+        blue: {
+            accent: '#3478f6', hover: '#2a65d4', bg: '#eaf1fe', c1: '#3478f6', c2: '#5856d6',
+            dark: { accent: '#5a9cf8', hover: '#4a8cf0', bg: '#162040', c1: '#5a9cf8', c2: '#7a78e8' }
+        },
+        purple: {
+            accent: '#8944ab', hover: '#753a95', bg: '#f3ecf7', c1: '#8944ab', c2: '#c44dba',
+            dark: { accent: '#a866c8', hover: '#9656b8', bg: '#2a1838', c1: '#a866c8', c2: '#d870ce' }
+        },
+        orange: {
+            accent: '#e87c2a', hover: '#d06c20', bg: '#fef3ea', c1: '#e87c2a', c2: '#e5a821',
+            dark: { accent: '#f09840', hover: '#e08830', bg: '#3a2010', c1: '#f09840', c2: '#f0c040' }
+        },
+        red: {
+            accent: '#d4483b', hover: '#bc3c30', bg: '#fcedec', c1: '#d4483b', c2: '#e87c2a',
+            dark: { accent: '#e85450', hover: '#d84540', bg: '#381512', c1: '#e85450', c2: '#f09840' }
+        },
+        teal: {
+            accent: '#2aabb8', hover: '#2295a0', bg: '#e8f6f8', c1: '#2aabb8', c2: '#34c759',
+            dark: { accent: '#4ec4b8', hover: '#3cb4a8', bg: '#102a2c', c1: '#4ec4b8', c2: '#50d070' }
+        }
     };
 
     var _themeApplying = false;
@@ -1025,134 +1042,134 @@
         if (_themeApplying) return;
         _themeApplying = true;
         try {
-        var globalConf = getGlobalConfig();
-        var mode = safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system');
-        var accent = safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green');
-        var fontSize = safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal');
+            var globalConf = getGlobalConfig();
+            var mode = safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system');
+            var accent = safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green');
+            var fontSize = safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal');
 
-        // --- 1. Dark/Light mode override ---
-        var root = document.documentElement;
-        var body = document.body;
-        _tmplClassChange = true;
-        if (mode === 'light') {
-            root.classList.remove('nightMode', 'night_mode');
-            body.classList.remove('nightMode', 'night_mode');
-        } else if (mode === 'dark') {
-            root.classList.add('nightMode', 'night_mode');
-            body.classList.add('nightMode', 'night_mode');
-        } else {
-            // 'system' → follow the OS/device dark mode preference.
-            // On AnkiDroid, Anki's own theme setting (body classes / _ankiNightMode)
-            // may differ from the device's OS dark mode. Prefer prefers-color-scheme
-            // when available since "System" means "follow the OS".
-            var ankiDark;
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').media !== 'not all') {
-                ankiDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            } else {
-                // Fallback: read Anki's native dark mode state from DOM
-                ankiDark = window._ankiNightMode
-                    || body.classList.contains('nightMode')
-                    || body.classList.contains('night_mode')
-                    || root.classList.contains('nightMode')
-                    || root.classList.contains('night_mode')
-                    || root.classList.contains('night-mode');
-            }
-            if (ankiDark) {
+            // --- 1. Dark/Light mode override ---
+            var root = document.documentElement;
+            var body = document.body;
+            _tmplClassChange = true;
+            if (mode === 'light') {
+                root.classList.remove('nightMode', 'night_mode');
+                body.classList.remove('nightMode', 'night_mode');
+            } else if (mode === 'dark') {
                 root.classList.add('nightMode', 'night_mode');
                 body.classList.add('nightMode', 'night_mode');
             } else {
-                root.classList.remove('nightMode', 'night_mode');
-                body.classList.remove('nightMode', 'night_mode');
+                // 'system' → follow the OS/device dark mode preference.
+                // On AnkiDroid, Anki's own theme setting (body classes / _ankiNightMode)
+                // may differ from the device's OS dark mode. Prefer prefers-color-scheme
+                // when available since "System" means "follow the OS".
+                var ankiDark;
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').media !== 'not all') {
+                    ankiDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                } else {
+                    // Fallback: read Anki's native dark mode state from DOM
+                    ankiDark = window._ankiNightMode
+                        || body.classList.contains('nightMode')
+                        || body.classList.contains('night_mode')
+                        || root.classList.contains('nightMode')
+                        || root.classList.contains('night_mode')
+                        || root.classList.contains('night-mode');
+                }
+                if (ankiDark) {
+                    root.classList.add('nightMode', 'night_mode');
+                    body.classList.add('nightMode', 'night_mode');
+                } else {
+                    root.classList.remove('nightMode', 'night_mode');
+                    body.classList.remove('nightMode', 'night_mode');
+                }
             }
-        }
-        // Reset _tmplClassChange asynchronously so that if classList changes
-        // were no-ops (no mutation fired), the flag doesn't stay stuck on true.
-        setTimeout(function() { _tmplClassChange = false; }, 0);
+            // Reset _tmplClassChange asynchronously so that if classList changes
+            // were no-ops (no mutation fired), the flag doesn't stay stuck on true.
+            setTimeout(function () { _tmplClassChange = false; }, 0);
 
-        // --- 2. Accent colors ---
-        var isDark = root.classList.contains('nightMode') || root.classList.contains('night_mode')
-                  || body.classList.contains('nightMode') || body.classList.contains('night_mode');
-        var colors = _accentColors[accent] || _accentColors.green;
-        var palette = isDark && colors.dark ? colors.dark : colors;
-        // Set on both <html> AND <body> so inline values override the
-        // .nightMode stylesheet rule on <body> (CSS custom-property cascade:
-        // the closest ancestor with an explicit value wins).
-        var accentTargets = [root, body];
-        for (var t = 0; t < accentTargets.length; t++) {
-            accentTargets[t].style.setProperty('--accent', palette.accent);
-            accentTargets[t].style.setProperty('--accent-hover', palette.hover);
-            accentTargets[t].style.setProperty('--accent-bg', palette.bg);
-            accentTargets[t].style.setProperty('--tab-color-c1', palette.c1);
-            accentTargets[t].style.setProperty('--tab-color-c2', palette.c2);
-        }
+            // --- 2. Accent colors ---
+            var isDark = root.classList.contains('nightMode') || root.classList.contains('night_mode')
+                || body.classList.contains('nightMode') || body.classList.contains('night_mode');
+            var colors = _accentColors[accent] || _accentColors.green;
+            var palette = isDark && colors.dark ? colors.dark : colors;
+            // Set on both <html> AND <body> so inline values override the
+            // .nightMode stylesheet rule on <body> (CSS custom-property cascade:
+            // the closest ancestor with an explicit value wins).
+            var accentTargets = [root, body];
+            for (var t = 0; t < accentTargets.length; t++) {
+                accentTargets[t].style.setProperty('--accent', palette.accent);
+                accentTargets[t].style.setProperty('--accent-hover', palette.hover);
+                accentTargets[t].style.setProperty('--accent-bg', palette.bg);
+                accentTargets[t].style.setProperty('--tab-color-c1', palette.c1);
+                accentTargets[t].style.setProperty('--tab-color-c2', palette.c2);
+            }
 
-        // --- 3. Font size (pure CSS class toggle + dynamic style for WKWebView) ---
-        root.classList.remove('font-small', 'font-large');
-        if (fontSize === 'small') root.classList.add('font-small');
-        else if (fontSize === 'large') root.classList.add('font-large');
-        // WKWebView (AnkiMobile) ignores CSS recalc on html class changes.
-        // Always remove+recreate a <style> element with !important rules.
-        var _dynFontId = 'dyn-font-size';
-        var _dynEl = document.getElementById(_dynFontId);
-        if (_dynEl) _dynEl.parentNode.removeChild(_dynEl);
-        var _fsMap = {
-            '.card':[16,14,18],'.card-title':[26,23,29],'.info-modal-header':[18,16,20],
-            '.info-modal-title':[13,11,15],'.info-modal-meaning':[14,12,16],
-            '.info-section-title':[13,11,15],'.info-text-story':[15,13,17],
-            '.visuell-hinweis':[14,12,16],'.word-jp':[20,18,22],'.word-de':[13,11,15],
-            '.reading-row':[16,14,18],'.reading-label':[11,10,12],'.info-btn':[15,13,17],
-            '.info-tag':[12,10,14],'.link-btn':[14,12,16],'.tree-root-kanji':[36,32,40],
-            '.tree-node-char':[28,24,32],'.tree-node-tooltip':[13,11,15],
-            '.no-tree-data':[13,11,15],'.side-by-side-label':[11,10,12],
-            '.setting-group-title':[11,10,12],'.segment-btn':[12,10,14],
-            '.category-name':[15,13,17],'.category-desc':[11,10,12],
-            '.subpage-header h3':[16,14,18],'.settings-main-title':[16,14,18],
-            '.setting-section-title':[13,11,15],'.visual-option span':[11,10,12],
-            '.accent-option span':[10,9,11],'.close-settings':[14,12,16]
-        };
-        var _fsIdx = fontSize === 'small' ? 1 : fontSize === 'large' ? 2 : 0;
-        var _cssRules = '';
-        for (var _sel in _fsMap) { _cssRules += _sel + '{font-size:' + _fsMap[_sel][_fsIdx] + 'px!important}'; }
-        var _newStyle = document.createElement('style');
-        _newStyle.id = _dynFontId;
-        _newStyle.textContent = _cssRules;
-        document.head.appendChild(_newStyle);
+            // --- 3. Font size (pure CSS class toggle + dynamic style for WKWebView) ---
+            root.classList.remove('font-small', 'font-large');
+            if (fontSize === 'small') root.classList.add('font-small');
+            else if (fontSize === 'large') root.classList.add('font-large');
+            // WKWebView (AnkiMobile) ignores CSS recalc on html class changes.
+            // Always remove+recreate a <style> element with !important rules.
+            var _dynFontId = 'dyn-font-size';
+            var _dynEl = document.getElementById(_dynFontId);
+            if (_dynEl) _dynEl.parentNode.removeChild(_dynEl);
+            var _fsMap = {
+                '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
+                '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
+                '.info-section-title': [13, 11, 15], '.info-text-story': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
+                '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
+                '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
+                '.tree-node-char': [28, 24, 32], '.tree-node-tooltip': [13, 11, 15],
+                '.no-tree-data': [13, 11, 15], '.side-by-side-label': [11, 10, 12],
+                '.setting-group-title': [11, 10, 12], '.segment-btn': [12, 10, 14],
+                '.category-name': [15, 13, 17], '.category-desc': [11, 10, 12],
+                '.subpage-header h3': [16, 14, 18], '.settings-main-title': [16, 14, 18],
+                '.setting-section-title': [13, 11, 15], '.visual-option span': [11, 10, 12],
+                '.accent-option span': [10, 9, 11], '.close-settings': [14, 12, 16]
+            };
+            var _fsIdx = fontSize === 'small' ? 1 : fontSize === 'large' ? 2 : 0;
+            var _cssRules = '';
+            for (var _sel in _fsMap) { _cssRules += _sel + '{font-size:' + _fsMap[_sel][_fsIdx] + 'px!important}'; }
+            var _newStyle = document.createElement('style');
+            _newStyle.id = _dynFontId;
+            _newStyle.textContent = _cssRules;
+            document.head.appendChild(_newStyle);
 
-        // --- 4. Tell Qt/Chromium that we handle theming ourselves.
-        //    Anki Desktop enables QWebEngine's ForceDarkMode when Anki is in
-        //    dark mode. ForceDarkMode inverts pages that declare color-scheme:
-        //    light (or have no declaration). By always declaring "dark" when
-        //    Anki's own nightMode is active (regardless of the template's theme
-        //    override), we prevent ForceDarkMode from mangling our CSS variables.
-        //    When Anki is in light mode, ForceDarkMode is off, so "light" is safe.
-        //    Use isDark (the RESOLVED theme) rather than _ankiNightMode to ensure
-        //    color-scheme matches what we actually rendered.
-        var scheme = isDark ? 'dark' : 'light';
-        root.style.colorScheme = scheme;
-        var meta = document.querySelector('meta[name="color-scheme"]');
-        if (!meta) {
-            meta = document.createElement('meta');
-            meta.name = 'color-scheme';
-            document.head.appendChild(meta);
-        }
-        meta.content = scheme;
+            // --- 4. Tell Qt/Chromium that we handle theming ourselves.
+            //    Anki Desktop enables QWebEngine's ForceDarkMode when Anki is in
+            //    dark mode. ForceDarkMode inverts pages that declare color-scheme:
+            //    light (or have no declaration). By always declaring "dark" when
+            //    Anki's own nightMode is active (regardless of the template's theme
+            //    override), we prevent ForceDarkMode from mangling our CSS variables.
+            //    When Anki is in light mode, ForceDarkMode is off, so "light" is safe.
+            //    Use isDark (the RESOLVED theme) rather than _ankiNightMode to ensure
+            //    color-scheme matches what we actually rendered.
+            var scheme = isDark ? 'dark' : 'light';
+            root.style.colorScheme = scheme;
+            var meta = document.querySelector('meta[name="color-scheme"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = 'color-scheme';
+                document.head.appendChild(meta);
+            }
+            meta.content = scheme;
 
-        // --- 5. Background-color failsafe for AnkiDroid only.
-        //    AnkiDroid's new reviewer may override CSS variables.
-        //    On all other platforms, remove inline bg so CSS var(--bg-main) applies.
-        var isAnkiDroid = typeof AnkiDroidJS !== 'undefined' || (typeof pycmd === 'function' && navigator.userAgent.indexOf('Android') !== -1);
-        if (isAnkiDroid) {
-            var bgColor = isDark ? '#1a1a1a' : '#f7f7f5';
-            root.style.backgroundColor = bgColor;
-            body.style.backgroundColor = bgColor;
-        } else {
-            root.style.removeProperty('background-color');
-            body.style.removeProperty('background-color');
-        }
+            // --- 5. Background-color failsafe for AnkiDroid only.
+            //    AnkiDroid's new reviewer may override CSS variables.
+            //    On all other platforms, remove inline bg so CSS var(--bg-main) applies.
+            var isAnkiDroid = typeof AnkiDroidJS !== 'undefined' || (typeof pycmd === 'function' && navigator.userAgent.indexOf('Android') !== -1);
+            if (isAnkiDroid) {
+                var bgColor = isDark ? '#1a1a1a' : '#f7f7f5';
+                root.style.backgroundColor = bgColor;
+                body.style.backgroundColor = bgColor;
+            } else {
+                root.style.removeProperty('background-color');
+                body.style.removeProperty('background-color');
+            }
         } finally {
             // Delay reset so MutationObserver callbacks (microtasks) triggered by
             // the class changes above see the guard as true and skip re-entry.
-            setTimeout(function() { _themeApplying = false; }, 0);
+            setTimeout(function () { _themeApplying = false; }, 0);
         }
     }
 
@@ -1233,7 +1250,7 @@
     }
 
     var _settingsReady = false;
-    setTimeout(function() { _settingsReady = true; }, 400);
+    setTimeout(function () { _settingsReady = true; }, 400);
 
     function openSettings(e) {
         // Guard: block non-user-initiated calls during page load to prevent
@@ -1291,11 +1308,11 @@
     // truth for "system" mode and the Card Editor preview toggle.
     // Check both <html> and <body> — AnkiMobile / Card Editor may set on either.
     window._ankiNightMode = document.body.classList.contains('nightMode')
-                         || document.body.classList.contains('night_mode')
-                         || document.documentElement.classList.contains('nightMode')
-                         || document.documentElement.classList.contains('night_mode')
-                         || document.documentElement.classList.contains('night-mode')
-                         || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        || document.body.classList.contains('night_mode')
+        || document.documentElement.classList.contains('nightMode')
+        || document.documentElement.classList.contains('night_mode')
+        || document.documentElement.classList.contains('night-mode')
+        || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     applyThemeSettings();
     // Run synchronously to prevent flicker on card load
@@ -1307,10 +1324,10 @@
     //  innerHTML replacement of #qa and would otherwise accumulate).
     if (typeof MutationObserver !== 'undefined') {
         if (window._kanjiThemeObserver) {
-            try { window._kanjiThemeObserver.disconnect(); } catch (e) {}
+            try { window._kanjiThemeObserver.disconnect(); } catch (e) { }
         }
         var _themeMODebounce = null;
-        window._kanjiThemeObserver = new MutationObserver(function(mutations) {
+        window._kanjiThemeObserver = new MutationObserver(function (mutations) {
             var themeChanged = false;
             var scrollLost = false;
             for (var i = 0; i < mutations.length; i++) {
@@ -1331,7 +1348,7 @@
             _tmplClassChange = false;
             if (themeChanged) {
                 clearTimeout(_themeMODebounce);
-                _themeMODebounce = setTimeout(function() { applyThemeSettings(); }, 16);
+                _themeMODebounce = setTimeout(function () { applyThemeSettings(); }, 16);
             }
             if (scrollLost && typeof checkScrollability === 'function') {
                 setTimeout(checkScrollability, 20);
@@ -1344,7 +1361,7 @@
     // Listen for OS dark-mode changes (AnkiMobile uses prefers-color-scheme)
     if (window.matchMedia) {
         var darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
-        var mqHandler = function(e) {
+        var mqHandler = function (e) {
             var mode = safeGetItem('kanjiThemeMode', 'system');
             if (mode === 'system') {
                 window._ankiNightMode = e.matches;
@@ -1352,7 +1369,7 @@
             }
         };
         if (window._kanjiMQHandler && darkMQ.removeEventListener) {
-            try { darkMQ.removeEventListener('change', window._kanjiMQHandler); } catch(ex){}
+            try { darkMQ.removeEventListener('change', window._kanjiMQHandler); } catch (ex) { }
         }
         window._kanjiMQHandler = mqHandler;
         darkMQ.addEventListener('change', mqHandler);
@@ -1412,7 +1429,7 @@
                 document.documentElement.style.setProperty('overflow-y', 'hidden', 'important');
             }
         } finally {
-            setTimeout(function() { window._checkingScroll = false; }, 0);
+            setTimeout(function () { window._checkingScroll = false; }, 0);
         }
     }
 
@@ -2130,26 +2147,26 @@
     // buttons behind the modal regardless of event timing or coordinate drift.
     if (!window._kanjiGlobalPenDefenseAdded) {
         window._kanjiGlobalPenDefenseAdded = true;
-    if (typeof PointerEvent !== 'undefined') {
-        ['pointerdown', 'pointerup', 'click'].forEach(function (evtName) {
-            document.addEventListener(evtName, function (e) {
-                if (e.pointerType !== undefined && e.pointerType !== 'pen') return;
-                if (evtName === 'click' && !e._penOrigin) return; // only block pen-originated clicks
-                var active = document.querySelector('.settings-overlay.active, .info-overlay.active');
-                if (!active) return;
-                if (active.contains(e.target)) return; // event is inside overlay → allow
-                e.stopImmediatePropagation();
-                e.preventDefault();
+        if (typeof PointerEvent !== 'undefined') {
+            ['pointerdown', 'pointerup', 'click'].forEach(function (evtName) {
+                document.addEventListener(evtName, function (e) {
+                    if (e.pointerType !== undefined && e.pointerType !== 'pen') return;
+                    if (evtName === 'click' && !e._penOrigin) return; // only block pen-originated clicks
+                    var active = document.querySelector('.settings-overlay.active, .info-overlay.active');
+                    if (!active) return;
+                    if (active.contains(e.target)) return; // event is inside overlay → allow
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                }, true);
+            });
+            // Mark click events that originate from pen so the filter above can identify them
+            document.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var mark = function (ev) { ev._penOrigin = true; document.removeEventListener('click', mark, true); };
+                document.addEventListener('click', mark, true);
+                setTimeout(function () { document.removeEventListener('click', mark, true); }, 600);
             }, true);
-        });
-        // Mark click events that originate from pen so the filter above can identify them
-        document.addEventListener('pointerup', function (e) {
-            if (e.pointerType !== 'pen') return;
-            var mark = function (ev) { ev._penOrigin = true; document.removeEventListener('click', mark, true); };
-            document.addEventListener('click', mark, true);
-            setTimeout(function () { document.removeEventListener('click', mark, true); }, 600);
-        }, true);
-    }
+        }
     } // end guard
 
     // --- userJs: Gesture / Shortcut hooks for AnkiDroid & AnkiMobile ---
