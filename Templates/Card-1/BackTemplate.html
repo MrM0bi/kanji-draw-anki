@@ -51,7 +51,7 @@
         try {
             var ps = JSON.parse(sessionStorage.getItem('kanjiErrors') || localStorage.getItem('kanjiErrors') || '[]');
             var sc = parseInt(sessionStorage.getItem('kanjiCurrentStroke') || localStorage.getItem('kanjiCurrentStroke') || '0', 10);
-            function _ck(k) { try { var cs = document.cookie.split('; '), i; if (location.protocol !== 'file:') { for (i = 0; i < cs.length; i++) { if (cs[i].indexOf('_k=') === 0) { var obj = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (obj[k] !== undefined) return obj[k]; break } } } for (i = cs.length - 1; i >= 0; i--) { if (cs[i].indexOf(k + '=') === 0) return decodeURIComponent(cs[i].substring(k.length + 1)) } } catch (e) { } return null }
+            function _ck(k) { if (window._ks && window._ks[k] !== undefined) return window._ks[k]; try { var cs = document.cookie.split('; '), i; if (location.protocol !== 'file:') { for (i = 0; i < cs.length; i++) { if (cs[i].indexOf('_k=') === 0) { var obj = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (obj[k] !== undefined) return obj[k]; break } } } for (i = cs.length - 1; i >= 0; i--) { if (cs[i].indexOf(k + '=') === 0) return decodeURIComponent(cs[i].substring(k.length + 1)) } } catch (e) { } return null }
             var colorOn = (_ck('c1_kanjiOptColorBack') || localStorage.getItem('c1_kanjiOptColorBack') || _ck('kanjiOptColorBack') || localStorage.getItem('kanjiOptColorBack') || 'on') === 'on';
             if (colorOn && ps.length > 0) {
                 var css = '';
@@ -1031,6 +1031,21 @@
     // Scroll guards for info modal (settings modal already guarded by FrontSide)
     document.querySelectorAll('.settings-modal, .info-modal').forEach(modal => { if (modal._kanjiScrollGuarded) return; modal._kanjiScrollGuarded = true; modal.addEventListener('touchmove', function (e) { if (this.scrollHeight <= this.clientHeight) e.preventDefault(); }, { passive: false }); });
     document.querySelectorAll('.settings-overlay, .info-overlay').forEach(overlay => { if (overlay._kanjiScrollGuarded) return; overlay._kanjiScrollGuarded = true; overlay.addEventListener('touchmove', function (e) { if (e.target === this) e.preventDefault(); }, { passive: false }); });
+
+    // Apple Pencil: pen-to-click for modal controls
+    if (typeof PointerEvent !== 'undefined') {
+        document.querySelectorAll('.settings-modal, .info-modal').forEach(function (modal) {
+            if (modal._kanjiPenClick) return;
+            modal._kanjiPenClick = true;
+            modal.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var target = e.target.closest('input, button, label, select, a, .settings-link, [onclick]');
+                if (!target) return;
+                e.preventDefault();
+                target.click();
+            });
+        });
+    }
 
     // Stylus fix: Apple Pencil / S-Pen don't reliably fire onclick
     (function () {

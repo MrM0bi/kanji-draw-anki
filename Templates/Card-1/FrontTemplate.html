@@ -1,5 +1,5 @@
 <script>qFade = 0; if (typeof anki !== "undefined") anki.qFade = 0;</script>
-<button class="gear-btn" onclick="openSettings(event)" title="Einstellungen">
+<button class="gear-btn" onclick="openSettings(event)" title="Einstellungen" tabindex="-1">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"></circle>
         <path
@@ -88,6 +88,25 @@
                     <div class="category-info">
                         <span class="category-name">Darstellung</span>
                         <span class="category-desc">Strich-Darstellung</span>
+                    </div>
+                    <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M9 18l6-6-6-6"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="setting-group-title">Allgemein</div>
+            <div class="category-list">
+                <button class="category-card" onclick="navigateToPage('page-theme')">
+                    <div class="category-icon cat-theme">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a10 10 0 0 1 0 20z"></path>
+                        </svg>
+                    </div>
+                    <div class="category-info">
+                        <span class="category-name">Erscheinungsbild</span>
+                        <span class="category-desc">Modus, Akzentfarbe, Schrift</span>
                     </div>
                     <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
@@ -533,6 +552,134 @@
             </div>
             <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
         </div>
+
+        <!-- ═══ Sub-Page: Erscheinungsbild ═══ -->
+        <div class="settings-page" id="page-theme">
+            <div class="subpage-header">
+                <button class="back-btn" onclick="navigateBack()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"></path>
+                    </svg>
+                </button>
+                <h3>Erscheinungsbild</h3>
+            </div>
+            <div class="setting-group-title">Erscheinungsmodus</div>
+            <div class="visual-options-grid">
+                <label><input type="radio" name="theme-mode" value="system"
+                        onchange="updateThemeSetting('mode', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="8" width="28" height="20" rx="3"></rect>
+                            <path d="M14 32h12"></path>
+                            <path d="M20 28v4"></path>
+                        </svg>
+                        <span>System</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-mode" value="light"
+                        onchange="updateThemeSetting('mode', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="20" cy="20" r="6"></circle>
+                            <path d="M20 8v-2M20 34v-2M8 20H6M34 20h-2M11.8 11.8l-1.4-1.4M29.6 29.6l-1.4-1.4M28.2 11.8l1.4-1.4M10.4 29.6l1.4-1.4"></path>
+                        </svg>
+                        <span>Hell</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-mode" value="dark"
+                        onchange="updateThemeSetting('mode', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 13a10 10 0 0 0 14 14 14 14 0 0 1-14-14Z"></path>
+                        </svg>
+                        <span>Dunkel</span>
+                    </div>
+                </label>
+            </div>
+            <div class="setting-group-title">Akzentfarbe</div>
+            <div class="accent-options-grid">
+                <label><input type="radio" name="theme-accent" value="green"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#56a83a;"></div>
+                        <span>Grün</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-accent" value="blue"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#3478f6;"></div>
+                        <span>Blau</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-accent" value="purple"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#8944ab;"></div>
+                        <span>Lila</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-accent" value="orange"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#e87c2a;"></div>
+                        <span>Orange</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-accent" value="red"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#d4483b;"></div>
+                        <span>Rot</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-accent" value="teal"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:#2aabb8;"></div>
+                        <span>Türkis</span>
+                    </div>
+                </label>
+            </div>
+            <div class="setting-group-title">Schriftgröße</div>
+            <div class="visual-options-grid">
+                <label><input type="radio" name="theme-font-size" value="small"
+                        onchange="updateThemeSetting('fontSize', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <text x="20" y="26" text-anchor="middle" fill="currentColor" stroke="none" font-size="14" font-weight="700">Aa</text>
+                        </svg>
+                        <span>Klein</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-font-size" value="normal"
+                        onchange="updateThemeSetting('fontSize', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <text x="20" y="27" text-anchor="middle" fill="currentColor" stroke="none" font-size="18" font-weight="700">Aa</text>
+                        </svg>
+                        <span>Normal</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-font-size" value="large"
+                        onchange="updateThemeSetting('fontSize', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <text x="20" y="28" text-anchor="middle" fill="currentColor" stroke="none" font-size="22" font-weight="700">Aa</text>
+                        </svg>
+                        <span>Groß</span>
+                    </div>
+                </label>
+            </div>
+            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+        </div>
     </div>
 </div>
 
@@ -657,14 +804,15 @@
             var obj = {};
             try { var cs = document.cookie.split('; '); for (var j = 0; j < cs.length; j++) { if (cs[j].indexOf('_k=') === 0) { obj = JSON.parse(decodeURIComponent(cs[j].substring(3))); break; } } } catch (e) { }
             obj[key] = value;
-            document.cookie = '_k=' + encodeURIComponent(JSON.stringify(obj)) + ';path=/;max-age=31536000;SameSite=Lax';
+            var encoded = '_k=' + encodeURIComponent(JSON.stringify(obj)) + ';path=/;max-age=31536000;SameSite=Lax';
+            if (encoded.length < 3800) { document.cookie = encoded; }
         }
         // Desktop add-on bridge: flush settings to persistent JSON (debounced)
         if (typeof pycmd === 'function') { clearTimeout(window._kdpT); window._kdpT = setTimeout(function () { try { pycmd('kdp:' + JSON.stringify(window._ks)); } catch (e) { } }, 500); }
     }
     // Android CookieManager only persists cookies on lifecycle events – flush proactively
     if (location.protocol !== 'file:') {
-        var _fc = function () { if (!window._ks) return; var o = {}; try { var c = document.cookie.split('; '); for (var i = 0; i < c.length; i++) { if (c[i].indexOf('_k=') === 0) { o = JSON.parse(decodeURIComponent(c[i].substring(3))); break; } } } catch (e) { } for (var k in window._ks) o[k] = window._ks[k]; document.cookie = '_k=' + encodeURIComponent(JSON.stringify(o)) + ';path=/;max-age=31536000;SameSite=Lax'; };
+        var _fc = function () { if (!window._ks) return; var o = {}; try { var c = document.cookie.split('; '); for (var i = 0; i < c.length; i++) { if (c[i].indexOf('_k=') === 0) { o = JSON.parse(decodeURIComponent(c[i].substring(3))); break; } } } catch (e) { } for (var k in window._ks) o[k] = window._ks[k]; var enc = '_k=' + encodeURIComponent(JSON.stringify(o)) + ';path=/;max-age=31536000;SameSite=Lax'; if (enc.length < 3800) document.cookie = enc; };
         if (window._kanjiFlushVis) document.removeEventListener('visibilitychange', window._kanjiFlushVis);
         if (window._kanjiFlushPH) { window.removeEventListener('pagehide', window._kanjiFlushPH); window.removeEventListener('beforeunload', window._kanjiFlushPH); }
         window._kanjiFlushVis = function () { if (document.hidden) _fc(); };
@@ -763,7 +911,10 @@
             'opt-display-style': scopedGet('kanjiOptDisplayStyle', globalConf.displayStyle),
             'opt-draw-mode': scopedGet('kanjiOptDrawMode', globalConf.drawMode),
             'opt-side-by-side': scopedGet('kanjiOptSideBySide', globalConf.sideBySide),
-            'opt-free-view': scopedGet('kanjiOptFreeView', globalConf.freeView)
+            'opt-free-view': scopedGet('kanjiOptFreeView', globalConf.freeView),
+            'theme-mode': safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system'),
+            'theme-accent': safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green'),
+            'theme-font-size': safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal')
         };
         document.querySelectorAll('.settings-modal input[type="radio"]').forEach(r => {
             if (radioValues[r.name] !== undefined) r.checked = (r.value === radioValues[r.name]);
@@ -828,9 +979,106 @@
             displayStyle: getVar('--default-opt-display-style', 'standard'),
             drawMode: getVar('--default-opt-draw-mode', 'guided'),
             sideBySide: getVar('--default-opt-side-by-side', 'on'),
-            freeView: getVar('--default-opt-free-view', 'handwriting')
+            freeView: getVar('--default-opt-free-view', 'handwriting'),
+            themeMode: getVar('--default-theme-mode', 'system'),
+            themeAccent: getVar('--default-theme-accent', 'green'),
+            themeFontSize: getVar('--default-theme-font-size', 'normal')
         };
         return _cachedGlobalConf;
+    }
+
+    // --- Theme: Accent color definitions ---
+    var _accentColors = {
+        green:  { accent: '#56a83a', hover: '#4a9432', bg: '#f0f7ec', c1: '#56a83a', c2: '#3a98a8',
+                  dark: { accent: '#6abe4e', hover: '#5cac40', bg: '#1e3315', c1: '#6abe4e', c2: '#4ec4b8' } },
+        blue:   { accent: '#3478f6', hover: '#2a65d4', bg: '#eaf1fe', c1: '#3478f6', c2: '#5856d6',
+                  dark: { accent: '#5a9cf8', hover: '#4a8cf0', bg: '#162040', c1: '#5a9cf8', c2: '#7a78e8' } },
+        purple: { accent: '#8944ab', hover: '#753a95', bg: '#f3ecf7', c1: '#8944ab', c2: '#c44dba',
+                  dark: { accent: '#a866c8', hover: '#9656b8', bg: '#2a1838', c1: '#a866c8', c2: '#d870ce' } },
+        orange: { accent: '#e87c2a', hover: '#d06c20', bg: '#fef3ea', c1: '#e87c2a', c2: '#e5a821',
+                  dark: { accent: '#f09840', hover: '#e08830', bg: '#3a2010', c1: '#f09840', c2: '#f0c040' } },
+        red:    { accent: '#d4483b', hover: '#bc3c30', bg: '#fcedec', c1: '#d4483b', c2: '#e87c2a',
+                  dark: { accent: '#e85450', hover: '#d84540', bg: '#381512', c1: '#e85450', c2: '#f09840' } },
+        teal:   { accent: '#2aabb8', hover: '#2295a0', bg: '#e8f6f8', c1: '#2aabb8', c2: '#34c759',
+                  dark: { accent: '#4ec4b8', hover: '#3cb4a8', bg: '#102a2c', c1: '#4ec4b8', c2: '#50d070' } }
+    };
+
+    var _themeApplying = false;
+    // Track whether the template (not Anki) caused the last body class change.
+    // Set true synchronously before classList modifications, read in the
+    // MutationObserver callback (microtask) before it's cleared.
+    var _tmplClassChange = false;
+
+    function applyThemeSettings() {
+        if (_themeApplying) return;
+        _themeApplying = true;
+        try {
+        var globalConf = getGlobalConfig();
+        var mode = safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system');
+        var accent = safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green');
+        var fontSize = safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal');
+
+        // --- 1. Dark/Light mode override ---
+        var root = document.documentElement;
+        var body = document.body;
+        _tmplClassChange = true;
+        if (mode === 'light') {
+            root.classList.remove('nightMode', 'night_mode');
+            body.classList.remove('nightMode', 'night_mode');
+        } else if (mode === 'dark') {
+            root.classList.add('nightMode', 'night_mode');
+            body.classList.add('nightMode', 'night_mode');
+        } else {
+            // 'system' → follow Anki's native dark mode preference.
+            // _ankiNightMode is captured from body.className at script init
+            // (set by Anki before our code runs) and updated by the
+            // MutationObserver whenever Anki (not us) toggles nightMode.
+            root.classList.remove('nightMode', 'night_mode');
+            var ankiDark = window._ankiNightMode;
+            // Fallback: if _ankiNightMode was never set, try matchMedia
+            if (ankiDark === undefined) {
+                ankiDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+            if (ankiDark) {
+                body.classList.add('nightMode', 'night_mode');
+            } else {
+                body.classList.remove('nightMode', 'night_mode');
+            }
+        }
+
+        // --- 2. Accent colors ---
+        var isDark = root.classList.contains('nightMode') || root.classList.contains('night_mode')
+                  || body.classList.contains('nightMode') || body.classList.contains('night_mode');
+        var colors = _accentColors[accent] || _accentColors.green;
+        var palette = isDark && colors.dark ? colors.dark : colors;
+        // Set on both <html> AND <body> so inline values override the
+        // .nightMode stylesheet rule on <body> (CSS custom-property cascade:
+        // the closest ancestor with an explicit value wins).
+        var accentTargets = [root, body];
+        for (var t = 0; t < accentTargets.length; t++) {
+            accentTargets[t].style.setProperty('--accent', palette.accent);
+            accentTargets[t].style.setProperty('--accent-hover', palette.hover);
+            accentTargets[t].style.setProperty('--accent-bg', palette.bg);
+            accentTargets[t].style.setProperty('--tab-color-c1', palette.c1);
+            accentTargets[t].style.setProperty('--tab-color-c2', palette.c2);
+        }
+
+        // --- 3. Font size (via --text-scale CSS variable) ---
+        var scale = fontSize === 'small' ? 0.875 : fontSize === 'large' ? 1.125 : 1;
+        root.style.setProperty('--text-scale', scale);
+        body.style.setProperty('--text-scale', scale);
+        } finally {
+            // Delay reset so MutationObserver callbacks (microtasks) triggered by
+            // the class changes above see the guard as true and skip re-entry.
+            setTimeout(function() { _themeApplying = false; }, 0);
+        }
+    }
+
+    function updateThemeSetting(category, val) {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+        var keyMap = { mode: 'kanjiThemeMode', accent: 'kanjiThemeAccent', fontSize: 'kanjiThemeFontSize' };
+        safeSetItem(keyMap[category], val);
+        applyThemeSettings();
     }
 
     // --- Grid Rendering [SHARED with c2-front] ---
@@ -902,7 +1150,13 @@
         }
     }
 
+    var _settingsReady = false;
+    setTimeout(function() { _settingsReady = true; }, 400);
+
     function openSettings(e) {
+        // Guard: block non-user-initiated calls during page load to prevent
+        // Anki Desktop focus/keyboard artefacts from auto-opening settings.
+        if (!_settingsReady && !(e && e.isTrusted)) return;
         if (e) { e.stopPropagation(); e.preventDefault(); }
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         // Reset to host card's tab on open
@@ -928,18 +1182,69 @@
 
     function closeSettings(e) {
         if (e) { e.stopPropagation(); e.preventDefault(); }
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         var ol = document.getElementById('settings-overlay');
         ol.classList.remove('active');
         var gb = document.querySelector('.gear-btn');
         if (gb) { gb.classList.remove('no-hover-fx'); }
         // Apply all settings on close — invalidate cache so changes take effect
         _cachedGlobalConf = null;
+        applyThemeSettings();
         updateGridDisplay();
         if (window.kanjiSettingsGlobalHandler) try { window.kanjiSettingsGlobalHandler(); } catch (ex) { }
     }
 
+    // Capture Anki's native nightMode state BEFORE applyThemeSettings modifies
+    // body classes. Anki sets body.className on card show; this is the ground
+    // truth for "system" mode and the Card Editor preview toggle.
+    window._ankiNightMode = document.body.classList.contains('nightMode')
+                         || document.body.classList.contains('night_mode');
+
+    applyThemeSettings();
     // Run synchronously to prevent flicker on card load
     updateGridDisplay();
+
+    // Prevent Anki from overriding forced light/dark mode.
+    // Store observer on window so previous card's observer is disconnected
+    // (Anki Desktop reuses a single WebView – observers on <html>/<body> survive
+    //  innerHTML replacement of #qa and would otherwise accumulate).
+    if (typeof MutationObserver !== 'undefined') {
+        if (window._kanjiThemeObserver) {
+            try { window._kanjiThemeObserver.disconnect(); } catch (e) {}
+        }
+        var _themeMODebounce = null;
+        window._kanjiThemeObserver = new MutationObserver(function(mutations) {
+            var themeChanged = false;
+            var scrollLost = false;
+            for (var i = 0; i < mutations.length; i++) {
+                var oldVal = mutations[i].oldValue || '';
+                var newVal = mutations[i].target.getAttribute('class') || '';
+                var hadNM = /\bnightMode\b|\bnight_mode\b/.test(oldVal);
+                var hasNM = /\bnightMode\b|\bnight_mode\b/.test(newVal);
+                if (hadNM !== hasNM) {
+                    themeChanged = true;
+                    // Update native state only for external changes (Anki/Card Editor),
+                    // not for changes we made ourselves in applyThemeSettings.
+                    // _tmplClassChange is set synchronously before our classList edits
+                    // and is still true when this microtask fires.
+                    if (!_tmplClassChange && mutations[i].target === document.body) {
+                        window._ankiNightMode = hasNM;
+                    }
+                }
+                if (/\bno-scroll\b/.test(oldVal) && !/\bno-scroll\b/.test(newVal)) scrollLost = true;
+            }
+            _tmplClassChange = false;
+            if (themeChanged) {
+                clearTimeout(_themeMODebounce);
+                _themeMODebounce = setTimeout(function() { applyThemeSettings(); }, 16);
+            }
+            if (scrollLost && typeof checkScrollability === 'function') {
+                setTimeout(checkScrollability, 20);
+            }
+        });
+        window._kanjiThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+        window._kanjiThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+    }
 
     // --- Scroll Lock & iOS Detection [SHARED with c2-front] ---
 
@@ -1647,6 +1952,23 @@
     // Register modal scroll guards synchronously to prevent flicker
     document.querySelectorAll('.settings-modal, .info-modal').forEach(modal => { if (modal._kanjiScrollGuarded) return; modal._kanjiScrollGuarded = true; modal.addEventListener('touchmove', function (e) { if (this.scrollHeight <= this.clientHeight) e.preventDefault(); }, { passive: false }); });
     document.querySelectorAll('.settings-overlay, .info-overlay').forEach(overlay => { if (overlay._kanjiScrollGuarded) return; overlay._kanjiScrollGuarded = true; overlay.addEventListener('touchmove', function (e) { if (e.target === this) e.preventDefault(); }, { passive: false }); });
+
+    // --- Apple Pencil: pen-to-click for modal controls [SHARED with c2-front] ---
+    // The addPenHandler() above only covers top-level buttons (gear, reveal, etc.).
+    // Inside modals, radio buttons / links / close buttons need pen support too.
+    if (typeof PointerEvent !== 'undefined') {
+        document.querySelectorAll('.settings-modal, .info-modal').forEach(function (modal) {
+            if (modal._kanjiPenClick) return;
+            modal._kanjiPenClick = true;
+            modal.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var target = e.target.closest('input, button, label, select, a, .settings-link, [onclick]');
+                if (!target) return;
+                e.preventDefault();
+                target.click();
+            });
+        });
+    }
 
     // --- userJs: Gesture / Shortcut hooks for AnkiDroid & AnkiMobile ---
     var userJs1 = function () { var b = document.getElementById('button-reveal'); if (b && b._kanjiAction) b._kanjiAction(); };
