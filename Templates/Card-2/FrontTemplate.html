@@ -1221,7 +1221,21 @@
     };
 
     var _themeApplying = false;
+    var _deferredThemeTimer = null;
     var _tmplClassChange = false;
+
+    function _scheduleDeferredThemeCheck() {
+        clearTimeout(_deferredThemeTimer);
+        _deferredThemeTimer = setTimeout(function () {
+            var mode = safeGetItem('kanjiThemeMode', 'system');
+            if (mode === 'system') return;
+            var wantDark = (mode === 'dark');
+            var root = document.documentElement, body = document.body;
+            var isDark = root.classList.contains('nightMode') || root.classList.contains('night_mode')
+                || body.classList.contains('nightMode') || body.classList.contains('night_mode');
+            if (isDark !== wantDark) applyThemeSettings();
+        }, 200);
+    }
 
     function applyThemeSettings() {
         if (_themeApplying) return;
@@ -1364,9 +1378,11 @@
             document.head.appendChild(_newStyle);
 
             // --- 4. Tell Qt/Chromium that we handle theming ourselves.
-            //    Use isDark (the RESOLVED theme) to ensure color-scheme matches
-            //    what we actually rendered.
-            var scheme = isDark ? 'dark' : 'light';
+            //    color-scheme must follow Anki's NATIVE dark state, not our
+            //    template override. ForceDarkMode on Anki Desktop inverts pages
+            //    with color-scheme:light when Anki is dark — using
+            //    _ankiNativeNightMode here prevents that inversion.
+            var scheme = window._ankiNativeNightMode ? 'dark' : 'light';
             root.style.colorScheme = scheme;
             var meta = document.querySelector('meta[name="color-scheme"]');
             if (!meta) {
@@ -1376,15 +1392,9 @@
             }
             meta.content = scheme;
 
-            // --- 5. Background-color failsafe for AnkiDroid only.
-            var isAnkiDroid = typeof AnkiDroidJS !== 'undefined' || (typeof pycmd === 'function' && navigator.userAgent.indexOf('Android') !== -1);
-            if (isAnkiDroid) {
-                root.style.backgroundColor = pPalette.bgMain;
-                body.style.backgroundColor = pPalette.bgMain;
-            } else {
-                root.style.removeProperty('background-color');
-                body.style.removeProperty('background-color');
-            }
+            // --- 5. Background-color: set directly on html + body for all platforms.
+            root.style.backgroundColor = pPalette.bgMain;
+            body.style.backgroundColor = pPalette.bgMain;
         } finally {
             // Delay reset so MutationObserver callbacks (microtasks) triggered by
             // the class changes above see the guard as true and skip re-entry.
@@ -1399,6 +1409,7 @@
         applyThemeSettings();
         // Immediately refresh back-side features (stroke colors, gel halos, etc.)
         if (window.kanjiSettingsGlobalHandlerC2) try { window.kanjiSettingsGlobalHandlerC2(); } catch (ex) { }
+        if (category === 'mode') _scheduleDeferredThemeCheck();
     }
 
     // --- Grid Rendering [SHARED with c1-front] ---
@@ -1508,13 +1519,14 @@
         applyThemeSettings();
         updateGridDisplay();
         if (window.kanjiSettingsGlobalHandlerC2) try { window.kanjiSettingsGlobalHandlerC2(); } catch (ex) { }
+        _scheduleDeferredThemeCheck();
     }
 
     // Capture Anki's native nightMode state BEFORE applyThemeSettings modifies
     // body classes. Anki sets body.className on card show; this is the ground
     // truth for "system" mode and the Card Editor preview toggle.
     // Check both <html> and <body> — AnkiMobile / Card Editor may set on either.
-    window._ankiNightMode = document.body.classList.contains('nightMode')
+    window._ankiNativeNightMode = window._ankiNightMode = document.body.classList.contains('nightMode')
         || document.body.classList.contains('night_mode')
         || document.documentElement.classList.contains('nightMode')
         || document.documentElement.classList.contains('night_mode')
@@ -1524,6 +1536,8 @@
     applyThemeSettings();
     // Run synchronously to prevent flicker on card load
     updateGridDisplay();
+    // Deferred re-apply: Anki may re-set nightMode after our script runs.
+    _scheduleDeferredThemeCheck();
 
     // Prevent Anki from overriding forced light/dark mode.
     // Store observer on window so previous card's observer is disconnected
@@ -1536,22 +1550,22 @@
         var _themeMODebounce = null;
         window._kanjiThemeObserver = new MutationObserver(function (mutations) {
             if (!document.getElementById('svg-bg')) return;
-            var themeChanged = false;
+            var nightModeChanged = false;
             var scrollLost = false;
             for (var i = 0; i < mutations.length; i++) {
                 var newVal = mutations[i].target.getAttribute('class') || '';
                 var hasNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(newVal);
-                if (hasNM !== !!window._ankiNightMode) {
-                    themeChanged = true;
-                    if (!_tmplClassChange) {
-                        window._ankiNightMode = hasNM;
-                    }
+                var prevNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(mutations[i].oldValue || '');
+                if (hasNM !== prevNM && !_tmplClassChange) {
+                    window._ankiNightMode = hasNM;
+                    window._ankiNativeNightMode = hasNM;
+                    nightModeChanged = true;
                 }
                 if (!window._checkingScroll && !/\bno-scroll\b/.test(newVal) && window._hadNoScroll) scrollLost = true;
                 window._hadNoScroll = /\bno-scroll\b/.test(newVal);
             }
             _tmplClassChange = false;
-            if (themeChanged) {
+            if (nightModeChanged) {
                 clearTimeout(_themeMODebounce);
                 _themeMODebounce = setTimeout(function () { applyThemeSettings(); }, 16);
             }
@@ -1559,8 +1573,8 @@
                 setTimeout(checkScrollability, 20);
             }
         });
-        window._kanjiThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        window._kanjiThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        window._kanjiThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+        window._kanjiThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
     }
 
     // Listen for OS dark-mode changes (AnkiMobile uses prefers-color-scheme)
@@ -1570,6 +1584,7 @@
             var mode = safeGetItem('kanjiThemeMode', 'system');
             if (mode === 'system') {
                 window._ankiNightMode = e.matches;
+                window._ankiNativeNightMode = e.matches;
                 applyThemeSettings();
             }
         };
@@ -1588,6 +1603,24 @@
     window._kanjiFreeEval = null;
     window._kanjiRenderFreeView = null;
     window._kanjiGeneration = (window._kanjiGeneration || 0) + 1;
+
+    // Re-apply theme after bfcache restore (WKWebView iOS 14+ may cache and restore
+    // the page without re-running scripts, leaving theme classes out of sync).
+    if (window._kanjiPagesShowHandler) {
+        window.removeEventListener('pageshow', window._kanjiPagesShowHandler);
+    }
+    window._kanjiPagesShowHandler = function (e) {
+        if (e.persisted && document.getElementById('svg-bg')) {
+            window._ankiNativeNightMode = window._ankiNightMode =
+                document.body.classList.contains('nightMode')
+                || document.body.classList.contains('night_mode')
+                || document.documentElement.classList.contains('nightMode')
+                || document.documentElement.classList.contains('night_mode')
+                || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            applyThemeSettings();
+        }
+    };
+    window.addEventListener('pageshow', window._kanjiPagesShowHandler);
 
     // --- Scroll Lock & iOS Detection [SHARED with c1-front] ---
 

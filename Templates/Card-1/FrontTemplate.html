@@ -1257,10 +1257,27 @@
     };
 
     var _themeApplying = false;
-    // Track whether the template (not Anki) caused the last body class change.
-    // Set true synchronously before classList modifications, read in the
-    // MutationObserver callback (microtask) before it's cleared.
+    var _deferredThemeTimer = null;
+    // Set true synchronously before classList modifications so the MutationObserver
+    // can distinguish our own changes from Anki's external class updates.
     var _tmplClassChange = false;
+
+    // Safety-net: if the DOM dark-state no longer matches the saved mode after
+    // 200 ms (e.g. Anki re-asserted its own nightMode class), re-apply.
+    // Only acts when mode is forced ('dark'/'light'); 'system' mode is handled
+    // by the matchMedia listener and the initial _ankiNightMode snapshot.
+    function _scheduleDeferredThemeCheck() {
+        clearTimeout(_deferredThemeTimer);
+        _deferredThemeTimer = setTimeout(function () {
+            var mode = safeGetItem('kanjiThemeMode', 'system');
+            if (mode === 'system') return;
+            var wantDark = (mode === 'dark');
+            var root = document.documentElement, body = document.body;
+            var isDark = root.classList.contains('nightMode') || root.classList.contains('night_mode')
+                || body.classList.contains('nightMode') || body.classList.contains('night_mode');
+            if (isDark !== wantDark) applyThemeSettings();
+        }, 200);
+    }
 
     function applyThemeSettings() {
         if (_themeApplying) return;
@@ -1443,13 +1460,14 @@
             // --- 4. Tell Qt/Chromium that we handle theming ourselves.
             //    Anki Desktop enables QWebEngine's ForceDarkMode when Anki is in
             //    dark mode. ForceDarkMode inverts pages that declare color-scheme:
-            //    light (or have no declaration). By always declaring "dark" when
-            //    Anki's own nightMode is active (regardless of the template's theme
-            //    override), we prevent ForceDarkMode from mangling our CSS variables.
+            //    light (or no declaration). CRITICAL: color-scheme must follow
+            //    Anki's NATIVE dark state, NOT our template override.
+            //    Example: Template=light, Anki=dark → we style the page light but
+            //    must still declare color-scheme:dark so ForceDarkMode doesn't
+            //    invert our already-styled light content (that would cause the
+            //    artifacts and wrong background the user sees on Anki Desktop).
             //    When Anki is in light mode, ForceDarkMode is off, so "light" is safe.
-            //    Use isDark (the RESOLVED theme) rather than _ankiNightMode to ensure
-            //    color-scheme matches what we actually rendered.
-            var scheme = isDark ? 'dark' : 'light';
+            var scheme = window._ankiNativeNightMode ? 'dark' : 'light';
             root.style.colorScheme = scheme;
             var meta = document.querySelector('meta[name="color-scheme"]');
             if (!meta) {
@@ -1459,17 +1477,12 @@
             }
             meta.content = scheme;
 
-            // --- 5. Background-color failsafe for AnkiDroid only.
-            //    AnkiDroid's new reviewer may override CSS variables.
-            //    On all other platforms, remove inline bg so CSS var(--bg-main) applies.
-            var isAnkiDroid = typeof AnkiDroidJS !== 'undefined' || (typeof pycmd === 'function' && navigator.userAgent.indexOf('Android') !== -1);
-            if (isAnkiDroid) {
-                root.style.backgroundColor = pPalette.bgMain;
-                body.style.backgroundColor = pPalette.bgMain;
-            } else {
-                root.style.removeProperty('background-color');
-                body.style.removeProperty('background-color');
-            }
+            // --- 5. Background-color: set directly on html + body for all platforms.
+            //    Relying solely on var(--bg-main) via CSS can fail when Anki's own
+            //    stylesheet overrides it or when the nightMode class gets toggled.
+            //    An inline style here wins over all author-stylesheet rules.
+            root.style.backgroundColor = pPalette.bgMain;
+            body.style.backgroundColor = pPalette.bgMain;
             if (window._kanjiInvalidateCSSCache) window._kanjiInvalidateCSSCache();
         } finally {
             // Delay reset so MutationObserver callbacks (microtasks) triggered by
@@ -1485,6 +1498,7 @@
         applyThemeSettings();
         // Immediately refresh back-side features (stroke colors, gel halos, etc.)
         if (window.kanjiSettingsGlobalHandler) try { window.kanjiSettingsGlobalHandler(); } catch (ex) { }
+        if (category === 'mode') _scheduleDeferredThemeCheck();
     }
 
     // --- Grid Rendering [SHARED with c2-front] ---
@@ -1605,13 +1619,14 @@
         if (window._kanjiInvalidateCSSCache) window._kanjiInvalidateCSSCache();
         if (window._kanjiRefreshDrawConfig) window._kanjiRefreshDrawConfig();
         if (window.kanjiSettingsGlobalHandler) try { window.kanjiSettingsGlobalHandler(); } catch (ex) { }
+        _scheduleDeferredThemeCheck();
     }
 
     // Capture Anki's native nightMode state BEFORE applyThemeSettings modifies
     // body classes. Anki sets body.className on card show; this is the ground
     // truth for "system" mode and the Card Editor preview toggle.
     // Check both <html> and <body> — AnkiMobile / Card Editor may set on either.
-    window._ankiNightMode = document.body.classList.contains('nightMode')
+    window._ankiNativeNightMode = window._ankiNightMode = document.body.classList.contains('nightMode')
         || document.body.classList.contains('night_mode')
         || document.documentElement.classList.contains('nightMode')
         || document.documentElement.classList.contains('night_mode')
@@ -1621,6 +1636,8 @@
     applyThemeSettings();
     // Run synchronously to prevent flicker on card load
     updateGridDisplay();
+    // Deferred re-apply: Anki may re-set nightMode after our script runs.
+    _scheduleDeferredThemeCheck();
 
     // Prevent Anki from overriding forced light/dark mode.
     // Store observer on window so previous card's observer is disconnected
@@ -1633,22 +1650,23 @@
         var _themeMODebounce = null;
         window._kanjiThemeObserver = new MutationObserver(function (mutations) {
             if (!document.getElementById('svg-bg')) return;
-            var themeChanged = false;
+            var nightModeChanged = false;
             var scrollLost = false;
             for (var i = 0; i < mutations.length; i++) {
                 var newVal = mutations[i].target.getAttribute('class') || '';
                 var hasNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(newVal);
-                if (hasNM !== !!window._ankiNightMode) {
-                    themeChanged = true;
-                    if (!_tmplClassChange) {
-                        window._ankiNightMode = hasNM;
-                    }
+                var prevNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(mutations[i].oldValue || '');
+                // Only act when nightMode actually changed AND it was Anki (not us).
+                if (hasNM !== prevNM && !_tmplClassChange) {
+                    window._ankiNightMode = hasNM;
+                    window._ankiNativeNightMode = hasNM;
+                    nightModeChanged = true;
                 }
                 if (!window._checkingScroll && !/\bno-scroll\b/.test(newVal) && window._hadNoScroll) scrollLost = true;
                 window._hadNoScroll = /\bno-scroll\b/.test(newVal);
             }
             _tmplClassChange = false;
-            if (themeChanged) {
+            if (nightModeChanged) {
                 clearTimeout(_themeMODebounce);
                 _themeMODebounce = setTimeout(function () { applyThemeSettings(); }, 16);
             }
@@ -1656,8 +1674,8 @@
                 setTimeout(checkScrollability, 20);
             }
         });
-        window._kanjiThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        window._kanjiThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        window._kanjiThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+        window._kanjiThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
     }
 
     // Listen for OS dark-mode changes (AnkiMobile uses prefers-color-scheme)
@@ -1667,6 +1685,7 @@
             var mode = safeGetItem('kanjiThemeMode', 'system');
             if (mode === 'system') {
                 window._ankiNightMode = e.matches;
+                window._ankiNativeNightMode = e.matches;
                 applyThemeSettings();
             }
         };
@@ -1676,6 +1695,24 @@
         window._kanjiMQHandler = mqHandler;
         darkMQ.addEventListener('change', mqHandler);
     }
+
+    // Re-apply theme after bfcache restore (WKWebView iOS 14+ may cache and restore
+    // the page without re-running scripts, leaving theme classes out of sync).
+    if (window._kanjiPagesShowHandler) {
+        window.removeEventListener('pageshow', window._kanjiPagesShowHandler);
+    }
+    window._kanjiPagesShowHandler = function (e) {
+        if (e.persisted && document.getElementById('svg-bg')) {
+            window._ankiNativeNightMode = window._ankiNightMode =
+                document.body.classList.contains('nightMode')
+                || document.body.classList.contains('night_mode')
+                || document.documentElement.classList.contains('nightMode')
+                || document.documentElement.classList.contains('night_mode')
+                || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            applyThemeSettings();
+        }
+    };
+    window.addEventListener('pageshow', window._kanjiPagesShowHandler);
 
     // --- Scroll Lock & iOS Detection [SHARED with c2-front] ---
 
@@ -1914,15 +1951,21 @@
 
         // ···· Save & Auto-Flip ····
 
+        const _saveStateTimer = { id: null };
         const saveState = () => {
             window._kanjiProblemStrokes = problemStrokes;
             window._kanjiCurrentStroke = currentStroke;
-            ['sessionStorage', 'localStorage'].forEach(storage => {
-                try {
-                    window[storage].setItem('kanjiErrors', JSON.stringify(problemStrokes));
-                    window[storage].setItem('kanjiCurrentStroke', currentStroke.toString());
-                } catch (e) { }
-            });
+            // Debounce storage writes: batch rapid successive strokes (e.g. guided skip)
+            // into a single write. 50ms is imperceptible but avoids sync I/O on each stroke.
+            clearTimeout(_saveStateTimer.id);
+            _saveStateTimer.id = setTimeout(function () {
+                ['sessionStorage', 'localStorage'].forEach(storage => {
+                    try {
+                        window[storage].setItem('kanjiErrors', JSON.stringify(problemStrokes));
+                        window[storage].setItem('kanjiCurrentStroke', currentStroke.toString());
+                    } catch (e) { }
+                });
+            }, 50);
         };
 
         // Persist initial state so the back side always has data
@@ -2240,7 +2283,9 @@
             requestAnimationFrame(tick);
         };
 
-        // Cached bounding rect — avoids layout thrashing on every pointermove
+        // Cached bounding rect — avoids layout thrashing on every pointermove.
+        // Invalidated on resize, orientationchange, and pointerleave so that
+        // re-entering the canvas after a scroll/zoom always gets a fresh rect.
         let _cachedRect = null;
         const invalidateRect = () => { _cachedRect = null; if (_useCanvas && _ctx && !isDrawing) _resizeCanvas(); };
         window.addEventListener('resize', invalidateRect);
@@ -2273,8 +2318,6 @@
                 var s = document.createElement('style');
                 s.id = styleId;
                 s.textContent = [
-                    '@-webkit-keyframes cel-glow{0%{box-shadow:0 4px 12px rgba(0,0,0,.06)}35%{box-shadow:0 0 28px rgba(255,210,50,.9),0 0 60px rgba(255,210,50,.35)}100%{box-shadow:0 4px 12px rgba(0,0,0,.06)}}',
-                    '@keyframes cel-glow{0%{box-shadow:0 4px 12px rgba(0,0,0,.06)}35%{box-shadow:0 0 28px rgba(255,210,50,.9),0 0 60px rgba(255,210,50,.35)}100%{box-shadow:0 4px 12px rgba(0,0,0,.06)}}',
                     '@-webkit-keyframes cel-bounce{0%{-webkit-transform:scale(1)}20%{-webkit-transform:scale(1.08)}45%{-webkit-transform:scale(.975)}70%{-webkit-transform:scale(1.015)}100%{-webkit-transform:scale(1)}}',
                     '@keyframes cel-bounce{0%{transform:scale(1)}20%{transform:scale(1.08)}45%{transform:scale(.975)}70%{transform:scale(1.015)}100%{transform:scale(1)}}',
                     '@-webkit-keyframes cel-flash{0%{opacity:1;-webkit-transform:scale(1)}25%{opacity:.2;-webkit-transform:scale(1.04)}100%{opacity:1;-webkit-transform:scale(1)}}',
@@ -2284,9 +2327,11 @@
                 ].join('\n');
                 document.head.appendChild(s);
             }
-            c.style.setProperty('-webkit-animation', 'cel-glow 850ms ease-out, cel-bounce 700ms cubic-bezier(.34,1.56,.64,1)');
-            c.style.setProperty('animation', 'cel-glow 850ms ease-out, cel-bounce 700ms cubic-bezier(.34,1.56,.64,1)');
+            c.style.willChange = 'transform';
+            c.style.setProperty('-webkit-animation', 'cel-bounce 700ms cubic-bezier(.34,1.56,.64,1)');
+            c.style.setProperty('animation', 'cel-bounce 700ms cubic-bezier(.34,1.56,.64,1)');
             if (svg) {
+                svg.style.willChange = 'transform, opacity';
                 var flashAnim = isNeon ? 'cel-neon-pulse 600ms ease-in-out' : 'cel-flash 600ms ease-in-out';
                 svg.style.setProperty('-webkit-animation', flashAnim);
                 svg.style.setProperty('animation', flashAnim);
@@ -2298,8 +2343,30 @@
             const radius = rect.width * 0.5;
             const cleanup = [];
 
+            // Glow: create a fixed-position sibling div so its opacity animation
+            // runs on its own compositor layer, fully decoupled from the bouncing
+            // container (child ::after inherits the parent's transform cascade).
+            const glowEl = document.createElement('div');
+            const bRad = getComputedStyle(c).borderRadius;
+            Object.assign(glowEl.style, {
+                position: 'fixed',
+                left: rect.left + 'px', top: rect.top + 'px',
+                width: rect.width + 'px', height: rect.height + 'px',
+                borderRadius: bRad,
+                boxShadow: '0 0 28px rgba(255,210,50,.9), 0 0 60px rgba(255,210,50,.35)',
+                pointerEvents: 'none',
+                opacity: '0',
+                willChange: 'opacity',
+                zIndex: '10'
+            });
+            glowEl.style.setProperty('-webkit-animation', 'cel-glow-opacity 850ms ease-out forwards');
+            glowEl.style.setProperty('animation', 'cel-glow-opacity 850ms ease-out forwards');
+            document.body.appendChild(glowEl);
+            cleanup.push(glowEl);
+
             const colors = ['#FFD700', '#FFA500', '#FF6B6B', '#00E5FF', '#B388FF', '#FFE082', '#FF4081', '#69F0AE', '#FFAB40', '#40C4FF'];
-            const N = 16;
+            // Fewer sparkles on WKWebView — each animated div is a compositor layer
+            const N = _isWK ? 5 : 10;
             // Ensure sparkle keyframes exist (CSS-based for AnkiMobile/WKWebView compat)
             if (!document.getElementById('sparkle-keyframes')) {
                 var sk = document.createElement('style');
@@ -2337,12 +2404,15 @@
                 cleanup.push(el);
             }
 
+            const _celGen = _drawGen;
             setTimeout(() => resolve(), 750);
             setTimeout(() => {
+                if (_drawGen !== _celGen) return; // Card changed — skip DOM cleanup (sparkles already removed by _kanjiSparkleCleanup)
                 c.classList.remove('celebration');
                 c.style.removeProperty('-webkit-animation');
                 c.style.removeProperty('animation');
-                if (svg) { svg.style.removeProperty('-webkit-animation'); svg.style.removeProperty('animation'); }
+                c.style.willChange = 'auto';
+                if (svg) { svg.style.removeProperty('-webkit-animation'); svg.style.removeProperty('animation'); svg.style.willChange = 'auto'; }
                 cleanup.forEach(p => { try { if (p.parentNode) p.parentNode.removeChild(p); } catch (e) { } });
             }, 950);
             window._kanjiSparkleCleanup = () => { cleanup.forEach(p => { try { if (p.parentNode) p.parentNode.removeChild(p); } catch (e) { } }); };
@@ -2738,7 +2808,7 @@
         }
         window.kanjiStopDrawingHandler = stopDrawing;
 
-        const stopDrawingOnLeave = (e) => { if (isDrawing) stopDrawing(e); };
+        const stopDrawingOnLeave = (e) => { if (isDrawing) stopDrawing(e); _cachedRect = null; };
         const touchPreventDefault = (e) => { if (e.cancelable) e.preventDefault(); };
 
         if (window.PointerEvent) {
@@ -2926,7 +2996,7 @@
             if (!btn) return;
             btn.classList.remove('btn-flash');
             requestAnimationFrame(function () { btn.classList.add('btn-flash'); });
-            if (navigator.vibrate) navigator.vibrate(10);
+            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         });
     })();
 
@@ -2952,7 +3022,7 @@
                     openSettings(e);
                 } else {
                     el.classList.remove('btn-flash'); requestAnimationFrame(function () { el.classList.add('btn-flash'); });
-                    if (navigator.vibrate) navigator.vibrate(10);
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
                     if (el._kanjiAction) el._kanjiAction();
                 }
                 // Absorb browser's delayed click

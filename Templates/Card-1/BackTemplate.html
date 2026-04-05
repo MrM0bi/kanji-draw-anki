@@ -1229,7 +1229,7 @@
                                     });
                                 } else {
                                     // ── Desktop/Android: pre-computed morph animation ──
-                                    var FRAMES = 30, N = 24;
+                                    var FRAMES = 15, N = 16;
 
                                     var resample = function (d) {
                                         var tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1281,7 +1281,7 @@
                                             return;
                                         }
 
-                                        var t0 = performance.now(), dur = 250;
+                                        var t0 = performance.now(), dur = 200;
                                         var tick = function (now) {
                                             var progress = (now - t0) / dur;
                                             if (progress > 1) progress = 1;
