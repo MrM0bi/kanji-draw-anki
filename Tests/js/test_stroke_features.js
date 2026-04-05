@@ -8,9 +8,9 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const c1f = fs.readFileSync(path.join(__dirname, '..', 'Templates', 'Card-1', 'FrontTemplate.html'), 'utf-8');
-const c2f = fs.readFileSync(path.join(__dirname, '..', 'Templates', 'Card-2', 'FrontTemplate.html'), 'utf-8');
-const css = fs.readFileSync(path.join(__dirname, '..', 'Templates', 'Styling.css'), 'utf-8');
+const c1f = fs.readFileSync(path.join(__dirname, '..', '..', 'Templates', 'Card-1', 'FrontTemplate.html'), 'utf-8');
+const c2f = fs.readFileSync(path.join(__dirname, '..', '..', 'Templates', 'Card-2', 'FrontTemplate.html'), 'utf-8');
+const css = fs.readFileSync(path.join(__dirname, '..', '..', 'Templates', 'Styling.css'), 'utf-8');
 
 let pass = 0, fail = 0, total = 0;
 function test(name, fn) {

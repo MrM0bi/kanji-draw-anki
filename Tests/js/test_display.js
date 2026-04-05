@@ -10,7 +10,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const cssContent = fs.readFileSync(path.join(__dirname, '..', 'Templates', 'Styling.css'), 'utf-8');
+const cssContent = fs.readFileSync(path.join(__dirname, '..', '..', 'Templates', 'Styling.css'), 'utf-8');
 
 // ─── Helpers ───────────────────────────────────────────────────
 

@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert').strict;
 
-const base = path.resolve(__dirname, '..');
+const base = path.resolve(__dirname, '../..');
 const c1f = fs.readFileSync(path.join(base, 'Templates/Card-1/FrontTemplate.html'), 'utf8');
 const c2f = fs.readFileSync(path.join(base, 'Templates/Card-2/FrontTemplate.html'), 'utf8');
 const c1b = fs.readFileSync(path.join(base, 'Templates/Card-1/BackTemplate.html'), 'utf8');
