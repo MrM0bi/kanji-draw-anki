@@ -868,6 +868,8 @@
 <div class="kanji-container">
     <svg id="grid-bg" viewBox="0 0 109 109"></svg>
     <svg id="svg-bg" viewBox="0 0 109 109">{{SVGPfade}}</svg>
+    <canvas id="draw-canvas"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;border-radius:var(--border-rad-main);display:none"></canvas>
     <svg id="draw-layer" viewBox="0 0 109 109"></svg>
 </div>
 
@@ -1934,7 +1936,7 @@
 
         // ···· Draw Helpers & Pointer Handlers ····
 
-        const clearDrawLayer = () => { _drawGen++; drawLayer.innerHTML = ''; currentSVGPath = null; _gelHalo = null; _inkGroup = null; };
+        const clearDrawLayer = () => { _drawGen++; drawLayer.innerHTML = ''; currentSVGPath = null; _gelHalo = null; _inkGroup = null; if (_useCanvas) _clearCanvas(); };
 
         // ···· Per-path stroke style application ····
         // Returns the current stroke style setting
@@ -1944,6 +1946,132 @@
         // Neon glow: filter defs live in #neon-defs (static HTML). Just toggle the attribute.
         // WebKit/AnkiMobile uses lighter single-blur filter to avoid GPU jank with many paths.
         const _isWK = document.documentElement.classList.contains('is-ankimobile');
+
+        // ···· Canvas 2D Hybrid Drawing Engine (AnkiMobile only) ····
+        // On WKWebView, SVG setAttribute('d') on every pointermove is expensive.
+        // Canvas 2D is used for real-time rendering during the active drawing gesture;
+        // SVG elements are built on pointerup for grading, snap animation, and persistence.
+        const _useCanvas = _isWK;
+        let _ctx = null, _canvasEl = null, _canvasPath = null, _canvasInkSegs = null;
+
+        const _initCanvas = () => {
+            _canvasEl = document.getElementById('draw-canvas');
+            if (!_canvasEl) return;
+            _canvasEl.style.display = 'block';
+            _resizeCanvas();
+        };
+        const _resizeCanvas = () => {
+            if (!_canvasEl) return;
+            const rect = drawLayer.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const dpr = window.devicePixelRatio || 1;
+            _canvasEl.width = rect.width * dpr;
+            _canvasEl.height = rect.height * dpr;
+            _canvasEl.style.width = rect.width + 'px';
+            _canvasEl.style.height = rect.height + 'px';
+            _ctx = _canvasEl.getContext('2d');
+            _ctx.scale(dpr, dpr);
+            _ctx._scaleX = rect.width / SVG_GRID_SIZE;
+            _ctx._scaleY = rect.height / SVG_GRID_SIZE;
+        };
+        const _clearCanvas = () => {
+            if (!_ctx || !_canvasEl) return;
+            var dpr = window.devicePixelRatio || 1;
+            _ctx.clearRect(0, 0, _canvasEl.width / dpr, _canvasEl.height / dpr);
+        };
+        const _drawCanvasStroke = (errorColor) => {
+            if (!_ctx || !_canvasEl) return;
+            _clearCanvas();
+            var style = getActiveStrokeStyle();
+            var color = errorColor || getCSSVar('--stroke-active') || '#333';
+            var sx = _ctx._scaleX, sy = _ctx._scaleY;
+
+            // Ink: variable-width segments
+            if (style === 'ink' && _canvasInkSegs && _canvasInkSegs.length > 0) {
+                _ctx.save();
+                _ctx.globalAlpha = 0.85;
+                _ctx.strokeStyle = color;
+                _ctx.lineCap = 'square';
+                _ctx.lineJoin = 'round';
+                for (var i = 0; i < _canvasInkSegs.length; i++) {
+                    var seg = _canvasInkSegs[i];
+                    _ctx.lineWidth = seg.w * sx;
+                    _ctx.beginPath();
+                    _ctx.moveTo(seg.x0 * sx, seg.y0 * sy);
+                    _ctx.quadraticCurveTo(seg.cx * sx, seg.cy * sy, seg.x1 * sx, seg.y1 * sy);
+                    _ctx.stroke();
+                }
+                _ctx.restore();
+                return;
+            }
+
+            if (!_canvasPath) return;
+            _ctx.save();
+            // Gel: halo underneath
+            if (style === 'gel') {
+                _ctx.lineWidth = 8 * sx;
+                _ctx.globalAlpha = 0.12;
+                _ctx.strokeStyle = color;
+                _ctx.lineCap = 'round';
+                _ctx.lineJoin = 'round';
+                _ctx.stroke(_canvasPath);
+                _ctx.globalAlpha = 1;
+            }
+            // Neon: shadow glow
+            if (style === 'neon') {
+                var dk = isDarkMode();
+                _ctx.shadowBlur = (dk ? 5 : 3) * sx;
+                _ctx.shadowColor = color;
+            }
+            _ctx.lineWidth = (style === 'gel' ? 4.5 : 4) * sx;
+            _ctx.strokeStyle = color;
+            _ctx.lineCap = 'round';
+            _ctx.lineJoin = 'round';
+            _ctx.stroke(_canvasPath);
+            _ctx.restore();
+        };
+        // Materialize canvas-drawn stroke into SVG elements for grading and snap animation
+        const _finalizeCanvasToSVG = () => {
+            if (!_useCanvas || !_ctx) return;
+            _clearCanvas();
+            if (currentSVGPath) currentSVGPath.setAttribute("d", dSegments.join(''));
+            var _fStyle = getActiveStrokeStyle();
+            // Reconstruct gel halo
+            if (_fStyle === 'gel' && currentSVGPath) {
+                _gelHalo = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                _gelHalo.setAttribute("d", dSegments.join(''));
+                _gelHalo.setAttribute("fill", "none");
+                _gelHalo.style.setProperty("stroke", "var(--stroke-active)");
+                _gelHalo.setAttribute("stroke-width", "8");
+                _gelHalo.setAttribute("stroke-linecap", "round");
+                _gelHalo.setAttribute("stroke-linejoin", "round");
+                _gelHalo.style.setProperty("opacity", "0.12");
+                drawLayer.appendChild(_gelHalo);
+            }
+            // Reconstruct ink group from accumulated segment data
+            if (_fStyle === 'ink' && _canvasInkSegs && _canvasInkSegs.length > 0) {
+                _inkGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                _inkGroup.setAttribute("fill", "none");
+                _inkGroup.setAttribute("stroke", "var(--stroke-active)");
+                _inkGroup.setAttribute("stroke-linecap", "square");
+                _inkGroup.setAttribute("stroke-linejoin", "round");
+                _inkGroup.style.setProperty("opacity", "0.85");
+                for (var i = 0; i < _canvasInkSegs.length; i++) {
+                    var s = _canvasInkSegs[i];
+                    var seg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    seg.setAttribute("d", 'M ' + s.x0 + ' ' + s.y0 + ' Q ' + s.cx + ' ' + s.cy + ' ' + s.x1 + ' ' + s.y1);
+                    seg.setAttribute("stroke-width", s.w.toFixed(1));
+                    seg.setAttribute("fill", "none");
+                    _inkGroup.appendChild(seg);
+                }
+                drawLayer.appendChild(_inkGroup);
+                if (currentSVGPath) currentSVGPath.style.setProperty('opacity', '0');
+            }
+            if (currentSVGPath) drawLayer.appendChild(currentSVGPath);
+            _canvasInkSegs = null;
+        };
+        if (_useCanvas) _initCanvas();
+
         const _neonFilterRef = () => {
             var dk = isDarkMode();
             if (_isWK) return dk ? 'url(#neon-glow-lite-dk)' : 'url(#neon-glow-lite)';
@@ -2070,7 +2198,7 @@
 
         // Cached bounding rect — avoids layout thrashing on every pointermove
         let _cachedRect = null;
-        const invalidateRect = () => { _cachedRect = null; };
+        const invalidateRect = () => { _cachedRect = null; if (_useCanvas && _ctx && !isDrawing) _resizeCanvas(); };
         window.addEventListener('resize', invalidateRect);
         window.addEventListener('orientationchange', invalidateRect);
 
@@ -2236,6 +2364,7 @@
             userPoints.push(pos);
             const isInk = getActiveStrokeStyle() === 'ink';
             const isGel = getActiveStrokeStyle() === 'gel';
+            // Always create SVG path for d-attribute accumulation and finalization
             currentSVGPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
             dSegments = ['M ', pos.x, ' ', pos.y];
             currentSVGPath.setAttribute("d", dSegments.join(''));
@@ -2245,34 +2374,47 @@
             currentSVGPath.setAttribute("stroke-linecap", "round");
             currentSVGPath.setAttribute("stroke-linejoin", "round");
             applyPathStyle(currentSVGPath);
-            // Gelstift: create halo path underneath for wet-ink bleed effect
-            if (isGel) {
-                _gelHalo = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                _gelHalo.setAttribute("d", dSegments.join(''));
-                _gelHalo.setAttribute("fill", "none");
-                _gelHalo.style.setProperty("stroke", "var(--stroke-active)");
-                _gelHalo.setAttribute("stroke-width", "8");
-                _gelHalo.setAttribute("stroke-linecap", "round");
-                _gelHalo.setAttribute("stroke-linejoin", "round");
-                _gelHalo.style.setProperty("opacity", "0.12");
-                drawLayer.appendChild(_gelHalo);
-            } else {
+
+            if (_useCanvas && _ctx) {
+                // Canvas mode: set up Path2D / ink segments, skip SVG DOM manipulation
+                _canvasPath = new Path2D();
+                _canvasPath.moveTo(pos.x * _ctx._scaleX, pos.y * _ctx._scaleY);
                 _gelHalo = null;
-            }
-            if (isInk) {
-                currentSVGPath.style.setProperty('opacity', '0');
-                _inkGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                _inkGroup.setAttribute("fill", "none");
-                _inkGroup.setAttribute("stroke", "var(--stroke-active)");
-                _inkGroup.setAttribute("stroke-linecap", "square");
-                _inkGroup.setAttribute("stroke-linejoin", "round");
-                _inkGroup.style.setProperty("opacity", "0.85");
-                drawLayer.appendChild(_inkGroup);
-                _inkLastPos = pos; _inkLastTime = performance.now(); _inkLastWidth = 3.5;
-            } else {
                 _inkGroup = null;
+                _canvasInkSegs = isInk ? [] : null;
+                if (isInk) { _inkLastPos = pos; _inkLastTime = performance.now(); _inkLastWidth = 3.5; }
+            } else {
+                // SVG mode: existing DOM manipulation
+                _canvasInkSegs = null;
+                // Gelstift: create halo path underneath for wet-ink bleed effect
+                if (isGel) {
+                    _gelHalo = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    _gelHalo.setAttribute("d", dSegments.join(''));
+                    _gelHalo.setAttribute("fill", "none");
+                    _gelHalo.style.setProperty("stroke", "var(--stroke-active)");
+                    _gelHalo.setAttribute("stroke-width", "8");
+                    _gelHalo.setAttribute("stroke-linecap", "round");
+                    _gelHalo.setAttribute("stroke-linejoin", "round");
+                    _gelHalo.style.setProperty("opacity", "0.12");
+                    drawLayer.appendChild(_gelHalo);
+                } else {
+                    _gelHalo = null;
+                }
+                if (isInk) {
+                    currentSVGPath.style.setProperty('opacity', '0');
+                    _inkGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    _inkGroup.setAttribute("fill", "none");
+                    _inkGroup.setAttribute("stroke", "var(--stroke-active)");
+                    _inkGroup.setAttribute("stroke-linecap", "square");
+                    _inkGroup.setAttribute("stroke-linejoin", "round");
+                    _inkGroup.style.setProperty("opacity", "0.85");
+                    drawLayer.appendChild(_inkGroup);
+                    _inkLastPos = pos; _inkLastTime = performance.now(); _inkLastWidth = 3.5;
+                } else {
+                    _inkGroup = null;
+                }
+                drawLayer.appendChild(currentSVGPath);
             }
-            drawLayer.appendChild(currentSVGPath);
         };
 
         const draw = (e) => {
@@ -2281,29 +2423,56 @@
             const pos = getMousePos(e);
             userPoints.push(pos);
             dSegments.push(' L ', pos.x, ' ', pos.y);
-            if (currentSVGPath) {
-                const d = dSegments.join('');
-                currentSVGPath.setAttribute("d", d);
-                // Gelstift: keep halo path in sync (reuse joined string)
-                if (_gelHalo) _gelHalo.setAttribute("d", d);
-            }
-            // Tusche: smooth flowing ink with variable width
-            if (_inkGroup && _inkLastPos) {
-                const now = performance.now();
-                const dt = Math.max(1, now - _inkLastTime);
-                const dist = Math.hypot(pos.x - _inkLastPos.x, pos.y - _inkLastPos.y);
-                if (dist > 1.5) {
-                    const speed = dist / dt;
-                    const targetW = Math.max(2, Math.min(5.5, 5.5 - speed * 8));
-                    _inkLastWidth = _inkLastWidth * 0.8 + targetW * 0.2;
-                    const mx = (_inkLastPos.x + pos.x) / 2;
-                    const my = (_inkLastPos.y + pos.y) / 2;
-                    const seg = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    seg.setAttribute("d", 'M ' + _inkLastPos.x + ' ' + _inkLastPos.y + ' Q ' + mx + ' ' + my + ' ' + pos.x + ' ' + pos.y);
-                    seg.setAttribute("stroke-width", _inkLastWidth.toFixed(1));
-                    seg.setAttribute("fill", "none");
-                    _inkGroup.appendChild(seg);
-                    _inkLastPos = pos; _inkLastTime = now;
+
+            if (_useCanvas && _ctx) {
+                // Canvas: accumulate path / ink segments and render
+                if (_canvasInkSegs !== null) {
+                    // Ink: variable-width segments
+                    if (_inkLastPos) {
+                        const now = performance.now();
+                        const dt = Math.max(1, now - _inkLastTime);
+                        const dist = Math.hypot(pos.x - _inkLastPos.x, pos.y - _inkLastPos.y);
+                        if (dist > 1.5) {
+                            const speed = dist / dt;
+                            const targetW = Math.max(2, Math.min(5.5, 5.5 - speed * 8));
+                            _inkLastWidth = _inkLastWidth * 0.8 + targetW * 0.2;
+                            const mx = (_inkLastPos.x + pos.x) / 2;
+                            const my = (_inkLastPos.y + pos.y) / 2;
+                            _canvasInkSegs.push({ x0: _inkLastPos.x, y0: _inkLastPos.y, cx: mx, cy: my, x1: pos.x, y1: pos.y, w: _inkLastWidth });
+                            _inkLastPos = pos; _inkLastTime = now;
+                        }
+                    }
+                } else {
+                    // Standard/Gel/Neon: extend Path2D
+                    _canvasPath.lineTo(pos.x * _ctx._scaleX, pos.y * _ctx._scaleY);
+                }
+                _drawCanvasStroke();
+            } else {
+                // SVG: existing behavior
+                if (currentSVGPath) {
+                    const d = dSegments.join('');
+                    currentSVGPath.setAttribute("d", d);
+                    // Gelstift: keep halo path in sync (reuse joined string)
+                    if (_gelHalo) _gelHalo.setAttribute("d", d);
+                }
+                // Tusche: smooth flowing ink with variable width
+                if (_inkGroup && _inkLastPos) {
+                    const now = performance.now();
+                    const dt = Math.max(1, now - _inkLastTime);
+                    const dist = Math.hypot(pos.x - _inkLastPos.x, pos.y - _inkLastPos.y);
+                    if (dist > 1.5) {
+                        const speed = dist / dt;
+                        const targetW = Math.max(2, Math.min(5.5, 5.5 - speed * 8));
+                        _inkLastWidth = _inkLastWidth * 0.8 + targetW * 0.2;
+                        const mx = (_inkLastPos.x + pos.x) / 2;
+                        const my = (_inkLastPos.y + pos.y) / 2;
+                        const seg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        seg.setAttribute("d", 'M ' + _inkLastPos.x + ' ' + _inkLastPos.y + ' Q ' + mx + ' ' + my + ' ' + pos.x + ' ' + pos.y);
+                        seg.setAttribute("stroke-width", _inkLastWidth.toFixed(1));
+                        seg.setAttribute("fill", "none");
+                        _inkGroup.appendChild(seg);
+                        _inkLastPos = pos; _inkLastTime = now;
+                    }
                 }
             }
         };
@@ -2313,6 +2482,9 @@
             if (e && e.pointerId) { try { drawLayer.releasePointerCapture(e.pointerId); } catch (err) { } }
             if (e && e.cancelable !== false) { e.preventDefault(); e.stopPropagation(); }
             isDrawing = false;
+
+            // Canvas → SVG handoff: materialize SVG elements for grading/snap/persistence
+            if (_useCanvas && _ctx) _finalizeCanvasToSVG();
 
             if (isFreeMode) {
                 let totalTravel = 0;
@@ -2626,6 +2798,7 @@
                 userPoints = []; problemStrokes.fill(0); currentStroke = 0; saveState();
                 drawLayer.innerHTML = ''; currentSVGPath = null;
                 _gelHalo = null; _inkGroup = null;
+                if (_useCanvas) _clearCanvas();
                 paths.forEach(p => {
                     p.classList.remove('stroke-complete', 'hint-active', 'animate-draw', 'rewind-anim');
                     p.style.removeProperty('stroke');

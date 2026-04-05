@@ -2408,6 +2408,7 @@ html.font-large.is-ankiweb .card-title {
 html.is-ankimobile .card-display {
     transition: none;
 }
+
 html.is-ankimobile .kanji-btn,
 html.is-ankimobile .gear-btn,
 html.is-ankimobile .info-btn,
@@ -2416,6 +2417,7 @@ html.is-ankimobile .link-btn,
 html.is-ankimobile .close-settings {
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
 html.is-ankimobile .visual-option,
 html.is-ankimobile .accent-option,
 html.is-ankimobile .category-card,
@@ -2423,6 +2425,7 @@ html.is-ankimobile .word-example-item,
 html.is-ankimobile .tree-node {
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
 html.is-ankimobile .visual-option svg,
 html.is-ankimobile .visual-option svg text,
 html.is-ankimobile .visual-option svg path[fill="currentColor"],
@@ -2430,25 +2433,32 @@ html.is-ankimobile .visual-option span,
 html.is-ankimobile .accent-option span {
     transition: none;
 }
+
 html.is-ankimobile .settings-modal {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 html.is-ankimobile .segment-btn {
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
 html.is-ankimobile .side-by-side-box .sbs-kanji {
     transition: none;
 }
+
 /* Faster stroke-dashoffset animation (shorter GPU repaint window) */
 html.is-ankimobile #svg-guide path {
     transition: stroke-dashoffset 0.4s ease-in-out !important;
 }
+
 html.is-ankimobile .animate-draw {
     transition: stroke-dashoffset 0.4s ease-in-out !important;
 }
+
 html.is-ankimobile .hint-active {
     transition: stroke-dashoffset 0.4s ease-in-out !important;
 }
+
 html.is-ankimobile .rewind-anim {
     transition: stroke-dashoffset 0.4s ease-in-out !important;
 }
