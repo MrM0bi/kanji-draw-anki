@@ -46,7 +46,7 @@
         try {
             var ps = JSON.parse(sessionStorage.getItem('kanjiErrors') || localStorage.getItem('kanjiErrors') || '[]');
             var sc = parseInt(sessionStorage.getItem('kanjiCurrentStroke') || localStorage.getItem('kanjiCurrentStroke') || '0', 10);
-            function _ck(k) { try { var cs = document.cookie.split('; '), i; if (location.protocol !== 'file:') { for (i = 0; i < cs.length; i++) { if (cs[i].indexOf('_k=') === 0) { var obj = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (obj[k] !== undefined) return obj[k]; break } } } for (i = cs.length - 1; i >= 0; i--) { if (cs[i].indexOf(k + '=') === 0) return decodeURIComponent(cs[i].substring(k.length + 1)) } } catch (e) { } return null }
+            function _ck(k) { if (window._ks && window._ks[k] !== undefined) return window._ks[k]; try { var cs = document.cookie.split('; '), i; if (location.protocol !== 'file:') { for (i = 0; i < cs.length; i++) { if (cs[i].indexOf('_k=') === 0) { var obj = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (obj[k] !== undefined) return obj[k]; break } } } for (i = cs.length - 1; i >= 0; i--) { if (cs[i].indexOf(k + '=') === 0) return decodeURIComponent(cs[i].substring(k.length + 1)) } } catch (e) { } return null }
             var displayStyle = _ck('c2_kanjiOptDisplayStyle') || localStorage.getItem('c2_kanjiOptDisplayStyle') || _ck('kanjiOptDisplayStyle') || localStorage.getItem('kanjiOptDisplayStyle') || 'standard';
             var css = '';
             if (displayStyle === 'colorOrder' && ps.length > 0) {
@@ -247,6 +247,88 @@
 
     // Provided by FrontSide injection: safeGetItem(), safeSetItem(), getGlobalConfig()
 
+    // Re-apply font-size on back side (class toggle + dynamic style for WKWebView)
+    (function () {
+        try {
+            var fs = (typeof safeGetItem === 'function')
+                ? safeGetItem('kanjiThemeFontSize', 'normal')
+                : (localStorage.getItem('kanjiThemeFontSize') || 'normal');
+            document.documentElement.classList.remove('font-small', 'font-large');
+            if (fs === 'small') document.documentElement.classList.add('font-small');
+            else if (fs === 'large') document.documentElement.classList.add('font-large');
+            // Always remove+recreate dynamic style (WKWebView caching workaround)
+            var _dynFontId = 'dyn-font-size';
+            var _dynEl = document.getElementById(_dynFontId);
+            if (_dynEl) _dynEl.parentNode.removeChild(_dynEl);
+            var _fsMap = {
+                '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
+                '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
+                '.info-section-title': [13, 11, 15], '.info-text-story': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
+                '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
+                '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
+                '.tree-node-char': [28, 24, 32], '.tree-node-tooltip': [13, 11, 15],
+                '.no-tree-data': [13, 11, 15], '.side-by-side-label': [11, 10, 12],
+                '.setting-group-title': [11, 10, 12], '.segment-btn': [12, 10, 14],
+                '.category-name': [15, 13, 17], '.category-desc': [11, 10, 12],
+                '.subpage-header h3': [16, 14, 18], '.settings-main-title': [16, 14, 18],
+                '.setting-section-title': [13, 11, 15], '.visual-option span': [11, 10, 12],
+                '.accent-option span': [10, 9, 11], '.close-settings': [14, 12, 16]
+            };
+            var _fsIdx = fs === 'small' ? 1 : fs === 'large' ? 2 : 0;
+            var _cssRules = Object.keys(_fsMap).map(function (_sel) { return _sel + '{font-size:' + _fsMap[_sel][_fsIdx] + 'px!important}'; }).join('');
+            var _newStyle = document.createElement('style');
+            _newStyle.id = _dynFontId;
+            _newStyle.textContent = _cssRules;
+            document.head.appendChild(_newStyle);
+        } catch (e) { }
+    })();
+
+    // Re-apply stroke style class on back side (CSS needs it on .kanji-container)
+    (function () {
+        try {
+            var ss = (typeof safeGetItem === 'function')
+                ? safeGetItem('kanjiThemeStrokeStyle', 'standard')
+                : (localStorage.getItem('kanjiThemeStrokeStyle') || 'standard');
+            if (ss === 'soft') ss = 'gel';
+            window._kanjiStrokeStyle = ss;
+            var kc = document.querySelector('.kanji-container');
+            if (kc) {
+                kc.classList.remove('stroke-style-gel', 'stroke-style-ink', 'stroke-style-neon');
+                if (ss !== 'standard') kc.classList.add('stroke-style-' + ss);
+            }
+            // Apply per-path stroke style effects to reference SVGs
+            // NOTE: NO gel halos here — applyBackFeatures creates them with correct colors AFTER stroke colors are set
+            var dk = document.documentElement.classList.contains('nightMode') || document.documentElement.classList.contains('night_mode') || document.body.classList.contains('nightMode');
+            var _wk = document.documentElement.classList.contains('is-ankimobile');
+            [document.getElementById('svg-bg'), document.getElementById('svg-guide')].forEach(function (svgEl) {
+                if (!svgEl) return;
+                svgEl.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
+                svgEl.querySelectorAll('path:not(.gel-halo)').forEach(function (p) {
+                    // Full reset
+                    p.style.removeProperty('filter');
+                    p.style.removeProperty('-webkit-filter');
+                    p.style.removeProperty('opacity');
+                    p.removeAttribute('filter');
+                    p.removeAttribute('paint-order');
+                    // Apply basic style properties (halos added later by applyBackFeatures)
+                    switch (ss) {
+                        case 'neon':
+                            p.setAttribute('filter', _wk ? (dk ? 'url(#neon-glow-lite-dk)' : 'url(#neon-glow-lite)') : (dk ? 'url(#neon-glow-dk)' : 'url(#neon-glow)'));
+                            break;
+                        case 'gel':
+                            p.setAttribute('stroke-width', '4.5');
+                            p.setAttribute('paint-order', 'stroke');
+                            break;
+                        case 'ink':
+                            p.style.opacity = '0.85';
+                            break;
+                    }
+                });
+            });
+        } catch (e) { }
+    })();
+
     function safeGetState(key) {
         try { let val = window.sessionStorage.getItem(key); if (val) return val; } catch (e) { }
         try { let val = window.localStorage.getItem(key); if (val) return val; } catch (e) { }
@@ -267,7 +349,13 @@
     function closeInfoModal(e) {
         if (e) { e.stopPropagation(); e.preventDefault(); }
         var ol = document.getElementById('info-overlay');
+        // For backdrop clicks, verify pointerdown was also on the overlay itself.
+        if (e && e.target === ol && !ol._bgPointerDown) return;
+        ol._bgPointerDown = false;
         ol.classList.remove('active');
+        // Keep overlay clickable briefly to absorb S-Pen/stylus ghost clicks
+        ol.style.pointerEvents = 'auto';
+        setTimeout(function () { ol.style.pointerEvents = ''; }, 400);
     }
 
     // --- Radical Tree Renderer [SHARED with c1-back] ---
@@ -403,8 +491,34 @@
         if (!document.getElementById('is-back-side-marker')) return;
         const svgBg = document.getElementById('svg-bg');
         if (!svgBg) return;
-        const paths = svgBg.querySelectorAll('path');
+        const paths = svgBg.querySelectorAll('path:not(.gel-halo)');
         const afEl = document.getElementById('kanji-anti-flicker');
+
+        // Defined once outside applyBackFeatures to avoid re-creation on every settings change
+        const addNumbersGPAL = (svg, colorFn) => {
+            const svgPaths = svg.querySelectorAll('path:not(.gel-halo)');
+            const placed = [];
+            const MD = 6.0;
+            const frag = document.createDocumentFragment();
+            svgPaths.forEach((sp, i) => {
+                const s0 = sp.getPointAtLength(0);
+                let s1;
+                try { s1 = sp.getPointAtLength(4); } catch (e) { s1 = s0; }
+                const ddx = s1.x - s0.x, ddy = s1.y - s0.y;
+                const dd = Math.hypot(ddx, ddy) || 1;
+                let fx = s0.x - (ddx / dd) * 4.5, fy = s0.y - (ddy / dd) * 4.5;
+                let coll = true, att = 0;
+                while (coll && att < 10) { coll = false; for (const p of placed) { const dist = Math.hypot(fx - p.x, fy - p.y); if (dist < MD) { coll = true; let px = fx - p.x, py = fy - p.y; if (px === 0 && py === 0) { px = -1; py = -1; } const pd = Math.hypot(px, py); fx += (px / pd) * (MD - dist + 0.5); fy += (py / pd) * (MD - dist + 0.5); } } att++; }
+                placed.push({ x: fx, y: fy });
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', fx); t.setAttribute('y', fy);
+                t.setAttribute('class', 'stroke-number');
+                t.textContent = i + 1;
+                t.style.cssText = 'fill:' + colorFn(i) + ';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill';
+                frag.appendChild(t);
+            });
+            svg.appendChild(frag);
+        };
 
         const applyBackFeatures = function () {
             const globalConf = getGlobalConfig();
@@ -424,21 +538,20 @@
             if (problemStrokes.length === 0 && errStr) { try { problemStrokes = JSON.parse(errStr); } catch (e) { } }
             if (strokesCompleted === 0 && strokeStr) { try { strokesCompleted = parseInt(strokeStr, 10); } catch (e) { } }
 
-            // 1. Compute stroke colors
-            let colorCSS = '';
+            // 1. Compute stroke colors and apply inline styles in a single pass
+            const cssRules = [];
             const pathColors = [];
 
             if (displayStyle === 'colorOrder') {
-                // Stroke-order mode: each stroke gets a unique color (HSL rainbow)
                 const total = Math.max(paths.length - 1, 1);
                 paths.forEach((path, index) => {
                     const hue = Math.round((index / total) * 300);
                     const color = 'hsl(' + hue + ', 75%, 50%)';
                     pathColors.push(color);
-                    colorCSS += '#svg-bg path:nth-child(' + (index + 1) + '){stroke:' + color + ' !important} ';
+                    path.style.setProperty('stroke', color, 'important');
+                    cssRules.push('#svg-bg path:nth-child(' + (index + 1) + '){stroke:' + color + ' !important}');
                 });
             } else {
-                // Standard mode: error-based colors
                 paths.forEach((path, index) => {
                     let mistakeCount = problemStrokes[index] || 0;
                     let pathColor = 'var(--stroke-active)';
@@ -449,11 +562,13 @@
                         else if (mistakeCount === 1) pathColor = 'var(--stroke-warn1)';
                     }
                     pathColors.push(pathColor);
+                    path.style.setProperty('stroke', pathColor, 'important');
                     if (pathColor !== 'var(--stroke-active)') {
-                        colorCSS += '#svg-bg path:nth-child(' + (index + 1) + '){stroke:' + pathColor + ' !important} ';
+                        cssRules.push('#svg-bg path:nth-child(' + (index + 1) + '){stroke:' + pathColor + ' !important}');
                     }
                 });
             }
+            const colorCSS = cssRules.join(' ');
             // 2. Update stroke colors via a SEPARATE style element (preserves anti-flicker rules)
             let colorStyle = document.getElementById('kanji-stroke-colors');
             if (!colorStyle) {
@@ -463,56 +578,76 @@
                 else document.head.appendChild(colorStyle);
             }
             colorStyle.textContent = colorCSS;
-            // 3. Set inline styles (reliably override the stylesheet)
-            paths.forEach((path, index) => {
-                path.style.setProperty('stroke', pathColors[index], 'important');
+
+            // Apply stroke-style-specific inline effects
+            // Re-read from storage (not stale window._kanjiStrokeStyle from page load)
+            var ss = (typeof safeGetItem === 'function')
+                ? safeGetItem('kanjiThemeStrokeStyle', 'standard')
+                : (localStorage.getItem('kanjiThemeStrokeStyle') || 'standard');
+            if (ss === 'soft') ss = 'gel';
+            window._kanjiStrokeStyle = ss;
+            // Clean old gel halos before re-applying any style
+            var svgBgEl = document.getElementById('svg-bg');
+            if (svgBgEl) svgBgEl.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
+            // First pass: reset all paths + apply basic style properties
+            paths.forEach((path, i) => {
+                // Full reset
+                path.style.removeProperty('filter');
+                path.style.removeProperty('-webkit-filter');
+                path.style.removeProperty('opacity');
+                path.removeAttribute('filter');
+                path.removeAttribute('paint-order');
+                // Apply new style
+                var dk = document.documentElement.classList.contains('nightMode') ||
+                    document.documentElement.classList.contains('night_mode') ||
+                    document.body.classList.contains('nightMode');
+                switch (ss) {
+                    case 'neon': {
+                        var wk = document.documentElement.classList.contains('is-ankimobile');
+                        var fId = wk ? (dk ? 'neon-glow-lite-dk' : 'neon-glow-lite') : (dk ? 'neon-glow-dk' : 'neon-glow');
+                        path.setAttribute('filter', 'url(#' + fId + ')');
+                        break;
+                    }
+                    case 'gel': {
+                        path.setAttribute('stroke-width', '4.5');
+                        path.setAttribute('paint-order', 'stroke');
+                        // Resolve actual color for drop-shadow
+                        var resolvedC;
+                        try { resolvedC = getComputedStyle(path).stroke; } catch (e) { resolvedC = ''; }
+                        if (!resolvedC || resolvedC === 'none') resolvedC = pathColors[i] || 'var(--stroke-active)';
+                        path.style.setProperty('filter', 'drop-shadow(0 0 0.3px ' + resolvedC + ')');
+                        path.style.setProperty('-webkit-filter', 'drop-shadow(0 0 0.3px ' + resolvedC + ')');
+                        break;
+                    }
+                    case 'ink':
+                        path.style.opacity = '0.85';
+                        break;
+                }
             });
+            // Second pass: add gel halos AFTER all paths styled (avoids nth-child shift)
+            if (ss === 'gel') {
+                paths.forEach(function (path, i) {
+                    var haloC;
+                    try { haloC = getComputedStyle(path).stroke; } catch (e) { haloC = ''; }
+                    if (!haloC || haloC === 'none') haloC = pathColors[i] || 'var(--stroke-active)';
+                    var h2 = path.cloneNode(false);
+                    h2.setAttribute('class', 'gel-halo');
+                    h2.setAttribute('stroke-width', '8');
+                    h2.setAttribute('stroke-linecap', 'round');
+                    h2.setAttribute('stroke-linejoin', 'round');
+                    h2.style.cssText = '';
+                    h2.style.setProperty('opacity', '0.12', 'important');
+                    h2.style.setProperty('stroke', haloC, 'important');
+                    h2.removeAttribute('filter');
+                    path.parentNode.insertBefore(h2, path);
+                });
+            }
 
             svgBg.querySelectorAll('.stroke-number').forEach(el => el.remove());
 
             if (isNumbers) {
-                const placedPositions = [];
-                const MIN_DISTANCE = 6.0;
-                paths.forEach((path, index) => {
-                    const startPoint = path.getPointAtLength(0);
-                    let nextPoint;
-                    try { nextPoint = path.getPointAtLength(4); } catch (e) { nextPoint = startPoint; }
-
-                    const dx = nextPoint.x - startPoint.x, dy = nextPoint.y - startPoint.y;
-                    const dist = Math.hypot(dx, dy) || 1;
-                    const OFFSET = 4.5;
-                    let finalX = startPoint.x - (dx / dist) * OFFSET, finalY = startPoint.y - (dy / dist) * OFFSET;
-
-                    let collision = true, attempts = 0;
-                    while (collision && attempts < 10) {
-                        collision = false;
-                        for (let pos of placedPositions) {
-                            const d = Math.hypot(finalX - pos.x, finalY - pos.y);
-                            if (d < MIN_DISTANCE) {
-                                collision = true;
-                                let pushDx = finalX - pos.x, pushDy = finalY - pos.y;
-                                if (pushDx === 0 && pushDy === 0) { pushDx = -1; pushDy = -1; }
-                                const pushDist = Math.hypot(pushDx, pushDy), pushPower = (MIN_DISTANCE - d + 0.5);
-                                finalX += (pushDx / pushDist) * pushPower; finalY += (pushDy / pushDist) * pushPower;
-                            }
-                        }
-                        attempts++;
-                    }
-                    placedPositions.push({ x: finalX, y: finalY });
-
-                    const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    textNode.setAttribute("x", finalX);
-                    textNode.setAttribute("y", finalY);
-                    textNode.setAttribute("class", "stroke-number");
-                    textNode.textContent = index + 1;
-                    textNode.style.fill = (pathColors[index] && pathColors[index] !== 'var(--stroke-active)') ? pathColors[index] : 'var(--text-muted)';
-                    textNode.style.stroke = "var(--surface)";
-                    textNode.style.strokeWidth = "1.5px";
-                    textNode.style.strokeLinecap = "round";
-                    textNode.style.strokeLinejoin = "round";
-                    textNode.style.paintOrder = "stroke fill";
-
-                    svgBg.appendChild(textNode);
+                addNumbersGPAL(svgBg, (i) => {
+                    return (pathColors[i] && pathColors[i] !== 'var(--stroke-active)') ? pathColors[i] : 'var(--text-muted)';
                 });
             }
         };
@@ -520,7 +655,20 @@
         // Run synchronously to prevent flicker on card load
         applyBackFeatures();
 
-        window.kanjiSettingsGlobalHandlerC2 = applyBackFeatures;
+        window.kanjiSettingsGlobalHandlerC2 = () => {
+            // Re-read and apply stroke style class (may have changed)
+            var _ss = (typeof safeGetItem === 'function')
+                ? safeGetItem('kanjiThemeStrokeStyle', 'standard')
+                : (localStorage.getItem('kanjiThemeStrokeStyle') || 'standard');
+            if (_ss === 'soft') _ss = 'gel';
+            window._kanjiStrokeStyle = _ss;
+            var _kc = document.querySelector('.kanji-container');
+            if (_kc) {
+                _kc.classList.remove('stroke-style-gel', 'stroke-style-ink', 'stroke-style-neon');
+                if (_ss !== 'standard') _kc.classList.add('stroke-style-' + _ss);
+            }
+            applyBackFeatures();
+        };
     })();
 
     // --- Cross-Platform Fixes [SHARED with c1-back] ---
@@ -534,6 +682,31 @@
     // Scroll guards for info modal (settings modal already guarded by FrontSide)
     document.querySelectorAll('.settings-modal, .info-modal').forEach(modal => { if (modal._kanjiScrollGuarded) return; modal._kanjiScrollGuarded = true; modal.addEventListener('touchmove', function (e) { if (this.scrollHeight <= this.clientHeight) e.preventDefault(); }, { passive: false }); });
     document.querySelectorAll('.settings-overlay, .info-overlay').forEach(overlay => { if (overlay._kanjiScrollGuarded) return; overlay._kanjiScrollGuarded = true; overlay.addEventListener('touchmove', function (e) { if (e.target === this) e.preventDefault(); }, { passive: false }); });
+
+    // Apple Pencil: pen-to-click for modal controls
+    if (typeof PointerEvent !== 'undefined') {
+        window._kanjiModalEatClick = null;
+        window._kanjiModalEatTimer = null;
+        document.querySelectorAll('.settings-modal, .info-modal').forEach(function (modal) {
+            if (modal._kanjiPenClick) return;
+            modal._kanjiPenClick = true;
+            modal.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var target = e.target.closest('input, button, label, select, a, .settings-link, [onclick]');
+                if (!target) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (window._kanjiModalEatClick) {
+                    document.removeEventListener('click', window._kanjiModalEatClick, true);
+                    clearTimeout(window._kanjiModalEatTimer);
+                }
+                target.click();
+                window._kanjiModalEatClick = function (ev) { ev.stopPropagation(); ev.stopImmediatePropagation(); ev.preventDefault(); document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; };
+                document.addEventListener('click', window._kanjiModalEatClick, true);
+                window._kanjiModalEatTimer = setTimeout(function () { if (window._kanjiModalEatClick) { document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; } }, 300);
+            });
+        });
+    }
 
     // Stylus fix: Apple Pencil / S-Pen don't reliably fire onclick
     (function () {
@@ -550,17 +723,67 @@
                     if (handler === 'info') lastInfoOpen = now;
                     if (handler === 'gear') lastGearOpen = now;
                     e.preventDefault(); e.stopPropagation();
-                    var eatClick = function (ev) { ev.stopPropagation(); ev.stopImmediatePropagation(); ev.preventDefault(); document.removeEventListener('click', eatClick, true); };
-                    document.addEventListener('click', eatClick, true);
-                    setTimeout(function () { document.removeEventListener('click', eatClick, true); }, 500);
+                    if (window._kanjiModalEatClick) {
+                        document.removeEventListener('click', window._kanjiModalEatClick, true);
+                        clearTimeout(window._kanjiModalEatTimer);
+                        window._kanjiModalEatClick = null;
+                    }
                     if (handler === 'info') openInfoModal(e);
                     else openSettings(e);
+                    window._kanjiModalEatClick = function (ev) { ev.stopPropagation(); ev.stopImmediatePropagation(); ev.preventDefault(); document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; };
+                    document.addEventListener('click', window._kanjiModalEatClick, true);
+                    window._kanjiModalEatTimer = setTimeout(function () { if (window._kanjiModalEatClick) { document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; } }, 300);
                 });
             });
         }
         addPenHandler('.info-btn', 'info');
         addPenHandler('.gear-btn', 'gear');
+
+        var infoModal = document.querySelector('.info-modal');
+        if (infoModal && !infoModal._ankiPenDelegateFixed) {
+            infoModal._ankiPenDelegateFixed = true;
+            infoModal.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var tappable = e.target.closest('.tree-node, .word-example-item, .tappable');
+                if (!tappable) return;
+                e.preventDefault(); e.stopPropagation();
+                tappable.click();
+            });
+        }
     })();
+
+    // --- S-Pen / Stylus: backdrop-close verification ---
+    document.querySelectorAll('.settings-overlay, .info-overlay').forEach(function (ol) {
+        if (ol._kanjiPointerDown) return;
+        ol._kanjiPointerDown = true;
+        ol.addEventListener('pointerdown', function (e) {
+            this._bgPointerDown = (e.target === this);
+        });
+    });
+
+    // --- Global S-Pen defense ---
+    if (!window._kanjiGlobalPenDefenseAdded) {
+        window._kanjiGlobalPenDefenseAdded = true;
+        if (typeof PointerEvent !== 'undefined') {
+            ['pointerdown', 'pointerup', 'click'].forEach(function (evtName) {
+                document.addEventListener(evtName, function (e) {
+                    if (e.pointerType !== undefined && e.pointerType !== 'pen') return;
+                    if (evtName === 'click' && !e._penOrigin) return;
+                    var active = document.querySelector('.settings-overlay.active, .info-overlay.active');
+                    if (!active) return;
+                    if (active.contains(e.target)) return;
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                }, true);
+            });
+            document.addEventListener('pointerup', function (e) {
+                if (e.pointerType !== 'pen') return;
+                var mark = function (ev) { ev._penOrigin = true; document.removeEventListener('click', mark, true); };
+                document.addEventListener('click', mark, true);
+                setTimeout(function () { document.removeEventListener('click', mark, true); }, 600);
+            }, true);
+        }
+    } // end guard
 
     // Link fix: force 1-tap activation on iOS/AnkiDroid (Apple Pencil + finger)
     document.querySelectorAll('.link-btn[href]').forEach(function (link) {

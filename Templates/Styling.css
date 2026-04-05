@@ -43,6 +43,35 @@
 
     /* Strich-Darstellung (Nur Erkennen-Karte): 'standard' (Standard), 'colorOrder' (Farbig) */
     --default-opt-display-style: standard;
+
+    /* Zeichenmodus (Nur Zeichnen-Karte): 'guided' (Geführt), 'free' (Frei) */
+    --default-opt-draw-mode: guided;
+
+    /* Vergleichsansicht (Nur Zeichnen-Karte, Frei-Modus): 'on' (An), 'off' (Aus) */
+    --default-opt-side-by-side: on;
+
+    /* Strichansicht (Nur Zeichnen-Karte, Frei-Modus): 'handwriting' (Handschrift), 'svg' (SVG-Pfade) */
+    --default-opt-free-view: handwriting;
+
+    /* --- 3. ERSCHEINUNGSBILD (Appearance) --- */
+
+    /* Modus: 'system' (System), 'light' (Hell), 'dark' (Dunkel) */
+    --default-theme-mode: system;
+
+    /* Akzentfarbe: 'green' (Grün), 'blue' (Blau), 'purple' (Lila), 'orange' (Orange), 'red' (Rot), 'teal' (Türkis) */
+    --default-theme-accent: green;
+
+    /* Primärfarbe: 'neutral' (Neutral), 'warm' (Warm), 'cool' (Kühl), 'sepia' (Sepia), 'rose' (Rosé), 'sage' (Salbei) */
+    --default-theme-primary: neutral;
+
+    /* Schriftgröße: 'small' (Klein), 'normal' (Normal), 'large' (Groß) */
+    --default-theme-font-size: normal;
+
+    /* Strichfarbe: 'black' (Schwarz), 'inkblue' (Tintenblau), 'violet' (Violett), 'brown' (Braun), 'teal' (Türkis), 'slate' (Schiefer) */
+    --default-theme-stroke-color: black;
+
+    /* Strichstil: 'standard' (Standard), 'gel' (Gelstift), 'ink' (Tusche), 'neon' (Neon) */
+    --default-theme-stroke-style: standard;
 }
 
 /* ==========================================================================
@@ -72,6 +101,7 @@
     --stroke-warn1: #e5a821;
     --stroke-warn2: #e87c2a;
     --stroke-err: #d4483b;
+    --stroke-hint: #56a83a;
 
     /* Tags */
     --tag-on-bg: #f0f0ed;
@@ -89,7 +119,11 @@
     --tab-color-c2: #3a98a8;
 
     /* Hover-Shadow */
-    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    /* GPU-composited shadow filters (transition-safe on WKWebView) */
+    --filter-soft: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.04)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.02));
+    --filter-hover: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.08));
 
     /* Layout Limits */
     --dynamic-size: min(90vw, 65vh, 550px);
@@ -100,6 +134,21 @@
 /* AnkiWeb: answer bar overlays the card content like a layer on top.
    --dynamic-size is set via JS (window.innerHeight measurement).
    Reduce spacing to fit everything into the visible area without scrolling. */
+
+html.is-ankiweb,
+html.is-ankiweb body {
+    background-color: var(--bg-main) !important;
+}
+
+/* AnkiWeb: the .card / #qa wrapper may create a containing block for
+   position:fixed overlays (transform, will-change, etc).  Expand the card
+   to full viewport height while an overlay is open so the backdrop covers
+   the entire visible area – prevents the grey bar beneath the card. */
+html.is-ankiweb:has(.settings-overlay.active) .card,
+html.is-ankiweb:has(.info-overlay.active) .card {
+    min-height: 100vh !important;
+    overflow: hidden;
+}
 
 html.is-ankiweb .card {
     padding: 8px 20px 8px;
@@ -151,6 +200,7 @@ html.is-ankiweb .info-modal {
     --stroke-warn1: #f0c040;
     --stroke-warn2: #f09840;
     --stroke-err: #e85450;
+    --stroke-hint: #6abe4e;
     --tag-on-bg: #333330;
     --tag-on-text: #d0d0cc;
     --tag-kun-bg: #1e3318;
@@ -161,6 +211,8 @@ html.is-ankiweb .info-modal {
     --tab-color-c1: #6abe4e;
     --tab-color-c2: #4ec4b8;
     --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.4);
+    --filter-soft: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+    --filter-hover: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.4));
 }
 
 /* --------------------------------------------------------------------------
@@ -183,13 +235,26 @@ body.no-scroll {
     overflow: hidden !important;
 }
 
-/* iOS/WKWebView: overflow:hidden alone is insufficient – position:fixed required */
-.is-ankimobile body.no-scroll,
-html.iphone body.no-scroll,
-html.ipad body.no-scroll {
+/* iOS/WKWebView: overflow:hidden alone is insufficient – position:fixed required.
+   Modals scroll via overflow-y:auto + overscroll-behavior:contain inside the
+   fixed body — no position switching needed on modern iOS (15+). */
+.is-ankimobile body.no-scroll {
     position: fixed !important;
     inset: 0 !important;
     width: 100% !important;
+}
+
+/* AnkiMobile: the WebView renders slightly behind the native toolbar,
+   but position:fixed bottom:0 stops at the CSS viewport boundary.
+   When an overlay is active, match the html background to the overlay's
+   blended appearance so the gap is invisible. */
+html.is-ankimobile {
+    transition: background-color 0.2s ease-out;
+}
+
+html.is-ankimobile:has(.settings-overlay.active),
+html.is-ankimobile:has(.info-overlay.active) {
+    background-color: color-mix(in srgb, var(--bg-main) 50%, black);
 }
 
 .card {
@@ -212,6 +277,16 @@ html.ipad body.no-scroll {
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
     line-height: 1.5;
+}
+
+/* Reset Anki's global button styles (webview.css sets button backgrounds
+   and hover effects via --button-bg / --button-gradient-start that leak
+   into our template). We unset only the Anki variables so our own rules
+   (which use --surface, --accent-bg etc.) still apply normally. */
+.card button {
+    --button-bg: initial;
+    --button-gradient-start: initial;
+    --button-gradient-end: initial;
 }
 
 .card-title {
@@ -321,17 +396,133 @@ svg#svg-guide path,
 }
 
 /* --------------------------------------------------------------------------
+   3a. Stroke Style Filters
+   -------------------------------------------------------------------------- */
+/* Drawn strokes: per-path via JS (applyPathStyle).
+   Reference kanji: CSS rules below (#svg-bg, #svg-guide paths). */
+
+/* Gelstift — bold, opaque, saturated gel ink: wider rounded strokes with subtle ink spread */
+.kanji-container.stroke-style-gel #svg-bg path:not(.gel-halo),
+.kanji-container.stroke-style-gel #svg-guide path:not(.gel-halo) {
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    paint-order: stroke;
+}
+
+/* Tusche (Ink) — organic, wider, calligraphic reference strokes */
+.kanji-container.stroke-style-ink #svg-bg path,
+.kanji-container.stroke-style-ink #svg-guide path {
+    stroke-width: 4.5;
+    stroke-linecap: square;
+    opacity: 0.85;
+}
+
+/* Neon — relax stacking-context + paint isolation for WebKit drop-shadow */
+.kanji-container.stroke-style-neon {
+    contain: layout style;
+    isolation: auto;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+}
+
+/* Neon — glow is applied via SVG <filter> in JS (feGaussianBlur) for WebKit compatibility.
+   CSS drop-shadow() is not used because it fails in WKWebView stacking contexts. */
+
+/* Stroke color swatches */
+.stroke-swatch-black {
+    background: #1a1a1a;
+}
+
+.stroke-swatch-inkblue {
+    background: #1a3a7a;
+}
+
+.stroke-swatch-violet {
+    background: #5a2080;
+}
+
+.stroke-swatch-brown {
+    background: #5a3018;
+}
+
+.stroke-swatch-teal {
+    background: #0a5858;
+}
+
+.stroke-swatch-slate {
+    background: #404858;
+}
+
+.nightMode .stroke-swatch-black,
+.night_mode .stroke-swatch-black {
+    background: #e8e8e4;
+}
+
+.nightMode .stroke-swatch-inkblue,
+.night_mode .stroke-swatch-inkblue {
+    background: #7ab0e0;
+}
+
+.nightMode .stroke-swatch-violet,
+.night_mode .stroke-swatch-violet {
+    background: #b888d8;
+}
+
+.nightMode .stroke-swatch-brown,
+.night_mode .stroke-swatch-brown {
+    background: #c8a070;
+}
+
+.nightMode .stroke-swatch-teal,
+.night_mode .stroke-swatch-teal {
+    background: #60c0c0;
+}
+
+.nightMode .stroke-swatch-slate,
+.night_mode .stroke-swatch-slate {
+    background: #a8b0c0;
+}
+
+/* --------------------------------------------------------------------------
    3b. Completion Celebration
    -------------------------------------------------------------------------- */
 .kanji-container.celebration {
     overflow: visible;
 }
 
+@-webkit-keyframes cel-glow-opacity {
+    0% {
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes cel-glow-opacity {
+    0% {
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
 .completion-sparkle {
     position: fixed;
     pointer-events: none;
     z-index: 9999;
-    will-change: transform, opacity;
 }
 
 /* --------------------------------------------------------------------------
@@ -352,12 +543,14 @@ svg#svg-guide path,
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     cursor: pointer;
-    box-shadow: var(--shadow-soft);
-    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    filter: var(--filter-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
     transform: translateZ(0);
     backface-visibility: hidden;
 }
@@ -395,9 +588,10 @@ svg#svg-guide path,
 
 @media (hover: hover) {
     .action-buttons button:hover {
+        background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 }
@@ -417,17 +611,20 @@ svg#svg-guide path,
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: var(--filter-soft);
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
     transform: translateZ(0);
 }
 
 @media (hover: hover) {
     .gear-btn:hover {
+        background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 
@@ -439,9 +636,10 @@ svg#svg-guide path,
 /* Force-reset gear hover state when overlay is open (prevents stuck S-Pen hover) */
 .gear-btn.no-hover-fx,
 .gear-btn.no-hover-fx:hover {
+    background: var(--surface) !important;
     color: var(--text-faint) !important;
     border-color: var(--border-color) !important;
-    box-shadow: var(--shadow-soft) !important;
+    filter: var(--filter-soft) !important;
     transform: translateZ(0) !important;
     transition: none !important;
 }
@@ -487,28 +685,17 @@ svg#svg-guide path,
 .info-overlay.active {
     opacity: 1;
     pointer-events: auto;
-    will-change: opacity;
 }
 
 /* AnkiMobile: native toolbar overlays the WebView — reserve space at the bottom */
 .is-ankimobile .settings-overlay,
-.is-ankimobile .info-overlay,
-html.iphone .settings-overlay,
-html.iphone .info-overlay,
-html.ipad .settings-overlay,
-html.ipad .info-overlay {
-    padding-bottom: max(env(safe-area-inset-bottom, 8px), 60px);
+.is-ankimobile .info-overlay {
+    padding-bottom: max(env(safe-area-inset-bottom, 8px), 80px);
 }
 
-/* max-height: 85% resolves against the viewport, not the padded content area —
-   explicitly cap modal height so it cannot extend behind the native toolbar */
 .is-ankimobile .settings-modal,
-.is-ankimobile .info-modal,
-html.iphone .settings-modal,
-html.iphone .info-modal,
-html.ipad .settings-modal,
-html.ipad .info-modal {
-    max-height: calc(100dvh - 48px - 60px);
+.is-ankimobile .info-modal {
+    max-height: calc(100dvh - 48px - 80px);
 }
 
 .settings-modal,
@@ -533,6 +720,8 @@ html.ipad .info-modal {
     max-width: 420px;
     border: 2px solid var(--tab-color-c1);
     --active-tab-color: var(--tab-color-c1);
+    overflow-y: auto;
+    overflow-y: overlay;
     transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -550,7 +739,6 @@ html.ipad .info-modal {
 .settings-overlay.active .settings-modal,
 .info-overlay.active .info-modal {
     transform: translateY(0) scale(1);
-    will-change: transform;
 }
 
 .settings-modal h3,
@@ -596,8 +784,8 @@ html.ipad .info-modal {
 
 .visual-options-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 6px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -610,9 +798,9 @@ html.ipad .info-modal {
     background: var(--bg-main);
     border: 1.5px solid transparent;
     border-radius: var(--border-rad-sm);
-    padding: 12px 0;
+    padding: 10px 2px;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
     width: 100%;
     box-sizing: border-box;
     color: var(--text-muted);
@@ -622,6 +810,30 @@ html.ipad .info-modal {
     transform: scale(0.94);
 }
 
+@media (hover: hover) {
+    .visual-option:hover {
+        border-color: var(--active-tab-color, var(--accent));
+        background: var(--surface);
+        filter: var(--filter-hover);
+    }
+
+    .visual-option:hover svg {
+        stroke: var(--active-tab-color, var(--accent));
+    }
+
+    .visual-option:hover span {
+        color: var(--active-tab-color, var(--accent));
+    }
+
+    .visual-option:hover svg text {
+        fill: var(--active-tab-color, var(--accent));
+    }
+
+    .visual-option:hover svg path[fill="currentColor"] {
+        fill: var(--active-tab-color, var(--accent));
+    }
+}
+
 /* SVG default (inactive) styling */
 .visual-option svg {
     width: 24px;
@@ -629,6 +841,7 @@ html.ipad .info-modal {
     stroke: var(--text-muted);
     stroke-linecap: round;
     transition: stroke 0.15s ease, fill 0.15s ease;
+    overflow: visible;
 }
 
 .visual-option svg text {
@@ -657,7 +870,7 @@ html.ipad .info-modal {
 .visual-options-grid label input[type="radio"]:checked+.visual-option {
     border-color: var(--active-tab-color, var(--accent));
     background: var(--surface);
-    box-shadow: var(--shadow-soft);
+    filter: var(--filter-soft);
 }
 
 .visual-options-grid label input[type="radio"]:checked+.visual-option svg {
@@ -687,194 +900,443 @@ html.ipad .info-modal {
     padding: 0;
     background: var(--accent-bg);
     color: var(--accent);
-    border: none;
+    border: 1.5px solid var(--accent);
     border-radius: var(--border-rad-sm);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.15s ease;
+    transition: opacity 0.2s ease, transform 0.15s ease, background 0.15s ease;
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
 }
 
 @media (hover: hover) {
     .close-settings:hover {
-        opacity: 0.85;
+        background: var(--accent-bg);
+        filter: brightness(1.1);
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-1px);
+        border: none;
     }
 }
 
 .close-settings:active {
     opacity: 0.7;
     transform: scale(0.98);
+    border: none;
 }
 
 /* --------------------------------------------------------------------------
-   5b. Settings Tabs – Integrated Folder Tabs (50/50 split)
+   5b. Settings Navigation – iOS-style category cards with sub-pages
    -------------------------------------------------------------------------- */
-.settings-tabs {
-    display: flex;
-    gap: 0;
-    margin: -24px -24px 0 -24px;
-    padding: 0;
-    position: relative;
-    background: var(--bg-main);
-    border-radius: calc(var(--border-rad-main) - 2px) calc(var(--border-rad-main) - 2px) 0 0;
-    overflow: hidden;
-    width: calc(100% + 48px);
-    box-sizing: border-box;
+
+/* --- Pages (show/hide with slide animation) --- */
+.settings-page {
+    display: none;
 }
 
-/* No ::after indicator — underline is handled by each tab's border-bottom directly */
+.settings-page.active {
+    display: block;
+}
 
-.settings-tab {
-    position: relative;
-    flex: 1 1 50%;
-    min-width: 0;
-    margin: 0;
+@keyframes pageSlideInRight {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pageSlideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.settings-page.slide-in-right {
+    animation: pageSlideInRight 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.settings-page.slide-in-left {
+    animation: pageSlideInLeft 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* --- Segmented control (c1/c2 toggle) --- */
+.settings-segment {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 13px 0;
+    background: var(--bg-main);
+    border-radius: 9px;
+    padding: 3px;
+    margin-bottom: 20px;
+}
+
+.segment-btn {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
     color: var(--text-muted);
-    background: var(--bg-main);
-    border: none;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
     font-family: inherit;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    margin: 0;
     box-sizing: border-box;
 }
 
-/* Top-left corner radius for first tab */
-.settings-tab:first-child {
-    border-radius: 0;
-}
-
-/* Top-right corner radius for last tab */
-.settings-tab:last-child {
-    border-radius: 0;
-}
-
-/* ---- c1 active (Zeichnen) ---- */
-.settings-tab[data-tab="c1"].active {
-    color: var(--tab-color-c1);
+.segment-btn.active {
     background: var(--surface);
-    border-bottom-color: var(--tab-color-c1);
+    color: var(--active-tab-color, var(--accent));
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
-/* ---- c2 active (Erkennen) ---- */
-.settings-tab[data-tab="c2"].active {
-    color: var(--tab-color-c2);
-    background: var(--surface);
-    border-bottom-color: var(--tab-color-c2);
+.segment-btn:not(.active):active {
+    opacity: 0.6;
+    border: none;
 }
 
-/* INACTIVE – recessed into background */
-.settings-tab:not(.active) {
-    background: var(--bg-main);
-    box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.04);
-}
-
-/* INACTIVE hover */
 @media (hover: hover) {
-    .settings-tab:not(.active):hover {
+    .segment-btn:not(.active):hover {
+        background: transparent;
         color: var(--text-main);
+        border: none;
+    }
+
+    .segment-btn.active:hover {
+        background: var(--surface);
+        border: none;
     }
 }
 
-.settings-tab:not(.active):active {
-    opacity: 0.7;
+/* --- Category cards list --- */
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
 }
 
-/* --------------------------------------------------------------------------
-   5b-2. Tab Content Animation (Swipe)
-   -------------------------------------------------------------------------- */
-@keyframes tabContentSwipeFromLeft {
-    0% {
-        opacity: 0;
-        transform: translateX(-20px);
+.category-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 14px 14px 12px;
+    background: var(--surface);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    margin: 0;
+    box-sizing: border-box;
+    transition: background 0.15s ease;
+}
+
+.category-card:active {
+    background: var(--bg-main);
+    border: none;
+}
+
+@media (hover: hover) {
+    .category-card:hover {
+        background: var(--bg-main);
+        border: none;
     }
+}
 
-    100% {
-        opacity: 1;
-        transform: translateX(0);
+.category-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.category-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: #fff;
+    overflow: visible;
+}
+
+.category-icon.cat-grid {
+    background: #3478f6;
+}
+
+.category-icon.cat-front {
+    background: #34c759;
+}
+
+.category-icon.cat-back {
+    background: #ff9500;
+}
+
+.category-icon.cat-display {
+    background: #af52de;
+}
+
+.category-icon.cat-theme {
+    background: #ff2d55;
+}
+
+.category-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.category-name {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.3;
+}
+
+.category-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    line-height: 1.3;
+}
+
+.category-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+}
+
+/* --- Theme accent color swatches --- */
+.accent-options-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.accent-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 10px 0;
+    border-radius: var(--border-rad-sm);
+    border: 1.5px solid transparent;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    background: var(--bg-main);
+}
+
+.accent-options-grid label input[type="radio"] {
+    display: none;
+}
+
+.accent-options-grid label input[type="radio"]:checked+.accent-option {
+    border-color: var(--active-tab-color, var(--accent));
+    background: var(--surface);
+    filter: var(--filter-soft);
+}
+
+@media (hover: hover) {
+    .accent-option:hover {
+        border-color: var(--active-tab-color, var(--accent));
+        background: var(--surface);
+        filter: var(--filter-hover);
     }
 }
 
-@keyframes tabContentSwipeFromRight {
-    0% {
-        opacity: 0;
-        transform: translateX(20px);
+.accent-option:active {
+    transform: scale(0.94);
+}
+
+.accent-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.nightMode .accent-swatch,
+.night_mode .accent-swatch {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Primary color swatches — saturated preview colors for clear distinction */
+.primary-swatch-neutral {
+    background: linear-gradient(135deg, #d0d0cc 50%, #e8e8e5 50%);
+}
+
+.primary-swatch-warm {
+    background: linear-gradient(135deg, #c8b898 50%, #ddd0b4 50%);
+}
+
+.primary-swatch-cool {
+    background: linear-gradient(135deg, #96a8cc 50%, #b0beda 50%);
+}
+
+.primary-swatch-sepia {
+    background: linear-gradient(135deg, #bca878 50%, #d0c0a0 50%);
+}
+
+.primary-swatch-rose {
+    background: linear-gradient(135deg, #c8a0b0 50%, #dab8c4 50%);
+}
+
+.primary-swatch-sage {
+    background: linear-gradient(135deg, #90b888 50%, #a8cca0 50%);
+}
+
+.nightMode .primary-swatch-neutral,
+.night_mode .primary-swatch-neutral {
+    background: linear-gradient(135deg, #2a2a2a 50%, #3a3a3a 50%);
+}
+
+.nightMode .primary-swatch-warm,
+.night_mode .primary-swatch-warm {
+    background: linear-gradient(135deg, #3a3020 50%, #4a4030 50%);
+}
+
+.nightMode .primary-swatch-cool,
+.night_mode .primary-swatch-cool {
+    background: linear-gradient(135deg, #202838 50%, #303848 50%);
+}
+
+.nightMode .primary-swatch-sepia,
+.night_mode .primary-swatch-sepia {
+    background: linear-gradient(135deg, #38321a 50%, #48422a 50%);
+}
+
+.nightMode .primary-swatch-rose,
+.night_mode .primary-swatch-rose {
+    background: linear-gradient(135deg, #38202a 50%, #48303a 50%);
+}
+
+.nightMode .primary-swatch-sage,
+.night_mode .primary-swatch-sage {
+    background: linear-gradient(135deg, #1e3020 50%, #2e4030 50%);
+}
+
+.accent-option span {
+    font-size: 10px;
+    margin-top: 6px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+}
+
+.accent-options-grid label input[type="radio"]:checked+.accent-option span {
+    color: var(--active-tab-color, var(--accent));
+}
+
+/* --- Sub-page header with back button --- */
+.subpage-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -24px -24px 20px -24px;
+    padding: 16px 24px;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: -24px;
+    z-index: 2;
+}
+
+.subpage-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    flex: 1;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--border-color);
+    background: var(--surface);
+    border-radius: 8px;
+    color: var(--active-tab-color, var(--accent));
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    margin: 0;
+    box-sizing: border-box;
+    transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.back-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.back-btn:active {
+    transform: scale(0.9);
+    border: none;
+}
+
+@media (hover: hover) {
+    .back-btn:hover {
+        background: var(--border-color);
+        border: none;
     }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
-/* Animated elements get their own compositor layer only during animation */
-.settings-modal.tab-switched h3,
-.settings-modal.tab-switched .setting-group-title,
-.settings-modal.tab-switched .visual-options-grid,
-.settings-modal.tab-switched .setting-section-title,
-.settings-modal.tab-switched .c1-only-setting,
-.settings-modal.tab-switched .c2-only-setting {
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-}
-
-/* Content swipes in from left when switching to c1 (Zeichnen) */
-.settings-modal[data-tab="c1"].tab-switched h3,
-.settings-modal[data-tab="c1"].tab-switched .setting-group-title,
-.settings-modal[data-tab="c1"].tab-switched .visual-options-grid,
-.settings-modal[data-tab="c1"].tab-switched .setting-section-title,
-.settings-modal[data-tab="c1"].tab-switched .c1-only-setting {
-    animation: tabContentSwipeFromLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* Content swipes in from right when switching to c2 (Erkennen) */
-.settings-modal[data-tab="c2"].tab-switched h3,
-.settings-modal[data-tab="c2"].tab-switched .setting-group-title,
-.settings-modal[data-tab="c2"].tab-switched .visual-options-grid,
-.settings-modal[data-tab="c2"].tab-switched .setting-section-title,
-.settings-modal[data-tab="c2"].tab-switched .c2-only-setting {
-    animation: tabContentSwipeFromRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* Staggered animation delays for visual cascade effect */
-.settings-modal.tab-switched h3 {
-    animation-delay: 0s;
-}
-
-.settings-modal.tab-switched .setting-group-title {
-    animation-delay: 0.02s;
-}
-
-.settings-modal.tab-switched .visual-options-grid {
-    animation-delay: 0.04s;
-}
-
-.settings-modal.tab-switched .setting-section-title {
-    animation-delay: 0.06s;
-}
-
-.settings-modal.tab-switched .c1-only-setting,
-.settings-modal.tab-switched .c2-only-setting {
-    animation-delay: 0.01s;
-}
-
-/* spacing between tab bar and first settings section */
-.settings-tabs+h3,
-.settings-tabs+.setting-group-title,
-.settings-tabs+.c1-only-setting {
-    margin-top: 20px;
+/* --- Main page title --- */
+.settings-main-title {
+    margin: -24px -24px 20px -24px;
+    padding: 18px 24px;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* --------------------------------------------------------------------------
@@ -935,9 +1397,9 @@ html.ipad .info-modal {
     transition: stroke-dashoffset 0.7s ease-in-out !important;
 }
 
-/* Auto-draw hint always uses the error color */
+/* Auto-draw hint uses the hint color (green) */
 .hint-active {
-    stroke: var(--stroke-err) !important;
+    stroke: var(--stroke-hint) !important;
     stroke-dashoffset: 0 !important;
     transition: stroke-dashoffset 0.7s ease-in-out !important;
 }
@@ -1064,23 +1526,23 @@ html.ipad .info-modal {
     border-radius: var(--border-rad-sm);
     padding: 12px 16px 12px 12px;
     text-align: left;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease;
     cursor: pointer;
-    box-shadow: var(--shadow-soft);
+    filter: var(--filter-soft);
     position: relative;
     -webkit-tap-highlight-color: transparent;
 }
 
 .word-example-item.show-furigana {
     border-color: var(--accent);
-    box-shadow: var(--shadow-hover);
+    filter: var(--filter-hover);
     transform: translateY(-1px);
 }
 
 @media (hover: hover) {
     .word-example-item:hover {
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px);
     }
 }
@@ -1130,7 +1592,7 @@ ruby rt {
 /* Overrides sticky :hover on touch devices when explicitly dismissed */
 .word-example-item.furigana-dismissed {
     border-color: var(--border-color) !important;
-    box-shadow: var(--shadow-soft) !important;
+    filter: var(--filter-soft) !important;
     transform: none !important;
 }
 
@@ -1200,10 +1662,12 @@ ruby rt {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: var(--shadow-soft);
-    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    filter: var(--filter-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     width: var(--dynamic-size);
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
     transform: translateZ(0);
     backface-visibility: hidden;
     position: relative;
@@ -1215,16 +1679,17 @@ ruby rt {
 
 @media (hover: hover) {
     .info-btn:hover {
+        background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 }
 
 .info-btn:active {
     transform: scale(0.98) translateZ(0);
-    box-shadow: var(--shadow-soft);
+    filter: var(--filter-soft);
 }
 
 .info-btn svg {
@@ -1253,16 +1718,19 @@ ruby rt {
     font-size: 14px;
     font-weight: 600;
     border: 1px solid var(--border-color);
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
     position: relative;
 }
 
 @media (hover: hover) {
     .link-btn:hover {
+        background: var(--bg-main);
         color: var(--accent);
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px);
     }
 }
@@ -1271,7 +1739,7 @@ ruby rt {
     background: var(--accent-bg);
     color: var(--accent);
     border-color: var(--accent);
-    box-shadow: var(--shadow-hover);
+    filter: var(--filter-hover);
     transform: scale(0.97);
 }
 
@@ -1329,16 +1797,16 @@ ruby rt {
     width: 54px;
     height: 54px;
     box-sizing: border-box;
-    box-shadow: var(--shadow-soft);
+    filter: var(--filter-soft);
     position: relative;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease;
     -webkit-tap-highlight-color: transparent;
 }
 
 .tree-node.show-tooltip {
     border-color: var(--accent);
-    box-shadow: var(--shadow-hover);
+    filter: var(--filter-hover);
     transform: translateY(-1px);
 }
 
@@ -1404,7 +1872,7 @@ ruby rt {
 /* Overrides sticky :hover on touch devices when explicitly dismissed */
 .tree-node.tooltip-dismissed {
     border-color: var(--border-color) !important;
-    box-shadow: var(--shadow-soft) !important;
+    filter: var(--filter-soft) !important;
     transform: none !important;
 }
 
@@ -1416,7 +1884,7 @@ ruby rt {
 @media (hover: hover) {
     .tree-node:hover {
         border-color: var(--accent);
-        box-shadow: var(--shadow-hover);
+        filter: var(--filter-hover);
         transform: translateY(-1px);
     }
 
@@ -1478,16 +1946,49 @@ ruby rt {
 .settings-modal::-webkit-scrollbar-thumb,
 .info-modal::-webkit-scrollbar-thumb,
 .card::-webkit-scrollbar-thumb {
-    background-color: var(--border-color) !important;
+    background-color: rgba(0, 0, 0, 0.25) !important;
     border-radius: 10px !important;
     border: 1px solid transparent !important;
     background-clip: padding-box !important;
 }
 
+.nightMode .settings-modal::-webkit-scrollbar-thumb,
+.nightMode .info-modal::-webkit-scrollbar-thumb,
+.nightMode .card::-webkit-scrollbar-thumb,
+.night_mode .settings-modal::-webkit-scrollbar-thumb,
+.night_mode .info-modal::-webkit-scrollbar-thumb,
+.night_mode .card::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
 .settings-modal::-webkit-scrollbar-thumb:hover,
 .info-modal::-webkit-scrollbar-thumb:hover,
 .card::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-muted) !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.nightMode .settings-modal::-webkit-scrollbar-thumb:hover,
+.nightMode .info-modal::-webkit-scrollbar-thumb:hover,
+.nightMode .card::-webkit-scrollbar-thumb:hover,
+.night_mode .settings-modal::-webkit-scrollbar-thumb:hover,
+.night_mode .info-modal::-webkit-scrollbar-thumb:hover,
+.night_mode .card::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Standard scrollbar-color (Safari 17.4+, Firefox, Chrome 121+).
+   Unlike ::-webkit-scrollbar (unsupported on iOS), this actually
+   works on modern iOS WKWebView to make scrollbars visible. */
+.settings-modal,
+.info-modal {
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.nightMode .settings-modal,
+.nightMode .info-modal,
+.night_mode .settings-modal,
+.night_mode .info-modal {
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
 /* --------------------------------------------------------------------------
@@ -1515,4 +2016,491 @@ ruby rt {
     stroke-linejoin: round;
     transform: scale(1, -1);
     shape-rendering: geometricPrecision;
+}
+
+/* --------------------------------------------------------------------------
+   10. Free Canvas Mode
+   -------------------------------------------------------------------------- */
+
+/* Disabled setting – greyed out, non-interactive */
+.setting-disabled {
+    opacity: 0.35 !important;
+    pointer-events: none;
+    filter: grayscale(1);
+    animation: none !important;
+}
+
+/* Handwriting overlay (back side, free mode) */
+.handwriting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: var(--border-rad-main);
+    fill: none;
+    background: transparent;
+}
+
+/* Hide reference paths when handwriting overlay is active */
+.kanji-container.show-handwriting svg#svg-bg path {
+    opacity: 0;
+}
+
+/* Hide default stroke numbers – handwriting overlay has its own */
+.kanji-container.show-handwriting svg#svg-bg .stroke-number {
+    display: none;
+}
+
+/* Keep user strokes visible in free mode (no auto-clear) */
+.free-canvas-mode #draw-layer {
+    transition: none;
+}
+
+.free-canvas-mode #draw-layer.fade-out {
+    opacity: 1;
+}
+
+.free-canvas-mode #draw-layer.free-reset-fade {
+    transition: opacity 0.35s ease-out;
+    opacity: 0;
+}
+
+/* Reference strokes hidden during free drawing, revealed after eval */
+.free-canvas-mode #svg-bg path {
+    stroke: transparent !important;
+    transition: none !important;
+}
+
+/* Excess strokes overlay (SVG-Pfade view, free mode) */
+.excess-strokes-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: var(--border-rad-main);
+    fill: none;
+    background: transparent;
+}
+
+/* Badge for excess strokes */
+.excess-strokes-badge,
+.missing-strokes-badge {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stroke-err);
+    opacity: 0;
+    animation: fadeInNumbers 0.4s ease-out 0.3s forwards;
+}
+
+.missing-strokes-badge {
+    color: var(--stroke-warn2, var(--stroke-err));
+}
+
+/* Hide guided-only settings in free mode */
+.free-mode-active .guided-only-setting {
+    display: none;
+}
+
+/* --------------------------------------------------------------------------
+   10b. Side-by-Side Comparison (Free Canvas)
+   -------------------------------------------------------------------------- */
+.side-by-side-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 0 auto;
+    width: var(--dynamic-size);
+    min-height: var(--dynamic-size);
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.side-by-side-wrapper.splitting {
+    transition: opacity 0.4s ease-out, transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.side-by-side-wrapper.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.side-by-side-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.side-by-side-box .sbs-kanji {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-main);
+    background-color: var(--surface) !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-elevated);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.side-by-side-box .sbs-kanji svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-rad-main);
+}
+
+.side-by-side-label {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   11. Font Size Scaling (class-based, no JS style manipulation)
+   Toggle html.font-small or html.font-large. Default (normal) uses base sizes.
+   -------------------------------------------------------------------------- */
+
+/* --- Small (×0.875) --- */
+html.font-small .card {
+    font-size: 14px;
+}
+
+html.font-small .card-title {
+    font-size: 23px;
+}
+
+html.font-small .info-modal-header {
+    font-size: 16px;
+}
+
+html.font-small .info-modal-title {
+    font-size: 11px;
+}
+
+html.font-small .info-modal-meaning {
+    font-size: 12px;
+}
+
+html.font-small .info-section-title {
+    font-size: 11px;
+}
+
+html.font-small .info-text-story {
+    font-size: 13px;
+}
+
+html.font-small .visuell-hinweis {
+    font-size: 12px;
+}
+
+html.font-small .word-jp {
+    font-size: 18px;
+}
+
+html.font-small .word-de {
+    font-size: 11px;
+}
+
+html.font-small .reading-row {
+    font-size: 14px;
+}
+
+html.font-small .reading-label {
+    font-size: 10px;
+}
+
+html.font-small .info-btn {
+    font-size: 13px;
+}
+
+html.font-small .info-tag {
+    font-size: 10px;
+}
+
+html.font-small .link-btn {
+    font-size: 12px;
+}
+
+html.font-small .tree-root-kanji {
+    font-size: 32px;
+}
+
+html.font-small .tree-node-char {
+    font-size: 24px;
+}
+
+html.font-small .tree-node-tooltip {
+    font-size: 11px;
+}
+
+html.font-small .no-tree-data {
+    font-size: 11px;
+}
+
+html.font-small .side-by-side-label {
+    font-size: 10px;
+}
+
+html.font-small .setting-group-title {
+    font-size: 10px;
+}
+
+html.font-small .segment-btn {
+    font-size: 10px;
+}
+
+html.font-small .category-name {
+    font-size: 13px;
+}
+
+html.font-small .category-desc {
+    font-size: 10px;
+}
+
+html.font-small .subpage-header h3 {
+    font-size: 14px;
+}
+
+html.font-small .settings-main-title {
+    font-size: 14px;
+}
+
+html.font-small .setting-section-title {
+    font-size: 11px;
+}
+
+html.font-small .visual-option span {
+    font-size: 10px;
+}
+
+html.font-small .accent-option span {
+    font-size: 9px;
+}
+
+html.font-small .close-settings {
+    font-size: 12px;
+}
+
+/* --- Large (×1.125) --- */
+html.font-large .card {
+    font-size: 18px;
+}
+
+html.font-large .card-title {
+    font-size: 29px;
+}
+
+html.font-large .info-modal-header {
+    font-size: 20px;
+}
+
+html.font-large .info-modal-title {
+    font-size: 15px;
+}
+
+html.font-large .info-modal-meaning {
+    font-size: 16px;
+}
+
+html.font-large .info-section-title {
+    font-size: 15px;
+}
+
+html.font-large .info-text-story {
+    font-size: 17px;
+}
+
+html.font-large .visuell-hinweis {
+    font-size: 16px;
+}
+
+html.font-large .word-jp {
+    font-size: 22px;
+}
+
+html.font-large .word-de {
+    font-size: 15px;
+}
+
+html.font-large .reading-row {
+    font-size: 18px;
+}
+
+html.font-large .reading-label {
+    font-size: 12px;
+}
+
+html.font-large .info-btn {
+    font-size: 17px;
+}
+
+html.font-large .info-tag {
+    font-size: 14px;
+}
+
+html.font-large .link-btn {
+    font-size: 16px;
+}
+
+html.font-large .tree-root-kanji {
+    font-size: 40px;
+}
+
+html.font-large .tree-node-char {
+    font-size: 32px;
+}
+
+html.font-large .tree-node-tooltip {
+    font-size: 15px;
+}
+
+html.font-large .no-tree-data {
+    font-size: 15px;
+}
+
+html.font-large .side-by-side-label {
+    font-size: 12px;
+}
+
+html.font-large .setting-group-title {
+    font-size: 12px;
+}
+
+html.font-large .segment-btn {
+    font-size: 14px;
+}
+
+html.font-large .category-name {
+    font-size: 17px;
+}
+
+html.font-large .category-desc {
+    font-size: 12px;
+}
+
+html.font-large .subpage-header h3 {
+    font-size: 18px;
+}
+
+html.font-large .settings-main-title {
+    font-size: 18px;
+}
+
+html.font-large .setting-section-title {
+    font-size: 15px;
+}
+
+html.font-large .visual-option span {
+    font-size: 12px;
+}
+
+html.font-large .accent-option span {
+    font-size: 11px;
+}
+
+html.font-large .close-settings {
+    font-size: 16px;
+}
+
+/* AnkiWeb card-title has different base size */
+html.font-small.is-ankiweb .card-title {
+    font-size: 19px;
+}
+
+html.font-large.is-ankiweb .card-title {
+    font-size: 25px;
+}
+
+/* --------------------------------------------------------------------------
+   12. WKWebView (AnkiMobile) GPU-safety overrides
+   Strip non-composited transitions (color, background, border-color,
+   stroke, fill, filter) — only keep opacity + transform which are
+   GPU-composited. Prevents jank on iPad/iPhone WKWebView.
+   -------------------------------------------------------------------------- */
+html.is-ankimobile .card-display {
+    transition: none;
+}
+
+html.is-ankimobile .kanji-btn,
+html.is-ankimobile .gear-btn,
+html.is-ankimobile .info-btn,
+html.is-ankimobile .back-btn,
+html.is-ankimobile .link-btn,
+html.is-ankimobile .close-settings {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+html.is-ankimobile .visual-option,
+html.is-ankimobile .accent-option,
+html.is-ankimobile .category-card,
+html.is-ankimobile .word-example-item,
+html.is-ankimobile .tree-node {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+html.is-ankimobile .visual-option svg,
+html.is-ankimobile .visual-option svg text,
+html.is-ankimobile .visual-option svg path[fill="currentColor"],
+html.is-ankimobile .visual-option span,
+html.is-ankimobile .accent-option span {
+    transition: none;
+}
+
+html.is-ankimobile .settings-modal {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.is-ankimobile .segment-btn {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+html.is-ankimobile .side-by-side-box .sbs-kanji {
+    transition: none;
+}
+
+/* Faster stroke-dashoffset animation (shorter GPU repaint window) */
+html.is-ankimobile #svg-guide path {
+    transition: stroke-dashoffset 0.4s ease-in-out !important;
+}
+
+html.is-ankimobile .animate-draw {
+    transition: stroke-dashoffset 0.4s ease-in-out !important;
+}
+
+html.is-ankimobile .hint-active {
+    transition: stroke-dashoffset 0.4s ease-in-out !important;
+}
+
+html.is-ankimobile .rewind-anim {
+    transition: stroke-dashoffset 0.4s ease-in-out !important;
+}
+
+/* ============================================================
+   13. Reduced Motion — Accessibility & iGPU Performance
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
