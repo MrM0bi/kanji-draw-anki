@@ -361,6 +361,7 @@
         // For backdrop clicks, verify pointerdown was also on the overlay itself.
         if (e && e.target === ol && !ol._bgPointerDown) return;
         ol._bgPointerDown = false;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         ol.classList.remove('active');
         // Keep overlay clickable briefly to absorb S-Pen/stylus ghost clicks
         ol.style.pointerEvents = 'auto';
