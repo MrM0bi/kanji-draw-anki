@@ -29,11 +29,6 @@
         }
     }
 
-    .stroke-number {
-        opacity: 0;
-        animation: fadeInNumbers 0.3s ease-out forwards;
-    }
-
     .info-btn {
         opacity: 0;
         animation: fadeAndSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -515,7 +510,7 @@
                 t.setAttribute('x', fx); t.setAttribute('y', fy);
                 t.setAttribute('class', 'stroke-number');
                 t.textContent = i + 1;
-                t.style.cssText = 'fill:' + colorFn(i) + ';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill';
+                t.style.cssText = 'fill:' + colorFn(i) + ';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;opacity:0;animation:fadeInNumbers 0.3s ease-out forwards';
                 frag.appendChild(t);
             });
             svg.appendChild(frag);
@@ -591,6 +586,7 @@
             var svgBgEl = document.getElementById('svg-bg');
             if (svgBgEl) svgBgEl.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
             // First pass: reset all paths + apply basic style properties
+            var resolvedColors = [];
             paths.forEach((path, i) => {
                 // Full reset
                 path.style.removeProperty('filter');
@@ -613,10 +609,11 @@
                     case 'gel': {
                         path.setAttribute('stroke-width', '4.5');
                         path.setAttribute('paint-order', 'stroke');
-                        // Resolve actual color for drop-shadow
+                        // Resolve actual color for drop-shadow; cache for second (halo) pass
                         var resolvedC;
                         try { resolvedC = getComputedStyle(path).stroke; } catch (e) { resolvedC = ''; }
                         if (!resolvedC || resolvedC === 'none') resolvedC = pathColors[i] || 'var(--stroke-active)';
+                        resolvedColors[i] = resolvedC;
                         path.style.setProperty('filter', 'drop-shadow(0 0 0.3px ' + resolvedC + ')');
                         path.style.setProperty('-webkit-filter', 'drop-shadow(0 0 0.3px ' + resolvedC + ')');
                         break;
@@ -629,9 +626,8 @@
             // Second pass: add gel halos AFTER all paths styled (avoids nth-child shift)
             if (ss === 'gel') {
                 paths.forEach(function (path, i) {
-                    var haloC;
-                    try { haloC = getComputedStyle(path).stroke; } catch (e) { haloC = ''; }
-                    if (!haloC || haloC === 'none') haloC = pathColors[i] || 'var(--stroke-active)';
+                    // Reuse cached color from first pass — avoids a second getComputedStyle call per path
+                    var haloC = resolvedColors[i] || pathColors[i] || 'var(--stroke-active)';
                     var h2 = path.cloneNode(false);
                     h2.setAttribute('class', 'gel-halo');
                     h2.setAttribute('stroke-width', '8');
@@ -645,12 +641,18 @@
                 });
             }
 
-            svgBg.querySelectorAll('.stroke-number').forEach(el => el.remove());
-
-            if (isNumbers) {
-                addNumbersGPAL(svgBg, (i) => {
-                    return (pathColors[i] && pathColors[i] !== 'var(--stroke-active)') ? pathColors[i] : 'var(--text-muted)';
-                });
+            if (!isNumbers) {
+                svgBg.querySelectorAll('.stroke-number').forEach(el => el.remove());
+            } else {
+                const colorFn = (i) => (pathColors[i] && pathColors[i] !== 'var(--stroke-active)') ? pathColors[i] : 'var(--text-muted)';
+                const existing = svgBg.querySelectorAll('.stroke-number');
+                if (existing.length === paths.length) {
+                    // Numbers already present (from FrontSide) — just update colors in place, no flicker
+                    existing.forEach((el, i) => { el.style.fill = colorFn(i); });
+                } else {
+                    svgBg.querySelectorAll('.stroke-number').forEach(el => el.remove());
+                    addNumbersGPAL(svgBg, colorFn);
+                }
             }
         };
 

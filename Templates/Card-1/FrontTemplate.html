@@ -1801,14 +1801,15 @@
             try { window._kanjiThemeObserver.disconnect(); } catch (e) { }
         }
         var _themeMODebounce = null;
+        var _nightModeRe = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/;
         window._kanjiThemeObserver = new MutationObserver(function (mutations) {
             if (!document.getElementById('svg-bg')) return;
             var nightModeChanged = false;
             var scrollLost = false;
             for (var i = 0; i < mutations.length; i++) {
                 var newVal = mutations[i].target.getAttribute('class') || '';
-                var hasNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(newVal);
-                var prevNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(mutations[i].oldValue || '');
+                var hasNM = _nightModeRe.test(newVal);
+                var prevNM = _nightModeRe.test(mutations[i].oldValue || '');
                 // Only act when nightMode actually changed AND it was Anki (not us).
                 if (hasNM !== prevNM && !_tmplClassChange) {
                     window._ankiNightMode = hasNM;

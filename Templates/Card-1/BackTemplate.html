@@ -1898,7 +1898,7 @@
                                                 a.el.setAttribute('d', d);
                                                 if (a.halo) a.halo.setAttribute('d', d);
                                             }
-                                            var _ease = 0.5 - 0.5 * Math.cos(Math.min(progress, 1) * Math.PI);
+                                            var _ease = 0.5 - 0.5 * Math.cos(progress * Math.PI);
                                             for (var ni = 0; ni < numAnims.length; ni++) {
                                                 var na = numAnims[ni];
                                                 var nx = na.posU.x + (na.posR.x - na.posU.x) * _ease;
@@ -2257,7 +2257,7 @@
                                                 a.el.setAttribute('d', a.frames[fi]);
                                                 if (a.halo) a.halo.setAttribute('d', a.frames[fi]);
                                             }
-                                            var _easeR = 0.5 - 0.5 * Math.cos(Math.min(progress, 1) * Math.PI);
+                                            var _easeR = 0.5 - 0.5 * Math.cos(progress * Math.PI);
                                             for (var ni = 0; ni < numAnimsR.length; ni++) {
                                                 var naR = numAnimsR[ni];
                                                 var nxR = naR.posR.x + (naR.posU.x - naR.posR.x) * _easeR;
