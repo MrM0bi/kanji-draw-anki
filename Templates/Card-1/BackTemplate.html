@@ -11,6 +11,7 @@
         pointer-events: none !important;
         transition: none !important;
     }
+
     /* Badges inside .kanji-container must be tappable despite parent pointer-events:none */
     .kanji-container .excess-strokes-badge,
     .kanji-container .missing-strokes-badge,
@@ -50,12 +51,27 @@
     }
 
     @keyframes stroke-pulse-extra {
-        0%, 100% { opacity: 1; }
-        50%       { opacity: 0.45; }
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.45;
+        }
     }
+
     @keyframes stroke-pulse-ghost {
-        0%, 100% { opacity: 0.8; }
-        50%       { opacity: 0.15; }
+
+        0%,
+        100% {
+            opacity: 0.8;
+        }
+
+        50% {
+            opacity: 0.15;
+        }
     }
 
     /* Extra stroke (zu viel) — solid red, thick */
@@ -65,6 +81,7 @@
         stroke-linejoin: round !important;
         stroke-dasharray: none !important;
     }
+
     /* Ghost stroke (zu wenig) — dashed orange placeholder */
     .stroke-ghost {
         stroke-width: 3 !important;
@@ -77,6 +94,7 @@
         will-change: opacity;
         animation: stroke-pulse-extra 2s ease-in-out 0.3s infinite;
     }
+
     .stroke-ghost-group {
         will-change: opacity;
         animation: stroke-pulse-ghost 1.6s ease-in-out 0.5s infinite;
@@ -1166,7 +1184,7 @@
                         // Clean up any scratch SVGs left by a previous animation that was
                         // interrupted (e.g. rapid card flip or settings change mid-morph).
                         if (window._kanjiScratchSvgs) {
-                            window._kanjiScratchSvgs.forEach(function(s){ if (s && s.parentNode) s.parentNode.removeChild(s); });
+                            window._kanjiScratchSvgs.forEach(function (s) { if (s && s.parentNode) s.parentNode.removeChild(s); });
                             window._kanjiScratchSvgs = [];
                         }
                         // Re-read stroke style from storage (may have changed since page load)
@@ -1387,7 +1405,7 @@
                                 cont.classList.add('show-handwriting');
                                 cont.appendChild(morphSvg);
                                 // Save pairs data for reverse morph (SVG→HW quicktoggle)
-                                window._kanjiLastMorphPairs = morphPairs.map(function(p) { return { userD: p.userD, refD: p.refD, color: p.color }; });
+                                window._kanjiLastMorphPairs = morphPairs.map(function (p) { return { userD: p.userD, refD: p.refD, color: p.color }; });
 
                                 if (isWK) {
                                     // ── WKWebView: SMIL <animate> for GPU-native smooth morphing ──
@@ -1399,7 +1417,7 @@
                                     document.body.appendChild(_wkScratch);
                                     if (!window._kanjiScratchSvgs) window._kanjiScratchSvgs = [];
                                     window._kanjiScratchSvgs.push(_wkScratch);
-                                    var _wkResamplePts = function(d) {
+                                    var _wkResamplePts = function (d) {
                                         var tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                         tmp.setAttribute('d', d);
                                         _wkScratch.appendChild(tmp);
@@ -1428,18 +1446,18 @@
                                     // causes severe GPU stalls on WKWebView (neon-glow is expensive).
                                     // applyBackFeatures() restores filters on svg-bg after animation.
                                     var _wkLastAnim = null;
-                                    morphPairs.forEach(function(pair) {
+                                    morphPairs.forEach(function (pair) {
                                         var uPts = _wkResamplePts(pair.userD);
                                         var rPts = _wkResamplePts(pair.refD);
                                         if (!uPts || !rPts) return;
                                         // Match direction (same flip as desktop morph)
                                         var last = (WK_N - 1) * 2;
-                                        if ((uPts[0]-rPts[last])*(uPts[0]-rPts[last])+(uPts[1]-rPts[last+1])*(uPts[1]-rPts[last+1]) <
-                                            (uPts[0]-rPts[0])*(uPts[0]-rPts[0])+(uPts[1]-rPts[1])*(uPts[1]-rPts[1])) {
-                                            for (var i=0,j=last;i<j;i+=2,j-=2){var tx=rPts[i],ty=rPts[i+1];rPts[i]=rPts[j];rPts[i+1]=rPts[j+1];rPts[j]=tx;rPts[j+1]=ty;}
+                                        if ((uPts[0] - rPts[last]) * (uPts[0] - rPts[last]) + (uPts[1] - rPts[last + 1]) * (uPts[1] - rPts[last + 1]) <
+                                            (uPts[0] - rPts[0]) * (uPts[0] - rPts[0]) + (uPts[1] - rPts[1]) * (uPts[1] - rPts[1])) {
+                                            for (var i = 0, j = last; i < j; i += 2, j -= 2) { var tx = rPts[i], ty = rPts[i + 1]; rPts[i] = rPts[j]; rPts[i + 1] = rPts[j + 1]; rPts[j] = tx; rPts[j + 1] = ty; }
                                         }
-                                        var fromD = 'M'; for (var k=0;k<WK_N;k++){if(k)fromD+='L';fromD+=uPts[k*2].toFixed(1)+' '+uPts[k*2+1].toFixed(1);}
-                                        var toD   = 'M'; for (var k=0;k<WK_N;k++){if(k)toD+='L';toD+=rPts[k*2].toFixed(1)+' '+rPts[k*2+1].toFixed(1);}
+                                        var fromD = 'M'; for (var k = 0; k < WK_N; k++) { if (k) fromD += 'L'; fromD += uPts[k * 2].toFixed(1) + ' ' + uPts[k * 2 + 1].toFixed(1); }
+                                        var toD = 'M'; for (var k = 0; k < WK_N; k++) { if (k) toD += 'L'; toD += rPts[k * 2].toFixed(1) + ' ' + rPts[k * 2 + 1].toFixed(1); }
                                         pair.el.setAttribute('d', fromD);
                                         pair.el.removeAttribute('filter'); // remove neon/gel filter — too expensive per-SMIL-frame
                                         var anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
@@ -1465,7 +1483,7 @@
                                     });
 
                                     if (_wkLastAnim) {
-                                        _wkLastAnim.addEventListener('endEvent', function() { _wkShowFinal(); });
+                                        _wkLastAnim.addEventListener('endEvent', function () { _wkShowFinal(); });
                                         setTimeout(_wkShowFinal, (DUR + 0.15) * 1000);
                                     } else {
                                         // No animatable pairs → just show final immediately
@@ -1731,7 +1749,7 @@
                                     document.body.appendChild(_scratchR);
                                     if (!window._kanjiScratchSvgs) window._kanjiScratchSvgs = [];
                                     window._kanjiScratchSvgs.push(_scratchR);
-                                    const _resampleR = function(d) {
+                                    const _resampleR = function (d) {
                                         const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                         tmp.setAttribute('d', d);
                                         _scratchR.appendChild(tmp);
@@ -1806,12 +1824,12 @@
                                         // opacity:0.12 !important which overrides the CSS opacity:0 !important,
                                         // so they'd stay visible (static at refD) during the whole animation.
                                         var _svgBgRev = document.getElementById('svg-bg');
-                                        if (_svgBgRev) _svgBgRev.querySelectorAll('.gel-halo').forEach(function(h){h.parentNode.removeChild(h);});
+                                        if (_svgBgRev) _svgBgRev.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
                                         // Hide ref paths via show-handwriting, overlay our reverse morph SVG
                                         _transC.classList.add('show-handwriting');
                                         _transC.appendChild(revSvg);
                                         let t0R = performance.now();
-                                        const tickR = function(now) {
+                                        const tickR = function (now) {
                                             if (_freeRenderGen !== myRenderGen) {
                                                 if (_scratchR.parentNode) _scratchR.parentNode.removeChild(_scratchR);
                                                 revSvg.remove();
@@ -1836,10 +1854,10 @@
                                                 renderFreeView(); // builds HW view beneath the overlay
                                                 revSvg.style.transition = 'opacity 80ms linear';
                                                 revSvg.style.opacity = '0';
-                                                setTimeout(function() { revSvg.remove(); }, 100);
+                                                setTimeout(function () { revSvg.remove(); }, 100);
                                             }
                                         };
-                                        requestAnimationFrame(function() { requestAnimationFrame(tickR); });
+                                        requestAnimationFrame(function () { requestAnimationFrame(tickR); });
                                     }
                                 } else {
                                     // WKWebView or no morph data → SMIL reverse morph if data available, else fade
@@ -1852,14 +1870,14 @@
                                         document.body.appendChild(_qtScratch);
                                         if (!window._kanjiScratchSvgs) window._kanjiScratchSvgs = [];
                                         window._kanjiScratchSvgs.push(_qtScratch);
-                                        const _qtResamplePts = function(d) {
+                                        const _qtResamplePts = function (d) {
                                             const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                             tmp.setAttribute('d', d);
                                             _qtScratch.appendChild(tmp);
                                             const L = tmp.getTotalLength();
                                             if (!L) { _qtScratch.removeChild(tmp); return null; }
                                             const pts = [];
-                                            for (let i = 0; i < QT_N; i++) { const pt = tmp.getPointAtLength((i/(QT_N-1))*L); pts.push(pt.x, pt.y); }
+                                            for (let i = 0; i < QT_N; i++) { const pt = tmp.getPointAtLength((i / (QT_N - 1)) * L); pts.push(pt.x, pt.y); }
                                             _qtScratch.removeChild(tmp);
                                             return pts;
                                         };
@@ -1872,14 +1890,14 @@
                                             const u = _qtResamplePts(pair.userD);
                                             const r = _qtResamplePts(pair.refD);
                                             if (!u || !r) continue;
-                                            const last = (QT_N-1)*2;
-                                            if ((u[0]-r[last])*(u[0]-r[last])+(u[1]-r[last+1])*(u[1]-r[last+1]) <
-                                                (u[0]-r[0])*(u[0]-r[0])+(u[1]-r[1])*(u[1]-r[1])) {
-                                                for (let i=0,j=last;i<j;i+=2,j-=2){const tx=r[i],ty=r[i+1];r[i]=r[j];r[i+1]=r[j+1];r[j]=tx;r[j+1]=ty;}
+                                            const last = (QT_N - 1) * 2;
+                                            if ((u[0] - r[last]) * (u[0] - r[last]) + (u[1] - r[last + 1]) * (u[1] - r[last + 1]) <
+                                                (u[0] - r[0]) * (u[0] - r[0]) + (u[1] - r[1]) * (u[1] - r[1])) {
+                                                for (let i = 0, j = last; i < j; i += 2, j -= 2) { const tx = r[i], ty = r[i + 1]; r[i] = r[j]; r[i + 1] = r[j + 1]; r[j] = tx; r[j + 1] = ty; }
                                             }
                                             const strokeColor = pair.color || 'var(--stroke-color,#23a0f0)';
-                                            let fromD='M', toD='M';
-                                            for (let k=0;k<QT_N;k++){if(k){fromD+='L';toD+='L';}fromD+=r[k*2].toFixed(1)+' '+r[k*2+1].toFixed(1);toD+=u[k*2].toFixed(1)+' '+u[k*2+1].toFixed(1);}
+                                            let fromD = 'M', toD = 'M';
+                                            for (let k = 0; k < QT_N; k++) { if (k) { fromD += 'L'; toD += 'L'; } fromD += r[k * 2].toFixed(1) + ' ' + r[k * 2 + 1].toFixed(1); toD += u[k * 2].toFixed(1) + ' ' + u[k * 2 + 1].toFixed(1); }
                                             // Gel: halo with SMIL too
                                             if (_ssRevWK === 'gel') {
                                                 const haloWK = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1931,17 +1949,17 @@
                                         if (_qtScratch.parentNode) _qtScratch.parentNode.removeChild(_qtScratch);
                                         // Remove svg-bg gel halos before show-handwriting (inline !important beats CSS)
                                         var _svgBgWKRev = document.getElementById('svg-bg');
-                                        if (_svgBgWKRev) _svgBgWKRev.querySelectorAll('.gel-halo').forEach(function(h){h.parentNode.removeChild(h);});
+                                        if (_svgBgWKRev) _svgBgWKRev.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
                                         _transC.classList.add('show-handwriting');
                                         _transC.appendChild(revSvgWK);
-                                        const _qtDone = function() {
+                                        const _qtDone = function () {
                                             _transC.classList.remove('show-handwriting');
                                             revSvgWK.style.zIndex = '5';
                                             revSvgWK.classList.remove('handwriting-overlay'); // hide from renderFreeView teardown
                                             renderFreeView();
                                             revSvgWK.style.transition = 'opacity 80ms linear';
                                             revSvgWK.style.opacity = '0';
-                                            setTimeout(function(){ revSvgWK.remove(); }, 100);
+                                            setTimeout(function () { revSvgWK.remove(); }, 100);
                                         };
                                         if (_qtLastAnim) {
                                             _qtLastAnim.addEventListener('endEvent', _qtDone);

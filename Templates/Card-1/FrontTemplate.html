@@ -2386,7 +2386,7 @@
         // Tusche (Ink): multi-segment variable-width brush.
         // A hidden master <path> tracks the full d-attribute for evaluation/snap.
         // A visible <g> group holds short segments with individual stroke-widths.
-        
+
         // Smooth snap animation: morph user's drawn stroke toward the reference SVG path
         const snapToReference = (drawnPath, refPath, userPts, onDone, gelHalo) => {
             const N = 24;
@@ -2698,7 +2698,7 @@
             _ctx.restore();
         };
 
-                const draw = (e) => {
+        const draw = (e) => {
             if (e && e.cancelable !== false) { e.preventDefault(); e.stopPropagation(); }
             if (!isDrawing) return;
             const pos = getMousePos(e);
