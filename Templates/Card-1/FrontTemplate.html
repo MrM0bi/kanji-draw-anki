@@ -1844,7 +1844,14 @@
             _tmplClassChange = false;
             if (nightModeChanged) {
                 clearTimeout(_themeMODebounce);
-                _themeMODebounce = setTimeout(function () { applyThemeSettings(); }, 16);
+                _themeMODebounce = setTimeout(function () {
+                    // Don't mutate the DOM mid-stroke — defer until drawing ends
+                    if (typeof isDrawing !== 'undefined' && isDrawing) {
+                        _themeMODebounce = setTimeout(arguments.callee, 100);
+                        return;
+                    }
+                    applyThemeSettings();
+                }, 16);
             }
             if (scrollLost && typeof checkScrollability === 'function') {
                 setTimeout(checkScrollability, 20);
@@ -2007,14 +2014,18 @@
             }
             return dp[n * m - 1];
         },
-        smoothInput: function (pts) {
+        smoothInput: function (pts, passes) {
             if (pts.length < 3) return pts;
-            var out = [pts[0]];
-            for (var i = 1; i < pts.length - 1; i++) {
-                out.push({ x: (pts[i - 1].x + pts[i].x + pts[i + 1].x) / 3, y: (pts[i - 1].y + pts[i].y + pts[i + 1].y) / 3 });
+            var p = passes || 1;
+            while (p-- > 0) {
+                var out = [pts[0]];
+                for (var i = 1; i < pts.length - 1; i++) {
+                    out.push({ x: (pts[i - 1].x + pts[i].x + pts[i + 1].x) / 3, y: (pts[i - 1].y + pts[i].y + pts[i + 1].y) / 3 });
+                }
+                out.push(pts[pts.length - 1]);
+                pts = out;
             }
-            out.push(pts[pts.length - 1]);
-            return out;
+            return pts;
         },
         hungarianMatch: function (costMatrix) {
             var n = costMatrix.length;
@@ -2090,6 +2101,8 @@
         let currentStroke = 0, mistakes = 0, isDrawing = false, userPoints = [];
         let currentSVGPath = null, dSegments = [], errorTimeout = null, fadeTimeout = null, skipTimeouts = [];
         let _drawGen = 0;
+        // rAF handle for SVG-mode path updates — batches setAttribute to one frame
+        let _svgRafId = null;
 
         // CSS custom-property cache (avoid repeated getComputedStyle in hot paths)
         let _cssCache = {};
@@ -2157,7 +2170,13 @@
 
         // ···· Draw Helpers & Pointer Handlers ····
 
-        const clearDrawLayer = () => { _drawGen++; drawLayer.innerHTML = ''; currentSVGPath = null; _gelHalo = null; if (_useCanvas) _clearCanvas(); };
+        const clearDrawLayer = () => {
+            _drawGen++;
+            if (_svgRafId) { cancelAnimationFrame(_svgRafId); _svgRafId = null; }
+            drawLayer.innerHTML = '';
+            currentSVGPath = null; _gelHalo = null;
+            if (_useCanvas) _clearCanvas();
+        };
 
         // ···· Per-path stroke style application ····
         // Returns the current stroke style setting
@@ -2718,12 +2737,16 @@
                 _lastCanvasX = pos.x;
                 _lastCanvasY = pos.y;
             } else {
-                // SVG: existing behavior
-                if (currentSVGPath) {
-                    const d = dSegments.join('');
-                    currentSVGPath.setAttribute("d", d);
-                    // Gelstift: keep halo path in sync (reuse joined string)
-                    if (_gelHalo) _gelHalo.setAttribute("d", d);
+                // SVG: batch setAttribute to one frame via rAF — avoids 120+ reflows/sec on
+                // high-refresh touchscreens where pointermove fires faster than display refresh.
+                if (currentSVGPath && !_svgRafId) {
+                    _svgRafId = requestAnimationFrame(() => {
+                        _svgRafId = null;
+                        if (!currentSVGPath) return;
+                        const d = dSegments.join('');
+                        currentSVGPath.setAttribute("d", d);
+                        if (_gelHalo) _gelHalo.setAttribute("d", d);
+                    });
                 }
             }
         };
@@ -2733,6 +2756,14 @@
             if (e && e.pointerId) { try { drawLayer.releasePointerCapture(e.pointerId); } catch (err) { } }
             if (e && e.cancelable !== false) { e.preventDefault(); e.stopPropagation(); }
             isDrawing = false;
+
+            // Flush any pending SVG rAF — write final path immediately before evaluation
+            if (_svgRafId) { cancelAnimationFrame(_svgRafId); _svgRafId = null; }
+            if (!_useCanvas && currentSVGPath && dSegments.length) {
+                const d = dSegments.join('');
+                currentSVGPath.setAttribute("d", d);
+                if (_gelHalo) _gelHalo.setAttribute("d", d);
+            }
 
             // Canvas → SVG handoff: materialize SVG elements for grading/snap/persistence
             if (_useCanvas && _ctx) _finalizeCanvasToSVG();
@@ -2977,6 +3008,8 @@
             skipTimeouts.forEach(clearTimeout); skipTimeouts = [];
             const strokeColor = getCSSVar('--stroke-active') || '';
             const hintColor = getCSSVar('--stroke-hint') || strokeColor;
+            // Collect halo elements for batched reflow (avoid O(n) forced layouts in loop)
+            const pendingHalos = [];
             paths.forEach((p) => {
                 const isHint = p.classList.contains('hint-active');
                 if (isHint || p.classList.contains('stroke-complete') || p.classList.contains('animate-draw')) {
@@ -2984,17 +3017,13 @@
                     if (col) p.style.setProperty('stroke', col, 'important');
                     p.classList.remove('stroke-complete', 'hint-active', 'animate-draw');
                     p.classList.add('rewind-anim');
-                    // Rewind gel halo in sync with the stroke (dashoffset 0→105, same timing)
+                    // Collect halo for batched reflow — write initial state here
                     const prevH = p.previousElementSibling;
                     if (prevH && prevH.classList.contains('gel-halo')) {
                         prevH.setAttribute('stroke-dasharray', '105');
                         prevH.style.setProperty('stroke-dashoffset', '0', 'important');
                         prevH.style.setProperty('transition', 'none', 'important');
-                        prevH.getBoundingClientRect();
-                        prevH.style.setProperty('stroke-dashoffset', '105', 'important');
-                        prevH.style.setProperty('transition', 'stroke-dashoffset ' + (ANIMATION_DURATION_MS / 1000) + 's ease-in-out', 'important');
-                        const _h = prevH;
-                        setTimeout(() => { if (_h.parentNode) _h.parentNode.removeChild(_h); }, ANIMATION_DURATION_MS);
+                        pendingHalos.push(prevH);
                     }
                     // Clean up exactly when the CSS transition ends — avoids the 1-frame linecap dot
                     const _p = p;
@@ -3012,7 +3041,9 @@
                     };
                     p.addEventListener('transitionend', onRewindEnd);
                     // Fallback in case transitionend never fires (e.g. reduced motion / hidden tab)
+                    const _rewindFallbackGen = _drawGen;
                     setTimeout(() => {
+                        if (_rewindFallbackGen !== _drawGen) return; // card navigated away
                         p.removeEventListener('transitionend', onRewindEnd);
                         p.style.setProperty('opacity', '0', 'important');
                         requestAnimationFrame(() => { p.classList.remove('rewind-anim'); p.style.removeProperty('stroke'); p.style.removeProperty('opacity'); });
@@ -3024,6 +3055,16 @@
                     if (prevH && prevH.classList.contains('gel-halo')) prevH.parentNode.removeChild(prevH);
                 }
             });
+            // Single forced reflow to commit all halo initial states, then start animations
+            if (pendingHalos.length) {
+                pendingHalos[0].getBoundingClientRect(); // one reflow for all
+                const haloTransition = 'stroke-dashoffset ' + (ANIMATION_DURATION_MS / 1000) + 's ease-in-out';
+                pendingHalos.forEach(_h => {
+                    _h.style.setProperty('stroke-dashoffset', '105', 'important');
+                    _h.style.setProperty('transition', haloTransition, 'important');
+                    setTimeout(() => { if (_h.parentNode) _h.parentNode.removeChild(_h); }, ANIMATION_DURATION_MS);
+                });
+            }
             clearTimeout(errorTimeout); clearTimeout(fadeTimeout); drawLayer.classList.remove('fade-out'); clearDrawLayer();
             guideSvg.classList.remove('is-visible');
             if (actionButtons) actionButtons.style.display = 'flex';

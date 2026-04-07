@@ -677,9 +677,40 @@
         // Wrap a path in an animated <g> element for compositor-promoted pulse animation.
         // Applying animation to individual SVG <path> elements is not GPU-accelerated on iOS;
         // animating a <g> with will-change:opacity allows WebKit to promote it to a compositor layer.
+        // CSS animation specs for each pulse group class.
+        const _pulseSpec = {
+            'stroke-extra-group': { init: 0.3, period: 2.0 },
+            'stroke-ghost-group': { init: 0.5, period: 1.6 }
+        };
+        // Compute a synced animation-delay so all groups of the same class share a continuous
+        // phase, even when recreated during view switches / morph transitions.
+        // On first call per class per card (_kanjiPulseSync[key] unset): record epoch, return null
+        // (CSS default delay plays normally). On subsequent calls: return a negative delay so the
+        // new element starts at exactly the phase the animation would be at right now.
+        const _pulseSyncDelay = (groupClass) => {
+            const spec = _pulseSpec[groupClass];
+            if (!spec) return null;
+            if (!window._kanjiPulseSync) window._kanjiPulseSync = {};
+            const now = performance.now() / 1000;
+            if (window._kanjiPulseSync[groupClass] === undefined) {
+                window._kanjiPulseSync[groupClass] = now;
+                return null; // first creation — let CSS default (initDelay) play normally
+            }
+            const elapsed = now - window._kanjiPulseSync[groupClass];
+            if (elapsed < spec.init) {
+                // Still within the initial delay — shrink remaining wait
+                return (spec.init - elapsed).toFixed(3) + 's';
+            }
+            // Past initial delay: compute phase within the loop and back-date
+            const phase = (elapsed - spec.init) % spec.period;
+            return '-' + phase.toFixed(3) + 's';
+        };
+
         const wrapInPulseGroup = (svg, pathEl, groupClass) => {
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.classList.add(groupClass);
+            const delay = _pulseSyncDelay(groupClass);
+            if (delay !== null) g.style.animationDelay = delay;
             g.appendChild(pathEl);
             svg.appendChild(g);
             return g;
@@ -687,17 +718,53 @@
 
         // Toggle visibility of all stroke groups matching groupClass inside container.
         // Updates badge appearance to reflect the hidden/visible state.
+        // Saves the new state to window._kanjiBadgeState for persistence across view switches.
         const toggleStrokeGroup = (badge, groupClass, container) => {
             const groups = container.querySelectorAll('.' + groupClass);
             if (!groups.length) return;
-            // Use visibility instead of display — more reliable for SVG <g> in WebKit,
-            // especially after child nodes have been moved in post-render (adoptNumbersIntoGroups).
             const isHidden = groups[0].style.visibility === 'hidden';
             groups.forEach(g => {
                 g.style.visibility = isHidden ? '' : 'hidden';
                 g.style.pointerEvents = isHidden ? '' : 'none';
+                // Pause infinite pulse animation while hidden — saves battery on mobile
+                g.style.animationPlayState = isHidden ? '' : 'paused';
             });
             badge.classList.toggle('strokes-hidden', !isHidden);
+            // Persist toggle state so re-renders (morph switch) restore it
+            if (!window._kanjiBadgeState) window._kanjiBadgeState = {};
+            const stateKey = groupClass === 'stroke-extra-group' ? 'extra' : groupClass === 'stroke-ghost-group' ? 'ghost' : null;
+            if (stateKey) window._kanjiBadgeState[stateKey] = !isHidden; // !isHidden = now hidden
+        };
+
+        // Restore saved badge visibility state after badge + groups are in the DOM.
+        const restoreBadgeVisibility = (badgeEl, groupClass, groupContainer) => {
+            if (!window._kanjiBadgeState) return;
+            const stateKey = groupClass === 'stroke-extra-group' ? 'extra' : groupClass === 'stroke-ghost-group' ? 'ghost' : null;
+            if (stateKey && window._kanjiBadgeState[stateKey]) {
+                const groups = groupContainer.querySelectorAll('.' + groupClass);
+                groups.forEach(g => {
+                    g.style.visibility = 'hidden';
+                    g.style.pointerEvents = 'none';
+                    g.style.animationPlayState = 'paused';
+                });
+                badgeEl.classList.add('strokes-hidden');
+            }
+        };
+
+        // Pre-hide stroke groups in an SVG *before* it is inserted into the DOM.
+        // This prevents a 1-frame flash when the badge state says the group should be hidden.
+        // WebKit may paint animated elements (pulse @keyframes) in their first frame before
+        // JS sets visibility:hidden, so we must set it before the element enters the DOM.
+        const preHideGroupsIfNeeded = (svgEl, groupClass) => {
+            if (!window._kanjiBadgeState) return;
+            const stateKey = groupClass === 'stroke-extra-group' ? 'extra' : groupClass === 'stroke-ghost-group' ? 'ghost' : null;
+            if (stateKey && window._kanjiBadgeState[stateKey]) {
+                svgEl.querySelectorAll('.' + groupClass).forEach(g => {
+                    g.style.visibility = 'hidden';
+                    g.style.pointerEvents = 'none';
+                    g.style.animationPlayState = 'paused';
+                });
+            }
         };
 
         // Create a stroke-count badge that toggles its associated stroke group on click/tap.
@@ -782,6 +849,9 @@
         };
 
         const applyBackFeatures = function () {
+            if (applyBackFeatures._running) return;
+            applyBackFeatures._running = true;
+            try {
             const globalConf = getGlobalConfig();
             const isColorBack = safeGetItem('c1_kanjiOptColorBack', safeGetItem('kanjiOptColorBack', globalConf.colorBack)) === 'on';
             const isNumbers = safeGetItem('c1_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', globalConf.numbers)) === 'on';
@@ -899,6 +969,9 @@
                 addNumbersGPAL(svgBg, (i) => {
                     return (pathColors[i] !== 'var(--stroke-active)') ? pathColors[i] : 'var(--text-muted)';
                 });
+            }
+            } finally {
+                applyBackFeatures._running = false;
             }
         };
 
@@ -1050,7 +1123,7 @@
 
                     const userProcessed = freeStrokeData.map(s => {
                         const rawPts = parseDToPoints(s.d);
-                        return resamplePts(smooth(rawPts), SAMPLE_N);
+                        return resamplePts(smooth(rawPts, 2), SAMPLE_N);
                     });
 
                     const refProcessed = [];
@@ -1211,7 +1284,11 @@
                         cont.classList.remove('show-handwriting');
                         const oldSbs = cont.parentNode ? cont.parentNode.querySelector('.side-by-side-wrapper') : null;
                         if (oldSbs) oldSbs.remove();
-                        cont.querySelectorAll('.excess-strokes-badge, .missing-strokes-badge').forEach(el => el.remove());
+                        const oldSbsBadgeRow = cont.parentNode ? cont.parentNode.querySelector('.sbs-badge-row') : null;
+                        if (oldSbsBadgeRow) oldSbsBadgeRow.remove();
+                        // Save badges before removal so they can act as visual placeholders during morph animation
+                        const _prevBadges = [...cont.querySelectorAll('.excess-strokes-badge, .missing-strokes-badge')];
+                        _prevBadges.forEach(el => el.remove());
                         cont.style.removeProperty('display');
                         // Clean gel halos from svg-bg before re-rendering
                         bg.querySelectorAll('.gel-halo').forEach(h => h.parentNode.removeChild(h));
@@ -1228,6 +1305,30 @@
                                 afStyle.textContent = afStyle.textContent.replace(/#svg-bg path\s*\{\s*stroke:\s*transparent\s*!important;?\s*\}/g, '');
                             }
                         }
+                        // Re-append as visual-only placeholders so they stay visible during morph animation.
+                        // Real badges (with proper event handlers) replace them when the final view is ready.
+                        // IMPORTANT: force opacity:1 and cancel animation — DOM reinsertion restarts CSS animations,
+                        // which would make badges invisible for 0.7s (opacity:0 + 0.3s delay + 0.4s fade-in).
+                        _prevBadges.forEach(el => {
+                            el.style.pointerEvents = 'none';
+                            el.style.animation = 'none';
+                            el.style.opacity = '1';
+                            cont.appendChild(el);
+                        });
+                        // Helper: skip fade-in animation on newly created badges during view switches.
+                        // On initial card reveal (_prevBadges is empty) the CSS animation plays normally.
+                        // On view switches (_prevBadges has old badges) new badges must appear instantly to
+                        // avoid the 700ms (0.3s delay + 0.4s fade) gap after the morph completes.
+                        // _kanjiFromMorph: set by morph-completion handlers to suppress number
+                        // fadeIn animation even when _prevBadges is empty (perfect kanji case).
+                        const _isViewSwitch = _prevBadges.length > 0 || !!window._kanjiFromMorph;
+                        window._kanjiFromMorph = false; // consume immediately
+                        const applyBadgeImmediate = (badge) => {
+                            if (_isViewSwitch) {
+                                badge.style.animation = 'none';
+                                badge.style.opacity = '1';
+                            }
+                        };
 
                         const isColorBack = safeGetItem('c1_kanjiOptColorBack', safeGetItem('kanjiOptColorBack', gc.colorBack)) === 'on';
                         const isNumbers = safeGetItem('c1_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', gc.numbers)) === 'on';
@@ -1270,18 +1371,24 @@
                             });
 
                             cont.classList.add('show-handwriting');
+                            preHideGroupsIfNeeded(overlaySvg, 'stroke-extra-group');
                             cont.appendChild(overlaySvg);
 
                             if (hwExtraCount > 0) {
+                                cont.querySelectorAll('.excess-strokes-badge, .missing-strokes-badge').forEach(el => el.remove());
                                 const badge = makeBadge('excess-strokes-badge', '<span style="font-size:11px;line-height:1">✚</span>' + (+hwExtraCount === 1 ? ' 1 Strich zu viel' : ' ' + hwExtraCount + ' Striche zu viel'), 'stroke-extra-group', cont);
+                                applyBadgeImmediate(badge);
                                 cont.appendChild(badge);
+                                restoreBadgeVisibility(badge, 'stroke-extra-group', cont);
                             }
 
                             // Count missing (ghost) strokes
                             const hwGhostCount = hwMeta.filter(m => m.type === 'ghost').length;
                             if (hwGhostCount > 0) {
                                 const mbadge = makeBadge('missing-strokes-badge', '<span style="font-size:11px;line-height:1;display:inline-block;transform:rotate(45deg)">✚</span>' + (+hwGhostCount === 1 ? ' 1 Strich zu wenig' : ' ' + hwGhostCount + ' Striche zu wenig'), 'stroke-ghost-group', cont);
+                                applyBadgeImmediate(mbadge);
                                 cont.appendChild(mbadge);
+                                restoreBadgeVisibility(mbadge, 'stroke-ghost-group', cont);
                             }
 
                             if (isNumbers) {
@@ -1301,6 +1408,7 @@
                                     return meta && meta.type === 'extra' ? meta.userIdx + 1 : i + 1;
                                 });
                                 adoptNumbersIntoGroups(overlaySvg);
+                                if (_isViewSwitch) overlaySvg.querySelectorAll('text.stroke-number').forEach(t => { t.style.animation = 'none'; t.style.opacity = '1'; });
                             }
                         } else if (!sbsEnabled) {
                             // ── SVG-PFADE VIEW (no SBS) ──
@@ -1309,6 +1417,10 @@
                             const showFinalSvgView = () => {
                                 hideRefPaths();
                                 applyBackFeatures();
+                                // If view switch: skip fadeIn animation on svgBg stroke numbers
+                                if (_isViewSwitch) svgBg.querySelectorAll('text.stroke-number').forEach(t => { t.style.animation = 'none'; t.style.opacity = '1'; });
+                                // Remove any placeholder badges from the morph animation
+                                cont.querySelectorAll('.excess-strokes-badge, .missing-strokes-badge').forEach(el => el.remove());
 
                                 const extraStrokes = ev.orderedStrokes.filter(e => e.type === 'extra');
                                 if (extraStrokes.length > 0) {
@@ -1326,10 +1438,14 @@
                                     if (isNumbers) {
                                         addNumbersGPAL(overlaySvg, () => 'var(--stroke-err)', undefined, (i) => extraStrokes[i] ? extraStrokes[i].userIdx + 1 : i + 1);
                                         adoptNumbersIntoGroups(overlaySvg);
+                                        if (_isViewSwitch) overlaySvg.querySelectorAll('text.stroke-number').forEach(t => { t.style.animation = 'none'; t.style.opacity = '1'; });
                                     }
+                                    preHideGroupsIfNeeded(overlaySvg, 'stroke-extra-group');
                                     cont.appendChild(overlaySvg);
                                     const badge = makeBadge('excess-strokes-badge', '<span style="font-size:11px;line-height:1">✚</span>' + (extraStrokes.length === 1 ? ' 1 Strich zu viel' : ' ' + extraStrokes.length + ' Striche zu viel'), 'stroke-extra-group', cont);
+                                    applyBadgeImmediate(badge);
                                     cont.appendChild(badge);
+                                    restoreBadgeVisibility(badge, 'stroke-extra-group', cont);
                                 }
 
                                 const ghostStrokes = ev.orderedStrokes.filter(e => e.type === 'ghost');
@@ -1360,16 +1476,17 @@
                                         const num = svgBgNumbers[entry.refIdx];
                                         if (num) {
                                             num.style.fill = 'var(--stroke-warn2, var(--stroke-err))';
-                                            num.style.opacity = '';
                                             g.appendChild(num);
                                         }
                                     });
+                                    preHideGroupsIfNeeded(ghostOverlaySvg, 'stroke-ghost-group');
                                     cont.appendChild(ghostOverlaySvg);
                                     const mbadge = makeBadge('missing-strokes-badge', '<span style="font-size:11px;line-height:1;display:inline-block;transform:rotate(45deg)">✚</span>' + (ghostStrokes.length === 1 ? ' 1 Strich zu wenig' : ' ' + ghostStrokes.length + ' Striche zu wenig'), 'stroke-ghost-group', cont);
+                                    applyBadgeImmediate(mbadge);
                                     cont.appendChild(mbadge);
+                                    restoreBadgeVisibility(mbadge, 'stroke-ghost-group', cont);
                                 }
                             };
-
                             // Play transition animation only on first render
                             if (_morphAnimPlayed) {
                                 showFinalSvgView();
@@ -1383,29 +1500,73 @@
                                 morphSvg.classList.add('handwriting-overlay');
 
                                 const morphPairs = [];
-                                ev.orderedStrokes.forEach(entry => {
+                                const _morphExtraGroups = []; // {g, p, label} — numbers added after DOM append
+                                const _morphGhostGroups = []; // {g, p} — ghost strokes stay static during morph
+                                ev.orderedStrokes.forEach((entry, orderedIdx) => {
                                     if (entry.type === 'user') {
                                         const stroke = entry.stroke;
                                         if (!stroke.d) return;
                                         const strokeColor = gradeColor(stroke.grade);
+                                        const numColor = isColorBack && stroke.grade && stroke.grade !== 'good' ? gradeColor(stroke.grade) : 'var(--text-muted)';
                                         const p = makeStrokePath(stroke.d, '4', strokeColor);
                                         appendStrokePath(morphSvg, p);
                                         const refD = ev.refPathData[entry.refIdx] || '';
-                                        if (refD) morphPairs.push({ el: p, userD: stroke.d, refD: refD, color: strokeColor });
+                                        if (refD) morphPairs.push({ el: p, userD: stroke.d, refD: refD, color: strokeColor, numLabel: isNumbers ? orderedIdx + 1 : 0, numColor: numColor, refIdx: entry.refIdx });
                                     } else if (entry.type === 'extra') {
                                         const stroke = entry.stroke;
                                         if (!stroke.d) return;
                                         const p = makeStrokePath(stroke.d, '3', 'var(--stroke-err)');
                                         stripGelStyle(p);
                                         p.classList.add('stroke-extra');
-                                        wrapInPulseGroup(morphSvg, p, 'stroke-extra-group');
+                                        const g = wrapInPulseGroup(morphSvg, p, 'stroke-extra-group');
+                                        if (isNumbers) _morphExtraGroups.push({ g: g, p: p, label: entry.userIdx + 1 });
+                                    } else if (entry.type === 'ghost') {
+                                        const origD = ev.refPathData[entry.refIdx] || '';
+                                        if (!origD) return;
+                                        const gp = makeStrokePath(origD, '3', 'var(--stroke-warn2, var(--stroke-err))');
+                                        stripGelStyle(gp);
+                                        gp.classList.add('stroke-ghost');
+                                        const gg = wrapInPulseGroup(morphSvg, gp, 'stroke-ghost-group');
+                                        if (isNumbers) _morphGhostGroups.push({ g: gg, p: gp });
                                     }
                                 });
 
                                 cont.classList.add('show-handwriting');
+                                preHideGroupsIfNeeded(morphSvg, 'stroke-extra-group');
+                                preHideGroupsIfNeeded(morphSvg, 'stroke-ghost-group');
                                 cont.appendChild(morphSvg);
+                                // Add numbers to extra stroke groups now that paths are in live DOM
+                                // (getTotalLength/getPointAtLength require a rendered element).
+                                _morphExtraGroups.forEach(function (eg) {
+                                    var L = eg.p.getTotalLength();
+                                    if (!L) return;
+                                    var s0 = eg.p.getPointAtLength(0);
+                                    var s1; try { s1 = eg.p.getPointAtLength(Math.min(4, L)); } catch(e) { s1 = s0; }
+                                    var dx = s1.x - s0.x, dy = s1.y - s0.y, dist = Math.sqrt(dx*dx+dy*dy) || 1;
+                                    var nt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                    nt.setAttribute('class', 'stroke-number');
+                                    nt.setAttribute('x', (s0.x - dx/dist*4.5).toFixed(2));
+                                    nt.setAttribute('y', (s0.y - dy/dist*4.5).toFixed(2));
+                                    nt.style.cssText = 'fill:var(--stroke-err);stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                    nt.textContent = eg.label;
+                                    eg.g.appendChild(nt);
+                                });
+                                // Add numbers to ghost stroke groups (static — no animation needed)
+                                _morphGhostGroups.forEach(function (gg) {
+                                    var L = gg.p.getTotalLength();
+                                    if (!L) return;
+                                    var s0 = gg.p.getPointAtLength(0);
+                                    var s1; try { s1 = gg.p.getPointAtLength(Math.min(4, L)); } catch(e) { s1 = s0; }
+                                    var dx = s1.x - s0.x, dy = s1.y - s0.y, dist = Math.sqrt(dx*dx+dy*dy) || 1;
+                                    var nt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                    nt.setAttribute('class', 'stroke-number');
+                                    nt.setAttribute('x', (s0.x - dx/dist*4.5).toFixed(2));
+                                    nt.setAttribute('y', (s0.y - dy/dist*4.5).toFixed(2));
+                                    nt.style.cssText = 'fill:var(--stroke-warn2,var(--stroke-err));stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                    gg.g.appendChild(nt);
+                                });
                                 // Save pairs data for reverse morph (SVG→HW quicktoggle)
-                                window._kanjiLastMorphPairs = morphPairs.map(function (p) { return { userD: p.userD, refD: p.refD, color: p.color }; });
+                                window._kanjiLastMorphPairs = morphPairs.map(function (p) { return { userD: p.userD, refD: p.refD, color: p.color, numLabel: p.numLabel, numColor: p.numColor, refIdx: p.refIdx }; });
 
                                 if (isWK) {
                                     // ── WKWebView: SMIL <animate> for GPU-native smooth morphing ──
@@ -1434,11 +1595,13 @@
                                     var _wkShowFinal = function () {
                                         if (_wkAnimDone) return;
                                         _wkAnimDone = true;
-                                        morphSvg.remove();
-                                        cont.classList.remove('show-handwriting');
                                         if (_wkScratch.parentNode) _wkScratch.parentNode.removeChild(_wkScratch);
-                                        if (_freeRenderGen !== myRenderGen) return;
+                                        if (_freeRenderGen !== myRenderGen) { morphSvg.remove(); return; }
+                                        // Same pattern as desktop: render real view first, then remove
+                                        // morph overlay — browser paints once, no flash.
+                                        cont.classList.remove('show-handwriting');
                                         showFinalSvgView();
+                                        morphSvg.remove();
                                     };
 
                                     // Add SMIL <animate> to each stroke path: userD → refD
@@ -1481,7 +1644,68 @@
                                         anim.beginElement();
                                         _wkLastAnim = anim;
                                     });
-
+                                    // Build number label SMIL elements with collision-adjusted positions.
+                                    // Must be done after the morphPairs.forEach loop so all uLP/rLP are
+                                    // available for the collision pass across the full set.
+                                    if (isNumbers) {
+                                        var _wkTrueLP = function(d) {
+                                            var tp = document.createElementNS('http://www.w3.org/2000/svg','path');
+                                            tp.setAttribute('d', d); _wkScratch.appendChild(tp);
+                                            var tL = tp.getTotalLength();
+                                            if (!tL) { _wkScratch.removeChild(tp); return null; }
+                                            var ts0 = tp.getPointAtLength(0);
+                                            var ts1; try { ts1 = tp.getPointAtLength(Math.min(4,tL)); } catch(e) { ts1=ts0; }
+                                            _wkScratch.removeChild(tp);
+                                            var tdx=ts1.x-ts0.x, tdy=ts1.y-ts0.y, td=Math.sqrt(tdx*tdx+tdy*tdy)||1;
+                                            return { x: ts0.x-tdx/td*4.5, y: ts0.y-tdy/td*4.5 };
+                                        };
+                                        var _wkColAdj = function(rawArr) {
+                                            var MD=6.0, placed=[];
+                                            return rawArr.map(function(pos) {
+                                                if (!pos) { placed.push(null); return null; }
+                                                var fx=pos.x, fy=pos.y, moved=true, att=0;
+                                                while (moved && att<10) {
+                                                    moved=false;
+                                                    for (var ci=0;ci<placed.length;ci++) {
+                                                        var cp=placed[ci]; if (!cp) continue;
+                                                        var dx=fx-cp.x, dy=fy-cp.y, dist=Math.sqrt(dx*dx+dy*dy);
+                                                        if (dist<MD) { moved=true; var pd=dist||1.414;
+                                                            fx+=(dist>0?dx/pd:-0.707)*(MD-dist+0.5);
+                                                            fy+=(dist>0?dy/pd:-0.707)*(MD-dist+0.5); }
+                                                    } att++;
+                                                }
+                                                placed.push({x:fx,y:fy}); return {x:fx,y:fy};
+                                            });
+                                        };
+                                        // End: all ref paths (matches addNumbersGPAL on svgBg)
+                                        var _wkRawRef = [];
+                                        for (var ri4=0; ri4<ev.nRef; ri4++) _wkRawRef.push(_wkTrueLP(ev.refPathData[ri4]));
+                                        var _wkAdjRef = _wkColAdj(_wkRawRef);
+                                        // Start: matched user paths in morphPairs order
+                                        var _wkAdjUser = _wkColAdj(morphPairs.map(function(p){ return _wkTrueLP(p.userD); }));
+                                        morphPairs.forEach(function(pair, pIdx) {
+                                            if (!pair.numLabel) return;
+                                            var uLP = _wkAdjUser[pIdx], rLP = _wkAdjRef[pair.refIdx];
+                                            if (!uLP || !rLP) return;
+                                            var nt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                            nt.setAttribute('class', 'stroke-number');
+                                            nt.setAttribute('x', uLP.x.toFixed(2)); nt.setAttribute('y', uLP.y.toFixed(2));
+                                            nt.style.cssText = 'fill:'+(pair.numColor||'var(--text-muted)')+';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                            nt.textContent = pair.numLabel;
+                                            ['x','y'].forEach(function(attr) {
+                                                var an = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                                                an.setAttribute('attributeName', attr);
+                                                an.setAttribute('from', (attr==='x'?uLP.x:uLP.y).toFixed(2));
+                                                an.setAttribute('to',   (attr==='x'?rLP.x:rLP.y).toFixed(2));
+                                                an.setAttribute('dur', DUR+'s'); an.setAttribute('fill','freeze');
+                                                an.setAttribute('calcMode','spline'); an.setAttribute('keyTimes','0;1');
+                                                an.setAttribute('keySplines','0.42 0 0.58 1');
+                                                an.setAttribute('begin','indefinite');
+                                                nt.appendChild(an); an.beginElement();
+                                            });
+                                            morphSvg.appendChild(nt);
+                                        });
+                                    }
                                     if (_wkLastAnim) {
                                         _wkLastAnim.addEventListener('endEvent', function () { _wkShowFinal(); });
                                         setTimeout(_wkShowFinal, (DUR + 0.15) * 1000);
@@ -1544,7 +1768,75 @@
                                             }
                                             var halo = pair.el.previousElementSibling;
                                             if (!halo || !halo.classList.contains('gel-halo')) halo = null;
-                                            anims.push({ el: pair.el, halo: halo, frames: frames });
+                                            anims.push({ el: pair.el, halo: halo, frames: frames, numLabel: pair.numLabel || 0, numColor: pair.numColor || 'var(--text-muted)' });
+                                        }
+                                        // Compute raw label position from a bezier path via getPointAtLength.
+                                        var _trueLabelPos = function (d, scratch) {
+                                            var tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                            tmp.setAttribute('d', d);
+                                            scratch.appendChild(tmp);
+                                            var L = tmp.getTotalLength();
+                                            if (!L) { scratch.removeChild(tmp); return null; }
+                                            var s0 = tmp.getPointAtLength(0);
+                                            var s1; try { s1 = tmp.getPointAtLength(Math.min(4, L)); } catch(e) { s1 = s0; }
+                                            scratch.removeChild(tmp);
+                                            var dx = s1.x - s0.x, dy = s1.y - s0.y, dist = Math.sqrt(dx*dx+dy*dy)||1;
+                                            return { x: s0.x - dx/dist*4.5, y: s0.y - dy/dist*4.5 };
+                                        };
+                                        // Apply the same collision-avoidance as addNumbersGPAL to an array of
+                                        // raw label positions (nulls are preserved and skipped).
+                                        var _colAdj = function (rawArr) {
+                                            var MD = 6.0, placed = [];
+                                            return rawArr.map(function (pos) {
+                                                if (!pos) { placed.push(null); return null; }
+                                                var fx = pos.x, fy = pos.y, moved = true, att = 0;
+                                                while (moved && att < 10) {
+                                                    moved = false;
+                                                    for (var ci = 0; ci < placed.length; ci++) {
+                                                        var cp = placed[ci]; if (!cp) continue;
+                                                        var dx = fx-cp.x, dy = fy-cp.y, dist = Math.sqrt(dx*dx+dy*dy);
+                                                        if (dist < MD) {
+                                                            moved = true;
+                                                            var pd = dist || 1.414;
+                                                            fx += (dist > 0 ? dx/pd : -0.707) * (MD - dist + 0.5);
+                                                            fy += (dist > 0 ? dy/pd : -0.707) * (MD - dist + 0.5);
+                                                        }
+                                                    }
+                                                    att++;
+                                                }
+                                                placed.push({ x: fx, y: fy });
+                                                return { x: fx, y: fy };
+                                            });
+                                        };
+                                        var numAnims = [];
+                                        if (isNumbers) {
+                                            // End positions: ALL ref paths in order (including ghost strokes)
+                                            // so collision detection matches addNumbersGPAL exactly.
+                                            var _rawAllRef = [];
+                                            for (var ri2 = 0; ri2 < ev.nRef; ri2++) {
+                                                _rawAllRef.push(_trueLabelPos(ev.refPathData[ri2], _scratchSvg));
+                                            }
+                                            var _adjAllRef = _colAdj(_rawAllRef);
+                                            // Start positions: matched user paths in morphPairs order
+                                            var _rawAllUser = morphPairs.map(function (p) { return _trueLabelPos(p.userD, _scratchSvg); });
+                                            var _adjAllUser = _colAdj(_rawAllUser);
+                                            for (var mpi2 = 0; mpi2 < morphPairs.length; mpi2++) {
+                                                var pair2 = morphPairs[mpi2];
+                                                if (!pair2.numLabel) continue;
+                                                var posU = _adjAllUser[mpi2];
+                                                var posR = _adjAllRef[pair2.refIdx];
+                                                if (!posU || !posR) continue;
+                                                var an2 = null;
+                                                for (var ai2 = 0; ai2 < anims.length; ai2++) { if (anims[ai2].el === pair2.el) { an2 = anims[ai2]; break; } }
+                                                if (!an2) continue;
+                                                var nt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                                nt.setAttribute('class', 'stroke-number');
+                                                nt.style.cssText = 'fill:'+pair2.numColor+';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                                nt.textContent = pair2.numLabel;
+                                                nt.setAttribute('x', posU.x.toFixed(2)); nt.setAttribute('y', posU.y.toFixed(2));
+                                                morphSvg.appendChild(nt);
+                                                numAnims.push({ el: nt, posU: posU, posR: posR });
+                                            }
                                         }
                                         if (!anims.length) {
                                             morphSvg.remove();
@@ -1569,22 +1861,33 @@
                                                 a.el.setAttribute('d', d);
                                                 if (a.halo) a.halo.setAttribute('d', d);
                                             }
+                                            var _ease = 0.5 - 0.5 * Math.cos(Math.min(progress, 1) * Math.PI);
+                                            for (var ni = 0; ni < numAnims.length; ni++) {
+                                                var na = numAnims[ni];
+                                                var nx = na.posU.x + (na.posR.x - na.posU.x) * _ease;
+                                                var ny = na.posU.y + (na.posR.y - na.posU.y) * _ease;
+                                                na.el.setAttribute('x', nx.toFixed(2)); na.el.setAttribute('y', ny.toFixed(2));
+                                            }
                                             if (progress < 1) {
                                                 requestAnimationFrame(tick);
                                             } else {
-                                                setTimeout(function () {
-                                                    if (_freeRenderGen !== myRenderGen) return;
-                                                    morphSvg.remove();
-                                                    if (_scratchSvg.parentNode) _scratchSvg.parentNode.removeChild(_scratchSvg);
-                                                    cont.classList.remove('show-handwriting');
-                                                    showFinalSvgView();
-                                                }, 60);
+                                                if (_freeRenderGen !== myRenderGen) return;
+                                                // showFinalSvgView renders real numbers onto svgBg (which sits behind
+                                                // morphSvg). Removing morphSvg immediately after — in the same JS
+                                                // task — means the browser paints exactly once: morph overlay gone,
+                                                // real numbers visible. No gap, no fade-in flash.
+                                                cont.classList.remove('show-handwriting');
+                                                showFinalSvgView();
+                                                morphSvg.remove();
+                                                if (_scratchSvg.parentNode) _scratchSvg.parentNode.removeChild(_scratchSvg);
                                             }
                                         };
                                         requestAnimationFrame(tick);
                                     };
-                                    // Double-rAF for layout flush
-                                    requestAnimationFrame(function () { requestAnimationFrame(startMorph); });
+                                    // startMorph uses _scratchSvg (off-screen) for all getTotalLength calls —
+                                    // no layout flush on the main DOM is needed. Run synchronously to avoid
+                                    // a 2-frame gap where HW numbers are gone but morph numbers not yet created.
+                                    startMorph();
                                 }
                             }
                         } else {
@@ -1638,22 +1941,37 @@
                             const gridRef = buildGridSvg();
                             if (gridUser) sbsBoxes[0].appendChild(gridUser);
                             if (gridRef) sbsBoxes[1].appendChild(gridRef);
+                            preHideGroupsIfNeeded(userSvg, 'stroke-extra-group');
+                            preHideGroupsIfNeeded(userSvg, 'stroke-ghost-group');
                             sbsBoxes[0].appendChild(userSvg);
                             sbsBoxes[1].appendChild(refSvg);
 
                             cont.style.display = 'none';
+                            // Remove placeholder badges from cont — SBS uses its own badge row outside cont
+                            cont.querySelectorAll('.excess-strokes-badge, .missing-strokes-badge').forEach(el => el.remove());
                             cont.parentNode && cont.parentNode.insertBefore(wrapper, cont.nextSibling);
 
-                            // Stroke count badges for SBS view
+                            // Stroke count badges for SBS view — placed in a row AFTER the SBS wrapper
+                            // (below both drawing pads) so they don't crowd the compact SBS layout.
                             const sbsExtra = ev.orderedStrokes.filter(e => e.type === 'extra').length;
                             const sbsGhost = ev.orderedStrokes.filter(e => e.type === 'ghost').length;
-                            if (sbsExtra > 0) {
-                                const eb = makeBadge('excess-strokes-badge', '<span style="font-size:11px;line-height:1">✚</span>' + (+sbsExtra === 1 ? ' 1 Strich zu viel' : ' ' + sbsExtra + ' Striche zu viel'), 'stroke-extra-group', sbsBoxes[0]);
-                                sbsBoxes[0].appendChild(eb);
-                            }
-                            if (sbsGhost > 0) {
-                                const mb = makeBadge('missing-strokes-badge', '<span style="font-size:11px;line-height:1;display:inline-block;transform:rotate(45deg)">✚</span>' + (+sbsGhost === 1 ? ' 1 Strich zu wenig' : ' ' + sbsGhost + ' Striche zu wenig'), 'stroke-ghost-group', sbsBoxes[0]);
-                                sbsBoxes[0].appendChild(mb);
+                            if (sbsExtra > 0 || sbsGhost > 0) {
+                                const sbsBadgeRow = document.createElement('div');
+                                sbsBadgeRow.className = 'sbs-badge-row';
+                                if (sbsExtra > 0) {
+                                    const eb = makeBadge('excess-strokes-badge', '<span style="font-size:11px;line-height:1">✚</span>' + (+sbsExtra === 1 ? ' 1 Strich zu viel' : ' ' + sbsExtra + ' Striche zu viel'), 'stroke-extra-group', sbsBoxes[0]);
+                                    applyBadgeImmediate(eb);
+                                    sbsBadgeRow.appendChild(eb);
+                                    restoreBadgeVisibility(eb, 'stroke-extra-group', sbsBoxes[0]);
+                                }
+                                if (sbsGhost > 0) {
+                                    const mb = makeBadge('missing-strokes-badge', '<span style="font-size:11px;line-height:1;display:inline-block;transform:rotate(45deg)">✚</span>' + (+sbsGhost === 1 ? ' 1 Strich zu wenig' : ' ' + sbsGhost + ' Striche zu wenig'), 'stroke-ghost-group', sbsBoxes[0]);
+                                    applyBadgeImmediate(mb);
+                                    sbsBadgeRow.appendChild(mb);
+                                    restoreBadgeVisibility(mb, 'stroke-ghost-group', sbsBoxes[0]);
+                                }
+                                // Insert badge row after the SBS wrapper (below both drawing pads)
+                                wrapper.parentNode && wrapper.parentNode.insertBefore(sbsBadgeRow, wrapper.nextSibling);
                             }
 
                             if (isNumbers) {
@@ -1667,10 +1985,12 @@
                                     return g && g !== 'good' ? gradeColor(g) : 'var(--text-muted)';
                                 });
                                 adoptNumbersIntoGroups(userSvg);
+                                if (_isViewSwitch) userSvg.querySelectorAll('text.stroke-number').forEach(t => { t.style.animation = 'none'; t.style.opacity = '1'; });
                                 addNumbersGPAL(refSvg, (i) => {
                                     if (!isColorBack) return 'var(--text-muted)';
                                     return penaltyColor(ev.freePS[i] || 0) !== 'var(--stroke-active)' ? penaltyColor(ev.freePS[i] || 0) : 'var(--text-muted)';
                                 });
+                                if (_isViewSwitch) refSvg.querySelectorAll('text.stroke-number').forEach(t => { t.style.animation = 'none'; t.style.opacity = '1'; });
                             }
 
                             requestAnimationFrame(() => {
@@ -1685,6 +2005,9 @@
 
                     window._freeViewOverride = null; // reset on each card render
                     window._kanjiLastMorphPairs = null; // reset stale morph data from previous card
+                    window._kanjiBadgeState = null; // reset badge toggle state for new card
+                    window._kanjiPulseSync = {}; // reset pulse-sync epochs for new card
+                    window._kanjiFromMorph = false; // reset morph-end number-suppress flag for new card
                     renderFreeView();
 
                     // ── Quicksettings toggle button (Handschrift ↔ SVG-Pfade) ──
@@ -1721,27 +2044,22 @@
                             _updateQsIcon();
                             const _transC = document.querySelector('.kanji-container');
                             if (next === 'svg') {
-                                // HW → SVG: hide during DOM rebuild, then fade in while morph runs
-                                if (_transC) {
-                                    _transC.style.transition = '';
-                                    _transC.style.opacity = '0';
-                                    requestAnimationFrame(() => {
-                                        _morphAnimPlayed = false;
-                                        renderFreeView();
-                                        requestAnimationFrame(() => {
-                                            _transC.style.transition = 'opacity 150ms ease-in';
-                                            _transC.style.opacity = '1';
-                                            setTimeout(() => { _transC.style.transition = ''; _transC.style.opacity = ''; }, 170);
-                                        });
-                                    });
-                                } else {
-                                    _morphAnimPlayed = false;
-                                    renderFreeView();
-                                }
+                                // HW → SVG: renderFreeView() is synchronous — teardown and morphSvg
+                                // insertion happen in one JS task with no paint between them, so no
+                                // opacity trick is needed. The opacity:0 that was here previously
+                                // was itself the flash the user saw.
+                                _morphAnimPlayed = false;
+                                window._kanjiFromMorph = true; // suppress number fadeIn at morph end (showFinalSvgView)
+                                renderFreeView();
                             } else {
                                 // SVG → HW: reverse morph (Desktop) / fade (WKWebView)
                                 const _isWKRev = document.documentElement.classList.contains('is-ankimobile');
                                 const _revPairs = window._kanjiLastMorphPairs;
+                                // Snapshot the current render generation so tickR can abort if a
+                                // new renderFreeView() call starts mid-animation. _freeRenderGen is
+                                // accessible here (same outer scope), but myRenderGen is not (it's
+                                // local to renderFreeView()).
+                                const _revSnapGen = _freeRenderGen;
                                 if (!_isWKRev && _revPairs && _revPairs.length && _transC) {
                                     const FRAMES_R = 15, N_R = 16;
                                     const _scratchR = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1791,33 +2109,84 @@
                                             frames[f] = s;
                                         }
                                         const strokeColor = pair.color || 'var(--stroke-color, #23a0f0)';
-                                        // Gel: add halo that morphs in sync with main path
-                                        let haloR = null;
-                                        if (_ssRev === 'gel') {
-                                            haloR = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                            haloR.setAttribute('d', frames[0]);
-                                            haloR.setAttribute('stroke-width', '8');
-                                            haloR.setAttribute('stroke', strokeColor);
-                                            haloR.setAttribute('fill', 'none');
-                                            haloR.setAttribute('stroke-linecap', 'round');
-                                            haloR.setAttribute('stroke-linejoin', 'round');
-                                            haloR.setAttribute('class', 'gel-halo');
-                                            haloR.style.setProperty('opacity', '0.12', 'important');
-                                            revSvg.appendChild(haloR);
+                                        // Build path via makeStrokePath to inherit stroke-style attributes
+                                        // (neon filter, gel halo, ink opacity, stroke-width, linecap, etc.).
+                                        const el = makeStrokePath(frames[0], '4', strokeColor);
+                                        // appendStrokePath inserts halo before el then el itself into revSvg
+                                        appendStrokePath(revSvg, el);
+                                        // Resolve gel halo reference — it was inserted immediately before el
+                                        const haloR = el.previousElementSibling && el.previousElementSibling.classList.contains('gel-halo')
+                                            ? el.previousElementSibling : null;
+                                        animsR.push({ el, halo: haloR, frames, numLabel: pair.numLabel, numColor: pair.numColor });
+                                    }
+                                    // Build animated number labels for reverse morph with collision adjustment.
+                                    var _trueLabelPosR = function (d) {
+                                        var tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                        tmp.setAttribute('d', d);
+                                        _scratchR.appendChild(tmp);
+                                        var L = tmp.getTotalLength();
+                                        if (!L) { _scratchR.removeChild(tmp); return null; }
+                                        var s0 = tmp.getPointAtLength(0);
+                                        var s1; try { s1 = tmp.getPointAtLength(Math.min(4, L)); } catch(e) { s1 = s0; }
+                                        _scratchR.removeChild(tmp);
+                                        var dx = s1.x - s0.x, dy = s1.y - s0.y, dist = Math.sqrt(dx*dx+dy*dy)||1;
+                                        return { x: s0.x - dx/dist*4.5, y: s0.y - dy/dist*4.5 };
+                                    };
+                                    var _colAdjR = function (rawArr) {
+                                        var MD = 6.0, placed = [];
+                                        return rawArr.map(function (pos) {
+                                            if (!pos) { placed.push(null); return null; }
+                                            var fx = pos.x, fy = pos.y, moved = true, att = 0;
+                                            while (moved && att < 10) {
+                                                moved = false;
+                                                for (var ci = 0; ci < placed.length; ci++) {
+                                                    var cp = placed[ci]; if (!cp) continue;
+                                                    var dx = fx-cp.x, dy = fy-cp.y, dist = Math.sqrt(dx*dx+dy*dy);
+                                                    if (dist < MD) {
+                                                        moved = true; var pd = dist || 1.414;
+                                                        fx += (dist > 0 ? dx/pd : -0.707) * (MD - dist + 0.5);
+                                                        fy += (dist > 0 ? dy/pd : -0.707) * (MD - dist + 0.5);
+                                                    }
+                                                }
+                                                att++;
+                                            }
+                                            placed.push({ x: fx, y: fy });
+                                            return { x: fx, y: fy };
+                                        });
+                                    };
+                                    var numAnimsR = [];
+                                    var _isNumbersRev = safeGetItem('c1_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', (getGlobalConfig().numbers))) === 'on';
+                                    if (_isNumbersRev) {
+                                        // Start positions: all ref paths in order (matches SVG-Pfade addNumbersGPAL)
+                                        var _rawAllRefR = [];
+                                        var _evR = window._kanjiFreeEval;
+                                        var _nRefR = _evR ? _evR.nRef : 0;
+                                        var _refPDR = _evR ? _evR.refPathData : [];
+                                        for (var ri3 = 0; ri3 < _nRefR; ri3++) {
+                                            _rawAllRefR.push(_trueLabelPosR(_refPDR[ri3]));
                                         }
-                                        const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                        el.setAttribute('d', frames[0]);
-                                        el.setAttribute('stroke-width', _ssRev === 'gel' ? '4.5' : '4');
-                                        el.setAttribute('stroke', strokeColor);
-                                        el.setAttribute('fill', 'none');
-                                        el.setAttribute('stroke-linecap', _ssRev === 'ink' ? 'square' : 'round');
-                                        el.setAttribute('stroke-linejoin', 'round');
-                                        if (_ssRev === 'ink') el.style.opacity = '0.85';
-                                        revSvg.appendChild(el);
-                                        animsR.push({ el, halo: haloR, frames });
+                                        var _adjAllRefR = _colAdjR(_rawAllRefR);
+                                        // End positions: user paths in _revPairs order (matches HW addNumbersGPAL)
+                                        var _rawAllUserR = _revPairs.map(function (p) { return _trueLabelPosR(p.userD); });
+                                        var _adjAllUserR = _colAdjR(_rawAllUserR);
+                                        for (var pi3 = 0; pi3 < _revPairs.length; pi3++) {
+                                            var aR = animsR[pi3];
+                                            if (!aR || !aR.numLabel) continue;
+                                            var posRev = _adjAllRefR[_revPairs[pi3].refIdx];
+                                            var posHW  = _adjAllUserR[pi3];
+                                            if (!posRev || !posHW) continue;
+                                            var ntR = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                            ntR.setAttribute('class', 'stroke-number');
+                                            ntR.style.cssText = 'fill:'+(aR.numColor||'var(--text-muted)')+';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                            ntR.textContent = aR.numLabel;
+                                            ntR.setAttribute('x', posRev.x.toFixed(2)); ntR.setAttribute('y', posRev.y.toFixed(2));
+                                            revSvg.appendChild(ntR);
+                                            numAnimsR.push({ el: ntR, posR: posRev, posU: posHW });
+                                        }
                                     }
                                     if (!animsR.length) {
                                         if (_scratchR.parentNode) _scratchR.parentNode.removeChild(_scratchR);
+                                        window._kanjiFromMorph = true;
                                         renderFreeView();
                                     } else {
                                         // Remove svg-bg gel halos BEFORE show-handwriting: they have inline
@@ -1825,12 +2194,22 @@
                                         // so they'd stay visible (static at refD) during the whole animation.
                                         var _svgBgRev = document.getElementById('svg-bg');
                                         if (_svgBgRev) _svgBgRev.querySelectorAll('.gel-halo').forEach(function (h) { h.parentNode.removeChild(h); });
+                                        // Strip neon/gel filters from svg-bg paths before animation.
+                                        // CSS opacity:0 hides the paths visually but SVG filters still run on GPU.
+                                        // Two competing sets of neon-filtered paths (svg-bg + revSvg) cause a
+                                        // "glow refresh" flash. Stripping svg-bg filters eliminates the conflict.
+                                        // renderFreeView() → applyBackFeatures() restores correct filters after.
+                                        if (_svgBgRev) _svgBgRev.querySelectorAll('path:not(.gel-halo)').forEach(function (p) {
+                                            p.removeAttribute('filter');
+                                            p.style.removeProperty('filter');
+                                            p.style.removeProperty('-webkit-filter');
+                                        });
                                         // Hide ref paths via show-handwriting, overlay our reverse morph SVG
                                         _transC.classList.add('show-handwriting');
                                         _transC.appendChild(revSvg);
                                         let t0R = performance.now();
                                         const tickR = function (now) {
-                                            if (_freeRenderGen !== myRenderGen) {
+                                            if (_freeRenderGen !== _revSnapGen) {
                                                 if (_scratchR.parentNode) _scratchR.parentNode.removeChild(_scratchR);
                                                 revSvg.remove();
                                                 return;
@@ -1841,16 +2220,36 @@
                                                 a.el.setAttribute('d', a.frames[fi]);
                                                 if (a.halo) a.halo.setAttribute('d', a.frames[fi]);
                                             }
+                                            var _easeR = 0.5 - 0.5 * Math.cos(Math.min(progress, 1) * Math.PI);
+                                            for (var ni = 0; ni < numAnimsR.length; ni++) {
+                                                var naR = numAnimsR[ni];
+                                                var nxR = naR.posR.x + (naR.posU.x - naR.posR.x) * _easeR;
+                                                var nyR = naR.posR.y + (naR.posU.y - naR.posR.y) * _easeR;
+                                                naR.el.setAttribute('x', nxR.toFixed(2)); naR.el.setAttribute('y', nyR.toFixed(2));
+                                            }
                                             if (progress < 1) {
                                                 requestAnimationFrame(tickR);
                                             } else {
-                                                // Cross-dissolve: temporarily remove .handwriting-overlay class so
-                                                // renderFreeView()'s teardown doesn't delete revSvg while it's still
-                                                // fading. Keep z-index inline so it stays on top during the fade.
-                                                _transC.classList.remove('show-handwriting');
+                                                // Hide morph numbers — polyline positions differ from final view positions
+                                                for (var ni = 0; ni < numAnimsR.length; ni++) { numAnimsR[ni].el.style.opacity = '0'; }
+                                                // Cross-dissolve: protect revSvg from teardown by removing
+                                                // .handwriting-overlay BEFORE renderFreeView(), but do NOT
+                                                // remove show-handwriting — renderFreeView() teardown handles
+                                                // it internally (remove + re-add in the same sync task, no paint).
+                                                // Removing it here caused a 1-frame flash of the SVG-Pfade view.
                                                 if (_scratchR.parentNode) _scratchR.parentNode.removeChild(_scratchR);
                                                 revSvg.style.zIndex = '5'; // preserve stacking after class removal
                                                 revSvg.classList.remove('handwriting-overlay'); // hide from teardown
+                                                // Strip filters from revSvg before renderFreeView() creates the new HW
+                                                // overlay with its own neon-filtered paths. Two concurrent neon-filter
+                                                // SVGs force a GPU re-rasterization that produces a visible glow pulse.
+                                                // revSvg is just fading out (80ms) — it doesn't need the glow.
+                                                revSvg.querySelectorAll('path').forEach(function (p) {
+                                                    p.removeAttribute('filter');
+                                                    p.style.removeProperty('filter');
+                                                    p.style.removeProperty('-webkit-filter');
+                                                });
+                                                window._kanjiFromMorph = true;
                                                 renderFreeView(); // builds HW view beneath the overlay
                                                 revSvg.style.transition = 'opacity 80ms linear';
                                                 revSvg.style.opacity = '0';
@@ -1881,11 +2280,49 @@
                                             _qtScratch.removeChild(tmp);
                                             return pts;
                                         };
+                                        // True bezier label position + collision adjustment.
+                                        const _qtTrueLP = function (d) {
+                                            const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                            tmp.setAttribute('d', d); _qtScratch.appendChild(tmp);
+                                            const tL = tmp.getTotalLength();
+                                            if (!tL) { _qtScratch.removeChild(tmp); return null; }
+                                            const ts0 = tmp.getPointAtLength(0);
+                                            let ts1; try { ts1 = tmp.getPointAtLength(Math.min(4, tL)); } catch(e) { ts1 = ts0; }
+                                            _qtScratch.removeChild(tmp);
+                                            const tdx = ts1.x - ts0.x, tdy = ts1.y - ts0.y, td = Math.sqrt(tdx*tdx + tdy*tdy) || 1;
+                                            return { x: ts0.x - tdx/td*4.5, y: ts0.y - tdy/td*4.5 };
+                                        };
+                                        const _qtColAdj = function (rawArr) {
+                                            var MD=6.0, placed=[];
+                                            return rawArr.map(function(pos) {
+                                                if (!pos) { placed.push(null); return null; }
+                                                var fx=pos.x, fy=pos.y, moved=true, att=0;
+                                                while (moved && att<10) {
+                                                    moved=false;
+                                                    for (var ci=0;ci<placed.length;ci++) {
+                                                        var cp=placed[ci]; if (!cp) continue;
+                                                        var dx=fx-cp.x, dy=fy-cp.y, dist=Math.sqrt(dx*dx+dy*dy);
+                                                        if (dist<MD) { moved=true; var pd=dist||1.414;
+                                                            fx+=(dist>0?dx/pd:-0.707)*(MD-dist+0.5);
+                                                            fy+=(dist>0?dy/pd:-0.707)*(MD-dist+0.5); }
+                                                    } att++;
+                                                }
+                                                placed.push({x:fx,y:fy}); return {x:fx,y:fy};
+                                            });
+                                        };
+                                        // Pre-compute collision-adjusted positions for all pairs before the loop
+                                        const _qtRawRef = [];
+                                        const _qtEvR = window._kanjiFreeEval;
+                                        const _qtNRef = _qtEvR ? _qtEvR.nRef : 0;
+                                        const _qtRefPD = _qtEvR ? _qtEvR.refPathData : [];
+                                        for (let ri5=0; ri5<_qtNRef; ri5++) _qtRawRef.push(_qtTrueLP(_qtRefPD[ri5]));
+                                        const _qtAdjRef = _qtColAdj(_qtRawRef);
+                                        const _qtAdjUser = _qtColAdj(_qtRevPairs.map(function(p){ return _qtTrueLP(p.userD); }));
                                         const revSvgWK = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                                         revSvgWK.setAttribute('viewBox', '0 0 109 109');
                                         revSvgWK.classList.add('handwriting-overlay');
-                                        const _ssRevWK = window._kanjiStrokeStyle || 'standard';
                                         let _qtLastAnim = null;
+                                        var _isNumbersRevWK = safeGetItem('c1_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', (getGlobalConfig().numbers))) === 'on';
                                         for (const pair of _qtRevPairs) {
                                             const u = _qtResamplePts(pair.userD);
                                             const r = _qtResamplePts(pair.refD);
@@ -1898,17 +2335,21 @@
                                             const strokeColor = pair.color || 'var(--stroke-color,#23a0f0)';
                                             let fromD = 'M', toD = 'M';
                                             for (let k = 0; k < QT_N; k++) { if (k) { fromD += 'L'; toD += 'L'; } fromD += r[k * 2].toFixed(1) + ' ' + r[k * 2 + 1].toFixed(1); toD += u[k * 2].toFixed(1) + ' ' + u[k * 2 + 1].toFixed(1); }
-                                            // Gel: halo with SMIL too
-                                            if (_ssRevWK === 'gel') {
-                                                const haloWK = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                                haloWK.setAttribute('d', fromD);
-                                                haloWK.setAttribute('stroke-width', '8');
-                                                haloWK.setAttribute('stroke', strokeColor);
-                                                haloWK.setAttribute('fill', 'none');
-                                                haloWK.setAttribute('stroke-linecap', 'round');
-                                                haloWK.setAttribute('stroke-linejoin', 'round');
-                                                haloWK.setAttribute('class', 'gel-halo');
-                                                haloWK.style.setProperty('opacity', '0.12', 'important');
+
+                                            // Build path via makeStrokePath to get neon/gel/ink effects.
+                                            // Neon filter on WK per-SMIL-frame is expensive, so strip it
+                                            // (same policy as forward morph on WK). Gel halo gets SMIL too.
+                                            const el = makeStrokePath(fromD, '4', strokeColor);
+                                            el.removeAttribute('filter'); // strip neon — GPU stall on WK per-frame
+                                            el.style.removeProperty('filter');
+                                            el.style.removeProperty('-webkit-filter');
+                                            appendStrokePath(revSvgWK, el);
+                                            // Gel halo reference
+                                            const haloWK = el.previousElementSibling && el.previousElementSibling.classList.contains('gel-halo')
+                                                ? el.previousElementSibling : null;
+
+                                            // Add SMIL <animate> for halo
+                                            if (haloWK) {
                                                 const hAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
                                                 hAnim.setAttribute('attributeName', 'd');
                                                 hAnim.setAttribute('from', fromD);
@@ -1920,17 +2361,8 @@
                                                 hAnim.setAttribute('keySplines', '0.42 0 0.58 1');
                                                 hAnim.setAttribute('begin', 'indefinite');
                                                 haloWK.appendChild(hAnim);
-                                                revSvgWK.appendChild(haloWK);
                                                 hAnim.beginElement();
                                             }
-                                            const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                            el.setAttribute('d', fromD);
-                                            el.setAttribute('stroke-width', _ssRevWK === 'gel' ? '4.5' : '4');
-                                            el.setAttribute('stroke', strokeColor);
-                                            el.setAttribute('fill', 'none');
-                                            el.setAttribute('stroke-linecap', _ssRevWK === 'ink' ? 'square' : 'round');
-                                            el.setAttribute('stroke-linejoin', 'round');
-                                            if (_ssRevWK === 'ink') el.style.opacity = '0.85';
                                             const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
                                             anim.setAttribute('attributeName', 'd');
                                             anim.setAttribute('from', fromD);
@@ -1942,9 +2374,31 @@
                                             anim.setAttribute('keySplines', '0.42 0 0.58 1');
                                             anim.setAttribute('begin', 'indefinite');
                                             el.appendChild(anim);
-                                            revSvgWK.appendChild(el);
                                             anim.beginElement();
                                             _qtLastAnim = anim;
+                                            // Animate number label for this pair (SMIL x/y on text element)
+                                            if (_isNumbersRevWK && pair.numLabel) {
+                                                var lpFrom = _qtAdjRef[pair.refIdx]; // start = collision-adjusted SVG-Pfade position
+                                                var lpTo   = _qtAdjUser[_qtRevPairs.indexOf(pair)]; // end = collision-adjusted HW position
+                                                if (lpFrom && lpTo) {
+                                                    var ntQ = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                                    ntQ.setAttribute('class', 'stroke-number');
+                                                    ntQ.setAttribute('x', lpFrom.x.toFixed(2)); ntQ.setAttribute('y', lpFrom.y.toFixed(2));
+                                                    ntQ.style.cssText = 'fill:'+(pair.numColor||'var(--text-muted)')+';stroke:var(--surface);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill;animation:none;opacity:1';
+                                                    ntQ.textContent = pair.numLabel;
+                                                    [['x',lpFrom.x,lpTo.x],['y',lpFrom.y,lpTo.y]].forEach(function(cfg) {
+                                                        var qa = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                                                        qa.setAttribute('attributeName', cfg[0]);
+                                                        qa.setAttribute('from', cfg[1].toFixed(2)); qa.setAttribute('to', cfg[2].toFixed(2));
+                                                        qa.setAttribute('dur', QT_DUR+'s'); qa.setAttribute('fill','freeze');
+                                                        qa.setAttribute('calcMode','spline'); qa.setAttribute('keyTimes','0;1');
+                                                        qa.setAttribute('keySplines','0.42 0 0.58 1');
+                                                        qa.setAttribute('begin','indefinite');
+                                                        ntQ.appendChild(qa); qa.beginElement();
+                                                    });
+                                                    revSvgWK.appendChild(ntQ);
+                                                }
+                                            }
                                         }
                                         if (_qtScratch.parentNode) _qtScratch.parentNode.removeChild(_qtScratch);
                                         // Remove svg-bg gel halos before show-handwriting (inline !important beats CSS)
@@ -1953,9 +2407,18 @@
                                         _transC.classList.add('show-handwriting');
                                         _transC.appendChild(revSvgWK);
                                         const _qtDone = function () {
-                                            _transC.classList.remove('show-handwriting');
+                                            // Same fix as desktop: do NOT remove show-handwriting here.
+                                            // renderFreeView() handles it internally without a paint gap.
                                             revSvgWK.style.zIndex = '5';
                                             revSvgWK.classList.remove('handwriting-overlay'); // hide from renderFreeView teardown
+                                            // Strip filters before renderFreeView — same reason as desktop:
+                                            // concurrent neon-filtered SVGs cause a GPU-induced glow pulse.
+                                            revSvgWK.querySelectorAll('path').forEach(function (p) {
+                                                p.removeAttribute('filter');
+                                                p.style.removeProperty('filter');
+                                                p.style.removeProperty('-webkit-filter');
+                                            });
+                                            window._kanjiFromMorph = true;
                                             renderFreeView();
                                             revSvgWK.style.transition = 'opacity 80ms linear';
                                             revSvgWK.style.opacity = '0';
@@ -1965,6 +2428,7 @@
                                             _qtLastAnim.addEventListener('endEvent', _qtDone);
                                             setTimeout(_qtDone, (QT_DUR + 0.15) * 1000);
                                         } else {
+                                            window._kanjiFromMorph = true;
                                             renderFreeView();
                                         }
                                     } else if (_transC) {
@@ -1973,6 +2437,7 @@
                                         _transC.style.opacity = '0';
                                         setTimeout(() => {
                                             _transC.style.transition = '';
+                                            window._kanjiFromMorph = true;
                                             renderFreeView();
                                             requestAnimationFrame(() => requestAnimationFrame(() => {
                                                 _transC.style.transition = 'opacity 220ms ease-in';
@@ -1981,6 +2446,7 @@
                                             }));
                                         }, 190);
                                     } else {
+                                        window._kanjiFromMorph = true;
                                         renderFreeView();
                                     }
                                 }

@@ -122,8 +122,8 @@
     --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
 
     /* GPU-composited shadow filters (transition-safe on WKWebView) */
-    --filter-soft: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.04)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.02));
-    --filter-hover: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.08));
+    --filter-soft: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+    --filter-hover: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
 
     /* Layout Limits */
     --dynamic-size: min(90vw, 65vh, 550px);
@@ -211,8 +211,8 @@ html.is-ankiweb .info-modal {
     --tab-color-c1: #6abe4e;
     --tab-color-c2: #4ec4b8;
     --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.4);
-    --filter-soft: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
-    --filter-hover: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.4));
+    --filter-soft: 0 2px 6px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+    --filter-hover: 0 4px 16px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* --------------------------------------------------------------------------
@@ -548,8 +548,8 @@ svg#svg-guide path,
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     cursor: pointer;
-    filter: var(--filter-soft);
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--filter-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -596,7 +596,7 @@ svg#svg-guide path,
         background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 }
@@ -616,8 +616,8 @@ svg#svg-guide path,
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: var(--filter-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    box-shadow: var(--filter-soft);
     -webkit-tap-highlight-color: transparent;
     -webkit-appearance: none;
     appearance: none;
@@ -629,7 +629,7 @@ svg#svg-guide path,
         background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 
@@ -644,7 +644,7 @@ svg#svg-guide path,
     background: var(--surface) !important;
     color: var(--text-faint) !important;
     border-color: var(--border-color) !important;
-    filter: var(--filter-soft) !important;
+    box-shadow: var(--filter-soft) !important;
     transform: translateZ(0) !important;
     transition: none !important;
 }
@@ -819,7 +819,7 @@ svg#svg-guide path,
     .visual-option:hover {
         border-color: var(--active-tab-color, var(--accent));
         background: var(--surface);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
     }
 
     .visual-option:hover svg {
@@ -875,7 +875,7 @@ svg#svg-guide path,
 .visual-options-grid label input[type="radio"]:checked+.visual-option {
     border-color: var(--active-tab-color, var(--accent));
     background: var(--surface);
-    filter: var(--filter-soft);
+    box-shadow: var(--filter-soft);
 }
 
 .visual-options-grid label input[type="radio"]:checked+.visual-option svg {
@@ -1171,14 +1171,14 @@ svg#svg-guide path,
 .accent-options-grid label input[type="radio"]:checked+.accent-option {
     border-color: var(--active-tab-color, var(--accent));
     background: var(--surface);
-    filter: var(--filter-soft);
+    box-shadow: var(--filter-soft);
 }
 
 @media (hover: hover) {
     .accent-option:hover {
         border-color: var(--active-tab-color, var(--accent));
         background: var(--surface);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
     }
 }
 
@@ -1528,23 +1528,23 @@ svg#svg-guide path,
     border-radius: var(--border-rad-sm);
     padding: 12px 16px 12px 12px;
     text-align: left;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
-    filter: var(--filter-soft);
+    box-shadow: var(--filter-soft);
     position: relative;
     -webkit-tap-highlight-color: transparent;
 }
 
 .word-example-item.show-furigana {
     border-color: var(--accent);
-    filter: var(--filter-hover);
+    box-shadow: var(--filter-hover);
     transform: translateY(-1px);
 }
 
 @media (hover: hover) {
     .word-example-item:hover {
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px);
     }
 }
@@ -1594,7 +1594,7 @@ ruby rt {
 /* Overrides sticky :hover on touch devices when explicitly dismissed */
 .word-example-item.furigana-dismissed {
     border-color: var(--border-color) !important;
-    filter: var(--filter-soft) !important;
+    box-shadow: var(--filter-soft) !important;
     transform: none !important;
 }
 
@@ -1664,8 +1664,8 @@ ruby rt {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    filter: var(--filter-soft);
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--filter-soft);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     width: var(--dynamic-size);
     -webkit-tap-highlight-color: transparent;
     -webkit-appearance: none;
@@ -1684,14 +1684,14 @@ ruby rt {
         background: var(--surface);
         color: var(--accent);
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px) translateZ(0);
     }
 }
 
 .info-btn:active {
     transform: scale(0.98) translateZ(0);
-    filter: var(--filter-soft);
+    box-shadow: var(--filter-soft);
 }
 
 .info-btn svg {
@@ -1732,7 +1732,7 @@ ruby rt {
         background: var(--bg-main);
         color: var(--accent);
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px);
     }
 }
@@ -1741,7 +1741,7 @@ ruby rt {
     background: var(--accent-bg);
     color: var(--accent);
     border-color: var(--accent);
-    filter: var(--filter-hover);
+    box-shadow: var(--filter-hover);
     transform: scale(0.97);
 }
 
@@ -1799,16 +1799,16 @@ ruby rt {
     width: 54px;
     height: 54px;
     box-sizing: border-box;
-    filter: var(--filter-soft);
+    box-shadow: var(--filter-soft);
     position: relative;
     cursor: pointer;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     -webkit-tap-highlight-color: transparent;
 }
 
 .tree-node.show-tooltip {
     border-color: var(--accent);
-    filter: var(--filter-hover);
+    box-shadow: var(--filter-hover);
     transform: translateY(-1px);
 }
 
@@ -1874,7 +1874,7 @@ ruby rt {
 /* Overrides sticky :hover on touch devices when explicitly dismissed */
 .tree-node.tooltip-dismissed {
     border-color: var(--border-color) !important;
-    filter: var(--filter-soft) !important;
+    box-shadow: var(--filter-soft) !important;
     transform: none !important;
 }
 
@@ -1886,7 +1886,7 @@ ruby rt {
 @media (hover: hover) {
     .tree-node:hover {
         border-color: var(--accent);
-        filter: var(--filter-hover);
+        box-shadow: var(--filter-hover);
         transform: translateY(-1px);
     }
 
@@ -2147,6 +2147,38 @@ ruby rt {
 .missing-strokes-badge.strokes-hidden {
     background: var(--text-muted, #888) !important;
     text-decoration: line-through;
+}
+
+/* SBS badge row — badges placed below the SBS wrapper, after both drawing pads */
+.sbs-badge-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 0 2px;
+}
+
+.sbs-badge-row .excess-strokes-badge,
+.sbs-badge-row .missing-strokes-badge {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+}
+
+/* Static stroke-number holder during morph — same absolute layout as .handwriting-overlay
+   but higher z-index (above morphSvg) so numbers stay visible throughout the animation. */
+.stroke-number-morph-snap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8;
+    pointer-events: none;
+    background: transparent;
 }
 
 /* Quicksettings: Handschrift ↔ SVG-Pfade toggle (session-only, no persistence) */
