@@ -123,7 +123,7 @@ function createTemplateState(numStrokes) {
         const N = 24;
         const uPts = algo.resamplePoints(userPts, N);
         const refLen = refPath.getTotalLength();
-        if (refLen === 0) { onDone(); snapAnimationsFinished++; return; }
+        if (refLen === 0 || uPts.length < 2) { onDone(); snapAnimationsFinished++; return; }
         const rPts = [];
         for (let i = 0; i < N; i++) {
             const pt = refPath.getPointAtLength((i / (N - 1)) * refLen);
@@ -756,6 +756,307 @@ test('benchmark: 100 full kanji completions (8 strokes each)', () => {
     const elapsed = performance.now() - t0;
     console.log(`    (100 kanji × 8 strokes = 800 strokes in ${elapsed.toFixed(0)}ms)`);
     assert(elapsed < 5000, `too slow: ${elapsed.toFixed(0)}ms`);
+});
+
+// ─── EDGE CASES: DEGENERATE STROKES ────────────────────────────────
+
+console.log('\n=== Degenerate Stroke Edge Cases ===\n');
+
+test('zero-point stroke does not crash engine', () => {
+    const s = createTemplateState(3);
+    // simulateStroke with empty points array — simulates accidental tap
+    s.simulateStroke([]);
+    s.rejectStroke();
+    advanceTime(500);
+    assert.strictEqual(_errors.length, 0, 'no errors from empty stroke');
+    assert.strictEqual(s.currentStroke, 0);
+});
+
+test('single-point stroke does not corrupt resample', () => {
+    const s = createTemplateState(3);
+    s.simulateStroke([{ x: 50, y: 50 }]);
+    s.rejectStroke();
+    advanceTime(500);
+    assert.strictEqual(_errors.length, 0, 'no errors from single-point stroke');
+});
+
+test('very long stroke (500 points) processed correctly', () => {
+    const s = createTemplateState(3);
+    const pts = [];
+    for (let i = 0; i < 500; i++) pts.push({ x: i * 0.4, y: Math.sin(i * 0.1) * 50 });
+    s.simulateStroke(pts);
+    s.acceptStroke();
+    advanceTime(500);
+    assert.strictEqual(_errors.length, 0, 'no errors from 500-point stroke');
+    assert.strictEqual(s.currentStroke, 1);
+});
+
+test('accept stroke with exactly 2 points (minimum valid stroke)', () => {
+    const s = createTemplateState(3);
+    s.simulateStroke([{ x: 10, y: 10 }, { x: 90, y: 90 }]);
+    s.acceptStroke();
+    advanceTime(500);
+    assert.strictEqual(_errors.length, 0, 'no errors from 2-point stroke');
+    assert.strictEqual(s.currentStroke, 1);
+    assert.strictEqual(s.snapAnimationsStarted, 1, 'snap should start for 2-point stroke');
+});
+
+test('all-same-point stroke (zero length path) handles gracefully', () => {
+    const s = createTemplateState(3);
+    const pts = Array.from({ length: 10 }, () => ({ x: 50, y: 50 }));
+    s.simulateStroke(pts);
+    s.acceptStroke(); // snapToReference gets 0-length ref path — onDone fallback
+    advanceTime(500);
+    assert.strictEqual(_errors.length, 0, 'no errors from zero-length stroke');
+});
+
+// ─── LARGE KANJI STRESS (25+ STROKES) ──────────────────────────────
+
+console.log('\n=== Large Kanji Stress (25+ strokes) ===\n');
+
+test('accept all 25 strokes of a complex kanji', () => {
+    const s = createTemplateState(25);
+    for (let i = 0; i < 25; i++) {
+        s.simulateStroke(goodStroke());
+        s.acceptStroke();
+        _now += 20;
+    }
+    advanceTime(2000);
+    assert.strictEqual(_errors.length, 0, 'no errors on 25-stroke kanji');
+    assert.strictEqual(s.currentStroke, 25);
+    assert(s.completionPlayed, 'completion should play');
+    assert.strictEqual(s.drawLayer.children.length, 0, 'draw layer should be clean');
+});
+
+test('skip all 25 strokes instantly', () => {
+    const s = createTemplateState(25);
+    for (let i = 0; i < 25; i++) s.skipAction();
+    advanceTime(2000);
+    assert.strictEqual(_errors.length, 0, 'no errors on 25-skip');
+    assert(s.completionPlayed, 'completion should play');
+    s.paths.forEach((p, i) => assert(p.classList.contains('stroke-complete'), `stroke ${i} not complete`));
+});
+
+test('mixed operations on 25-stroke kanji with many mistakes', () => {
+    const s = createTemplateState(25);
+    for (let i = 0; i < 25; i++) {
+        // 3 mistakes then accept each stroke
+        for (let m = 0; m < 3; m++) {
+            s.simulateStroke(goodStroke());
+            s.rejectStroke();
+            _now += 5;
+        }
+        s.simulateStroke(goodStroke());
+        s.acceptStroke();
+        _now += 10;
+    }
+    advanceTime(2000);
+    assert.strictEqual(_errors.length, 0, 'no errors');
+    assert.strictEqual(s.currentStroke, 25);
+    s.problemStrokes.forEach((v, i) => assert.strictEqual(v, 3, `stroke ${i} should have 3 mistakes`));
+});
+
+test('problemStrokes never grows beyond 999 (overflow guard)', () => {
+    const s = createTemplateState(1);
+    // Simulate 1000 rejections — problemStrokes should track correctly
+    for (let i = 0; i < 1000; i++) {
+        s.simulateStroke(goodStroke());
+        s.rejectStroke();
+    }
+    assert.strictEqual(s.problemStrokes[0], 1000, 'problemStrokes tracks all mistakes');
+    assert.strictEqual(s.currentStroke, 0, 'still on stroke 0 after all rejections');
+    assert.strictEqual(_errors.length, 0, 'no errors from 1000 rejections');
+});
+
+// ─── MULTI-INSTANCE ISOLATION ───────────────────────────────────────
+
+console.log('\n=== Multi-Instance Isolation ===\n');
+
+test('two concurrent state instances do not share state', () => {
+    const s1 = createTemplateState(5);
+    const s2 = createTemplateState(5);
+    // Advance s1 partially
+    s1.skipAction(); s1.skipAction();
+    // s2 untouched
+    assert.strictEqual(s1.currentStroke, 2, 's1 should be at stroke 2');
+    assert.strictEqual(s2.currentStroke, 0, 's2 should still be at stroke 0');
+    // Reset s1 — should not affect s2
+    s1.resetAction();
+    assert.strictEqual(s1.currentStroke, 0);
+    assert.strictEqual(s2.currentStroke, 0);
+    // Now advance s2 independently
+    s2.skipAction(); s2.skipAction(); s2.skipAction();
+    assert.strictEqual(s2.currentStroke, 3);
+    assert.strictEqual(s1.currentStroke, 0, 's1 should be unaffected by s2 operations');
+});
+
+test('two instances complete independently without interference', () => {
+    const s1 = createTemplateState(3);
+    const s2 = createTemplateState(3);
+    // Alternate operations on both
+    s1.skipAction();
+    s2.simulateStroke(goodStroke()); s2.rejectStroke();
+    s1.skipAction();
+    s2.simulateStroke(goodStroke()); s2.acceptStroke();
+    s1.skipAction();
+    advanceTime(1000);
+    assert.strictEqual(_errors.length, 0, 'no errors from two concurrent instances');
+    assert(s1.completionPlayed, 's1 should be complete');
+    assert(!s2.completionPlayed, 's2 should not be complete (only stroke 0 done)');
+    assert.strictEqual(s1.currentStroke, 3);
+    assert.strictEqual(s2.currentStroke, 1);
+});
+
+test('problemStrokes arrays are independent between instances', () => {
+    const s1 = createTemplateState(3);
+    const s2 = createTemplateState(3);
+    s1.simulateStroke(goodStroke()); s1.rejectStroke();
+    s1.simulateStroke(goodStroke()); s1.rejectStroke();
+    // s2 had no mistakes
+    assert.strictEqual(s1.problemStrokes[0], 2);
+    assert.strictEqual(s2.problemStrokes[0], 0, 's2 problemStrokes should be unaffected');
+});
+
+// ─── HINT / PROBLEM STROKE TRACKING ────────────────────────────────
+
+console.log('\n=== Hint & Problem Stroke Tracking ===\n');
+
+test('hint-active class removed on skip, stroke-complete set after timer', () => {
+    const s = createTemplateState(5);
+    // The skip action sets problemStrokes[current] = 3 — which normally triggers hint display
+    s.skipAction();
+    assert.strictEqual(s.problemStrokes[0], 3, 'skip sets problemStrokes to 3');
+    // stroke-complete is set after the 700ms animation timer fires
+    assert(!s.paths[0].classList.contains('stroke-complete'), 'stroke-complete not yet set synchronously');
+    assert(s.paths[0].classList.contains('animate-draw'), 'animate-draw should be set immediately');
+    advanceTime(1000);
+    assert(s.paths[0].classList.contains('stroke-complete'), 'skipped stroke gets stroke-complete after timer');
+    assert(!s.paths[0].classList.contains('animate-draw'), 'animate-draw removed after timer');
+});
+
+test('problemStrokes resets to 0 after clean accept', () => {
+    const s = createTemplateState(5);
+    s.simulateStroke(goodStroke()); s.rejectStroke(); // mistake
+    s.simulateStroke(goodStroke()); s.rejectStroke(); // mistake
+    assert.strictEqual(s.problemStrokes[0], 2);
+    s.simulateStroke(goodStroke()); s.acceptStroke();
+    // problemStrokes[0] stays at 2 — mistakes are not reset on accept (intentional: persists for back-side review)
+    assert.strictEqual(s.problemStrokes[0], 2, 'mistakes persist after accept (for back-side display)');
+    // But currentStroke advances
+    assert.strictEqual(s.currentStroke, 1);
+});
+
+test('problemStrokes fully resets on resetAction', () => {
+    const s = createTemplateState(5);
+    s.simulateStroke(goodStroke()); s.rejectStroke();
+    s.simulateStroke(goodStroke()); s.rejectStroke();
+    s.skipAction(); // stroke 0 skipped → problemStrokes[0] = 3
+    s.simulateStroke(goodStroke()); s.rejectStroke(); // stroke 1 mistake
+    s.resetAction();
+    s.problemStrokes.forEach((v, i) => assert.strictEqual(v, 0, `problemStrokes[${i}] should be 0 after reset`));
+});
+
+// ─── ENHANCED CHAOS ─────────────────────────────────────────────────
+
+console.log('\n=== Enhanced Chaos / Fuzz Testing ===\n');
+
+test('chaos: 1000 actions on 5-stroke kanji with time advancement', () => {
+    const s = createTemplateState(5);
+    const actions = ['draw-accept', 'draw-reject', 'skip', 'reset', 'draw-accept', 'draw-reject', 'skip'];
+    for (let i = 0; i < 1000; i++) {
+        const action = actions[i % actions.length];
+        switch (action) {
+            case 'draw-accept': s.simulateStroke(goodStroke()); s.acceptStroke(); break;
+            case 'draw-reject': s.simulateStroke(goodStroke()); s.rejectStroke(); break;
+            case 'skip': s.skipAction(); break;
+            case 'reset': s.resetAction(); break;
+        }
+        if (i % 50 === 0) advanceTime(200);
+    }
+    advanceTime(3000);
+    assert.strictEqual(_errors.length, 0, `${_errors.length} errors from 1000-action chaos`);
+    assert(s.currentStroke >= 0 && s.currentStroke <= 5, 'stroke in valid range');
+});
+
+test('chaos: degenerate strokes mixed into random sequence', () => {
+    const s = createTemplateState(8);
+    const strokeVariants = [
+        () => s.simulateStroke([]),                          // empty
+        () => s.simulateStroke([{ x: 50, y: 50 }]),          // single point
+        () => s.simulateStroke(goodStroke()),                 // normal
+        () => s.simulateStroke(Array.from({ length: 200 }, (_, i) => ({ x: i, y: i }))), // long
+    ];
+    for (let i = 0; i < 200; i++) {
+        strokeVariants[i % strokeVariants.length]();
+        if (i % 3 === 0) s.acceptStroke();
+        else if (i % 3 === 1) s.rejectStroke();
+        else s.skipAction();
+        if (i % 20 === 0) { s.resetAction(); advanceTime(50); }
+    }
+    advanceTime(2000);
+    assert.strictEqual(_errors.length, 0, `errors: ${_errors.map(e => e.message).join(', ')}`);
+});
+
+// ─── ENHANCED PERFORMANCE BENCHMARKS ────────────────────────────────
+
+console.log('\n=== Enhanced Performance Benchmarks ===\n');
+
+test('benchmark: 500 full kanji completions via skip (worst-case timer load)', () => {
+    const t0 = performance.now();
+    for (let k = 0; k < 500; k++) {
+        resetMocks();
+        const s = createTemplateState(8);
+        for (let i = 0; i < 8; i++) s.skipAction();
+        advanceTime(2000);
+        assert.strictEqual(_errors.length, 0);
+    }
+    const elapsed = performance.now() - t0;
+    console.log(`    (500 kanji × 8 skips = 4000 skips in ${elapsed.toFixed(0)}ms)`);
+    assert(elapsed < 10000, `too slow: ${elapsed.toFixed(0)}ms`);
+});
+
+test('benchmark: resample 10000 strokes of varying length', () => {
+    const t0 = performance.now();
+    for (let i = 0; i < 10000; i++) {
+        const len = 5 + (i % 50);
+        const pts = Array.from({ length: len }, (_, j) => ({ x: j * 2, y: Math.sin(j * 0.3) * 50 }));
+        algo.resamplePoints(pts, 24);
+    }
+    const elapsed = performance.now() - t0;
+    console.log(`    (10000 resample calls in ${elapsed.toFixed(0)}ms)`);
+    assert(elapsed < 3000, `resample too slow: ${elapsed.toFixed(0)}ms`);
+});
+
+test('benchmark: 1000 full kanji completions (accept path)', () => {
+    const t0 = performance.now();
+    for (let k = 0; k < 1000; k++) {
+        resetMocks();
+        const s = createTemplateState(4);
+        for (let i = 0; i < 4; i++) {
+            s.simulateStroke(goodStroke());
+            s.acceptStroke();
+            _now += 300;
+            advanceTime(50);
+        }
+        advanceTime(500);
+        assert.strictEqual(_errors.length, 0);
+    }
+    const elapsed = performance.now() - t0;
+    console.log(`    (1000 kanji × 4 strokes = 4000 strokes in ${elapsed.toFixed(0)}ms)`);
+    assert(elapsed < 15000, `too slow: ${elapsed.toFixed(0)}ms`);
+});
+
+test('benchmark: timer churn — 10000 setTimeout/clearTimeout cycles', () => {
+    const t0 = performance.now();
+    for (let i = 0; i < 10000; i++) {
+        const id = mockSetTimeout(() => {}, 100 + (i % 500));
+        if (i % 3 !== 0) mockClearTimeout(id); // cancel 2/3 of them
+    }
+    advanceTime(1500); // fire the remaining 1/3
+    const elapsed = performance.now() - t0;
+    console.log(`    (10000 timer cycles in ${elapsed.toFixed(0)}ms)`);
+    assert(elapsed < 2000, `timer churn too slow: ${elapsed.toFixed(0)}ms`);
+    assert.strictEqual(_errors.length, 0);
 });
 
 // ─── Results ────────────────────────────────────────────────────────

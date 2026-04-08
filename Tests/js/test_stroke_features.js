@@ -176,9 +176,9 @@ test('Card-1 applies style with colorOverride on correction strokes', () => {
   assert(c1f.includes('applyPathStyle(currentSVGPath, colorVar)'), 'Correction should pass color to applyPathStyle');
 });
 
-test('Card-1 has ink multi-segment brush via _inkGroup', () => {
-  assert(c1f.includes('_inkGroup'), 'Missing _inkGroup variable for multi-segment ink');
-  assert(c1f.includes('_inkGroup.appendChild'), 'draw handler should append to _inkGroup');
+test('Card-1 has canvas-based drawing engine for ink (WKWebView)', () => {
+  assert(c1f.includes('_useCanvas'), 'Must have _useCanvas for canvas-based drawing');
+  assert(c1f.includes('_finalizeCanvasToSVG'), 'draw handler should finalize canvas to SVG on pointerup');
 });
 
 test('CSS filters only target #svg-bg and #svg-guide (not #draw-layer)', () => {

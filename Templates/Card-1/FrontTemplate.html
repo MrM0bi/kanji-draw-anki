@@ -2423,7 +2423,7 @@
             const N = 24;
             const uPts = window._kanjiAlgo.resamplePoints(userPts, N);
             const refLen = refPath._cachedTotalLength !== undefined ? refPath._cachedTotalLength : (refPath._cachedTotalLength = refPath.getTotalLength());
-            if (refLen === 0) { onDone(); return; }
+            if (refLen === 0 || uPts.length < 2) { onDone(); return; }
             const rPts = [];
             for (let i = 0; i < N; i++) {
                 const pt = refPath.getPointAtLength((i / (N - 1)) * refLen);

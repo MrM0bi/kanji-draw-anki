@@ -156,72 +156,50 @@ test('evaluateStroke: recolors gel halo on error', () => {
     'Should recolor gel halo on correction feedback');
 });
 
-// ── 3. Ink multi-segment brush ──
-console.log('\n── 3. Tusche (Ink) multi-segment brush ──');
+// ── 3. Tusche (Ink) — Canvas-based drawing engine ──
+console.log('\n── 3. Tusche (Ink) — Canvas-based drawing engine ──');
 
-test('_inkGroup variable declared', () => {
-  assert(c1f.includes('_inkGroup'), 'Must have _inkGroup');
+test('_useCanvas flag declared (Canvas hybrid engine)', () => {
+  assert(c1f.includes('_useCanvas'), 'Must have _useCanvas variable');
 });
 
-test('startDrawing: creates _inkGroup SVG <g> for ink', () => {
-  assert(c1f.includes("_inkGroup = document.createElementNS"), 'Should create SVG g element');
+test('_useCanvas enabled on AnkiMobile/WKWebView only', () => {
+  const match = c1f.match(/_useCanvas\s*=\s*_isWK/);
+  assert(match, '_useCanvas should be tied to _isWK (WKWebView detection)');
 });
 
-test('startDrawing: hides master path for ink (opacity 0)', () => {
-  // The ink branch sets currentSVGPath opacity to 0
-  const match = c1f.match(/isInk[\s\S]{0,300}opacity.*0/);
-  assert(match, 'Master path should be hidden when ink is active');
+test('canvas element referenced via draw-canvas id', () => {
+  assert(c1f.includes("getElementById('draw-canvas')"), 'Should reference draw-canvas element');
 });
 
-test('startDrawing: ink group gets square linecap matching SVG reference', () => {
-  const match = c1f.match(/_inkGroup[\s\S]{0,200}stroke-linecap[\s\S]{0,20}square/);
-  assert(match, 'Ink group should have square linecap to match SVG kanji');
+test('ink style sets square linecap in applyPathStyle', () => {
+  const match = c1f.match(/case 'ink'[\s\S]{0,100}stroke-linecap[\s\S]{0,20}square/);
+  assert(match, 'applyPathStyle should set square linecap for ink');
 });
 
-test('draw handler: creates per-segment paths in _inkGroup directly', () => {
-  assert(c1f.includes('_inkGroup.appendChild(seg)'), 'Should append segments directly to _inkGroup');
+test('ink style sets 0.85 opacity in applyPathStyle', () => {
+  const match = c1f.match(/case 'ink'[\s\S]{0,200}0\.85/);
+  assert(match, 'applyPathStyle should set 0.85 opacity for ink');
 });
 
-test('draw handler: speed-based width (viscous: 2-5.5px)', () => {
-  const match = c1f.match(/Math\.max\(2.*Math\.min\(5\.5/);
-  assert(match, 'Width should be clamped 2-5.5');
+test('canvas is cleared on clearDrawLayer', () => {
+  assert(c1f.includes('_clearCanvas'), 'clearDrawLayer should call _clearCanvas');
 });
 
-test('draw handler: EMA smoothing on width', () => {
-  const match = c1f.match(/_inkLastWidth\s*\*\s*[\d.]+\s*\+\s*targetW\s*\*\s*[\d.]+/);
-  assert(match, 'Width should use EMA smoothing');
+test('canvas is resized on init', () => {
+  assert(c1f.includes('_resizeCanvas'), 'Canvas should be resized on init');
 });
 
-test('draw handler: min distance threshold for segment creation', () => {
-  assert(c1f.includes('dist > 1.5'), 'Should skip very short movements for smooth segments');
+test('canvas uses devicePixelRatio for HiDPI', () => {
+  assert(c1f.includes('devicePixelRatio'), 'Canvas should use devicePixelRatio for sharp rendering');
 });
 
-test('Correction feedback: recolors ink group', () => {
-  assert(c1f.includes('_inkGroup.setAttribute("stroke", colorVar)'),
-    'Correction should recolor all ink segments');
-});
-
-test('Snap animation: reveals master path, hides ink group', () => {
-  assert(c1f.includes('ig.style.setProperty'), 'Should hide ink group before snap');
-  assert(c1f.includes('ig.parentNode.removeChild(ig)'), 'Should remove ink group after snap');
-});
-
-test('Free mode: cleans up ink group on short stroke', () => {
-  const match = c1f.match(/totalTravel < 4[\s\S]{0,400}_inkGroup[\s\S]{0,100}removeChild/);
-  assert(match, 'Should remove ink group on too-short free strokes');
-});
-
-test('Free mode: shows master path with ink properties when saving', () => {
-  const match = c1f.match(/_inkGroup[\s\S]{0,500}opacity.*0\.85/);
-  assert(match, 'Should reveal master path with 0.85 opacity for ink look');
+test('canvas finalized to SVG on pointerup (_finalizeCanvasToSVG)', () => {
+  assert(c1f.includes('_finalizeCanvasToSVG'), 'Canvas should be finalized to SVG path on pointerup');
 });
 
 test('Ink bleed removed: no bleed timer', () => {
   assert(!c1f.includes('_inkBleedTimer'), 'Bleed timer should be completely removed');
-});
-
-test('Ink uses quadratic curves for smooth segments', () => {
-  assert(c1f.includes("' Q '"), 'Segments should use Q (quadratic) curves');
 });
 
 test('Ink no joint dots (clean shape only)', () => {
@@ -230,10 +208,6 @@ test('Ink no joint dots (clean shape only)', () => {
 
 test('Ink no pool dot at touch-down (clean shape only)', () => {
   assert(!c1f.match(/Ink pool dot/), 'Pool dot should be removed for clean shape');
-});
-
-test('clearDrawLayer resets _inkGroup', () => {
-  assert(c1f.includes('_inkGroup = null'), 'clearDrawLayer should null _inkGroup');
 });
 
 // ── 4. Integration ──
