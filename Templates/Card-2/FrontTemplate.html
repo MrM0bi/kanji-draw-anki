@@ -25,7 +25,8 @@
                 Einstellungen
             </div>
             <div class="settings-segment">
-                <div role="button" tabindex="0" class="segment-btn" data-tab="c1" onclick="switchSettingsTab('c1', event)">Zeichnen</div>
+                <div role="button" tabindex="0" class="segment-btn" data-tab="c1"
+                    onclick="switchSettingsTab('c1', event)">Zeichnen</div>
                 <div role="button" tabindex="0" class="segment-btn active" data-tab="c2"
                     onclick="switchSettingsTab('c2', event)">Erkennen</div>
             </div>
@@ -1808,6 +1809,7 @@
         if (window._kanjiThemeObserver) {
             try { window._kanjiThemeObserver.disconnect(); } catch (e) { }
         }
+        var _nightModeRe = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/;
         var _themeMODebounce = null;
         window._kanjiThemeObserver = new MutationObserver(function (mutations) {
             if (!document.getElementById('svg-bg')) return;
@@ -1815,8 +1817,8 @@
             var scrollLost = false;
             for (var i = 0; i < mutations.length; i++) {
                 var newVal = mutations[i].target.getAttribute('class') || '';
-                var hasNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(newVal);
-                var prevNM = /\bnightMode\b|\bnight_mode\b|\bnight-mode\b/.test(mutations[i].oldValue || '');
+                var hasNM = _nightModeRe.test(newVal);
+                var prevNM = _nightModeRe.test(mutations[i].oldValue || '');
                 if (hasNM !== prevNM && !_tmplClassChange) {
                     window._ankiNightMode = hasNM;
                     window._ankiNativeNightMode = hasNM;

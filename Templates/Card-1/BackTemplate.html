@@ -400,6 +400,7 @@
         if (e) { e.stopPropagation(); e.preventDefault(); }
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         var ol = document.getElementById('info-overlay');
+        if (!ol) return;
         var im = ol.querySelector('.info-modal');
         if (im) im.scrollTop = 0;
         ol.classList.add('active');
@@ -1101,11 +1102,16 @@
                     const nRef = paths.length;
                     const dim = Math.max(nUser, nRef);
 
-                    const userProcessed = freeStrokeData.map(s => {
-                        const rawPts = parseDToPoints(s.d);
-                        return resamplePts(smooth(rawPts, 2), SAMPLE_N);
-                    });
-                    if (_parseScratch.parentNode) _parseScratch.parentNode.removeChild(_parseScratch);
+                    const userProcessed = (() => {
+                        try {
+                            return freeStrokeData.map(s => {
+                                const rawPts = parseDToPoints(s.d);
+                                return resamplePts(smooth(rawPts, 2), SAMPLE_N);
+                            });
+                        } finally {
+                            if (_parseScratch.parentNode) _parseScratch.parentNode.removeChild(_parseScratch);
+                        }
+                    })();
 
                     const refProcessed = [];
                     for (let r = 0; r < nRef; r++) refProcessed.push(sampleRef(paths[r]));
