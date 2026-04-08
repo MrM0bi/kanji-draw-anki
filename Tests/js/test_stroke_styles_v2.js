@@ -147,7 +147,7 @@ test('clearDrawLayer resets _gelHalo', () => {
 });
 
 test('evaluateStroke: removes gel halo after snap', () => {
-  const snapBlock = c1f.match(/afterSnap[\s\S]{0,500}gh.*parentNode.*removeChild/);
+  const snapBlock = c1f.match(/afterSnap[\s\S]{0,1200}gh.*parentNode.*removeChild/);
   assert(snapBlock, 'Gel halo should be removed in afterSnap');
 });
 

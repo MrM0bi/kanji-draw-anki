@@ -19,16 +19,6 @@
         transition: none !important;
     }
 
-    @keyframes fadeInNumbers {
-        0% {
-            opacity: 0;
-        }
-
-        100% {
-            opacity: 1;
-        }
-    }
-
     .info-btn {
         opacity: 0;
         animation: fadeAndSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -226,7 +216,7 @@
                 </svg>
             </a>
         </div>
-        <button class="close-settings" onclick="closeInfoModal(event)">Schließen</button>
+        <div role="button" tabindex="0" class="close-settings" onclick="closeInfoModal(event)">Schließen</div>
     </div>
 </div>
 

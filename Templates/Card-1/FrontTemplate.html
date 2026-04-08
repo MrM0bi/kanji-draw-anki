@@ -24,12 +24,12 @@
                 Einstellungen
             </div>
             <div class="settings-segment">
-                <button class="segment-btn active" data-tab="c1"
-                    onclick="switchSettingsTab('c1', event)">Zeichnen</button>
-                <button class="segment-btn" data-tab="c2" onclick="switchSettingsTab('c2', event)">Erkennen</button>
+                <div role="button" tabindex="0" class="segment-btn active" data-tab="c1"
+                    onclick="switchSettingsTab('c1', event)">Zeichnen</div>
+                <div role="button" tabindex="0" class="segment-btn" data-tab="c2" onclick="switchSettingsTab('c2', event)">Erkennen</div>
             </div>
             <div class="category-list">
-                <button class="category-card" onclick="navigateToPage('page-grid')">
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-grid')">
                     <div class="category-icon cat-grid">
                         <svg viewBox="0 0 24 24">
                             <path d="M4 6h16M4 12h16M4 18h7"></path>
@@ -43,8 +43,8 @@
                         stroke-width="2">
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
-                </button>
-                <button class="category-card c1-only-setting" onclick="navigateToPage('page-front')">
+                </div>
+                <div role="button" tabindex="0" class="category-card c1-only-setting" onclick="navigateToPage('page-front')">
                     <div class="category-icon cat-front">
                         <svg viewBox="0 0 24 24">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -59,8 +59,8 @@
                         stroke-width="2">
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
-                </button>
-                <button class="category-card c2-only-setting" style="display:none"
+                </div>
+                <div role="button" tabindex="0" class="category-card c2-only-setting" style="display:none"
                     onclick="navigateToPage('page-front-c2')">
                     <div class="category-icon cat-front">
                         <svg viewBox="0 0 24 24">
@@ -76,8 +76,8 @@
                         stroke-width="2">
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
-                </button>
-                <button class="category-card" onclick="navigateToPage('page-back')">
+                </div>
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-back')">
                     <div class="category-icon cat-back">
                         <svg viewBox="0 0 24 24">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -93,11 +93,11 @@
                         stroke-width="2">
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
-                </button>
+                </div>
             </div>
             <div class="setting-group-title">Allgemein</div>
             <div class="category-list">
-                <button class="category-card" onclick="navigateToPage('page-theme')">
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-theme')">
                     <div class="category-icon cat-theme">
                         <svg viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -112,9 +112,9 @@
                         stroke-width="2">
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
-                </button>
+                </div>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
         <!-- ═══ Sub-Page: Hilfslinien ═══ -->
@@ -218,7 +218,7 @@
                         </svg><span>Stark</span></div>
                 </label>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
         <!-- ═══ Sub-Page: Vorderseite (c1-only) ═══ -->
@@ -372,7 +372,7 @@
                     </div>
                 </label>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
         <!-- ═══ Sub-Page: Rückseite ═══ -->
@@ -540,7 +540,7 @@
                     </label>
                 </div>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
         <!-- ═══ Sub-Page: Vorderseite Erkennen (c2-only) ═══ -->
@@ -622,7 +622,7 @@
                     </label>
                 </div>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
         <!-- ═══ Sub-Page: Erscheinungsbild ═══ -->
@@ -890,7 +890,7 @@
                     </div>
                 </label>
             </div>
-            <button class="close-settings" onclick="closeSettings(event)">Schließen</button>
+            <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
     </div>
 </div>
@@ -961,7 +961,7 @@
         <p class="lgw-path"><strong>Wischgesten deaktivieren</strong> unter<br>Einstellungen&nbsp;→ Steuerung<br>oder
             ggf. auf den <strong>Neuen Lernmodus</strong> wechseln.</p>
         <button id="lgw-dismiss"
-            onclick="(function(){window._lgwDismissed=true;try{sessionStorage.setItem('kanji-lgw-dismissed','1');}catch(e){}try{localStorage.setItem('kanji-lgw-dismissed','1');}catch(e){}document.getElementById('legacy-gesture-warning').classList.remove('lgw-visible');})()">Verstanden</button>
+            onclick="(function(){try{sessionStorage.setItem('kanji-lgw-dismissed','1');}catch(e){}document.getElementById('legacy-gesture-warning').classList.remove('lgw-visible');})()">Verstanden</button>
     </div>
     <div id="addon-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -980,7 +980,7 @@
         <div class="addon-hint-code-row">
             <code id="addon-hint-code">905251277</code>
             <button id="addon-hint-copy"
-                onclick="(function(){var t='905251277',b=document.getElementById('addon-hint-copy');try{var el=document.createElement('textarea');el.value=t;el.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';document.body.appendChild(el);el.focus();el.select();document.execCommand('copy');document.body.removeChild(el);b.textContent='✓';clearTimeout(b._ct);b._ct=setTimeout(function(){b.textContent='Kopieren';},1500);}catch(e){b.textContent='Fehler';}})()">Kopieren</button>
+                onclick="(function(){var t='905251277',b=document.getElementById('addon-hint-copy');function done(ok){b.textContent=ok?'✓':'Fehler';clearTimeout(b._ct);b._ct=setTimeout(function(){b.textContent='Kopieren';},1500);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done(true);}).catch(function(){done(false);});}else{try{var el=document.createElement('textarea');el.value=t;el.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';document.body.appendChild(el);el.focus();el.select();document.execCommand('copy');document.body.removeChild(el);done(true);}catch(e){done(false);}}})()">Kopieren</button>
         </div>
         <p class="addon-hint-note">Danach Anki neu starten – das Addon speichert deine Einstellungen dauerhaft.</p>
         <button id="addon-hint-dismiss"
@@ -1086,9 +1086,7 @@
                 typeof globalThis.ankidroid.userAction === 'function';
             if (!isNewMode) {
                 var dismissed = false;
-                try { dismissed = localStorage.getItem('kanji-lgw-dismissed') === '1'; } catch (e) { }
-                if (!dismissed) { try { dismissed = sessionStorage.getItem('kanji-lgw-dismissed') === '1'; } catch (e) { } }
-                if (!dismissed) { dismissed = !!window._lgwDismissed; }
+                try { dismissed = sessionStorage.getItem('kanji-lgw-dismissed') === '1'; } catch (e) { }
                 if (!dismissed) {
                     var w = document.getElementById('legacy-gesture-warning');
                     if (w) w.classList.add('lgw-visible');
@@ -2113,6 +2111,7 @@
         let currentStroke = 0, mistakes = 0, isDrawing = false, userPoints = [];
         let currentSVGPath = null, dSegments = [], errorTimeout = null, fadeTimeout = null, skipTimeouts = [];
         let _drawGen = 0;
+        let _isRewinding = false; // true during the 400ms freeResetAction animation window
         // rAF handle for SVG-mode path updates — batches setAttribute to one frame
         let _svgRafId = null;
 
@@ -2227,7 +2226,7 @@
             _canvasEl.style.width = rect.width + 'px';
             _canvasEl.style.height = rect.height + 'px';
             _canvasEl._dpr = dpr;
-            _ctx = _canvasEl.getContext('2d');
+            _ctx = _canvasEl.getContext('2d', { alpha: true, desynchronized: true });
             _ctx.scale(dpr, dpr);
             _ctx._scaleX = rect.width / SVG_GRID_SIZE;
             _ctx._scaleY = rect.height / SVG_GRID_SIZE;
@@ -2435,8 +2434,9 @@
             if (Math.hypot(uPts[0].x - rPts[N - 1].x, uPts[0].y - rPts[N - 1].y) <
                 Math.hypot(uPts[0].x - rPts[0].x, uPts[0].y - rPts[0].y)) rPts.reverse();
             const dur = 200, t0 = performance.now();
+            const snapGen = _drawGen;
             const tick = (now) => {
-                if (!drawnPath.parentNode) { onDone(); return; }
+                if (!drawnPath.parentNode || snapGen !== _drawGen) { onDone(); return; }
                 let t = Math.min(1, (now - t0) / dur);
                 t = 1 - (1 - t) * (1 - t) * (1 - t); // ease-out cubic
                 let d = 'M';
@@ -2793,13 +2793,13 @@
         };
 
         const evaluateStroke = () => {
-            if (userPoints.length === 0) { clearDrawLayer(); return; }
+            if (userPoints.length === 0) { clearTimeout(errorTimeout); clearTimeout(fadeTimeout); clearDrawLayer(); return; }
 
             let totalTravel = 0;
             for (let i = 1; i < userPoints.length; i++) {
                 totalTravel += Math.hypot(userPoints[i].x - userPoints[i - 1].x, userPoints[i].y - userPoints[i - 1].y);
             }
-            if (totalTravel < 4) { clearDrawLayer(); return; }
+            if (totalTravel < 4) { clearTimeout(errorTimeout); clearTimeout(fadeTimeout); clearDrawLayer(); return; }
 
             const strictness = hostGet('kanjiOptStrictness', cachedGlobalConf.strictness || 'normal');
             const mult = strictness === 'loose' ? 1.35 : strictness === 'strict' ? 0.7 : 1.0;
@@ -2860,8 +2860,16 @@
                 const gh = _gelHalo;
                 paths[si].classList.remove('hint-active');
                 currentStroke++; saveState(); currentSVGPath = null; _gelHalo = null;
+                const afterSnapGen = _drawGen;
                 const afterSnap = () => {
+                    if (afterSnapGen !== _drawGen) return; // reset fired during morph — discard
                     paths[si].classList.add('stroke-complete');
+                    paths[si].classList.remove('rewind-anim');
+                    paths[si].style.removeProperty('stroke-dashoffset');
+                    paths[si].style.removeProperty('stroke-dasharray');
+                    paths[si].style.removeProperty('transition');
+                    paths[si].style.removeProperty('stroke');
+                    paths[si].style.removeProperty('opacity');
                     _addGelHaloToPath(paths[si]);
                     if (dp && dp.parentNode) dp.parentNode.removeChild(dp);
                     if (gh && gh.parentNode) gh.parentNode.removeChild(gh);
@@ -2871,7 +2879,7 @@
                     // Gel: pass halo to snap so it morphs in sync
                     snapToReference(dp, paths[si], up, afterSnap, gh);
                 }
-                else { paths[si].classList.add('stroke-complete'); _addGelHaloToPath(paths[si]); clearDrawLayer(); if (currentStroke >= paths.length) { if (actionButtons) actionButtons.style.display = 'none'; playCompletionAnimation().then(() => triggerAutoFlip()); } }
+                else { paths[si].classList.add('stroke-complete'); paths[si].classList.remove('rewind-anim'); paths[si].style.removeProperty('stroke-dashoffset'); paths[si].style.removeProperty('stroke-dasharray'); paths[si].style.removeProperty('transition'); paths[si].style.removeProperty('stroke'); paths[si].style.removeProperty('opacity'); _addGelHaloToPath(paths[si]); clearDrawLayer(); if (currentStroke >= paths.length) { if (actionButtons) actionButtons.style.display = 'none'; playCompletionAnimation().then(() => triggerAutoFlip()); } }
             } else {
                 mistakes++;
                 if (mistakes > problemStrokes[currentStroke]) { problemStrokes[currentStroke] = mistakes; saveState(); }
@@ -2909,7 +2917,7 @@
                     if (errGen !== _drawGen) return;
                     if (!isDrawing) {
                         drawLayer.classList.add('fade-out');
-                        fadeTimeout = setTimeout(() => { if (errGen !== _drawGen) return; if (!isDrawing) { clearDrawLayer(); drawLayer.classList.remove('fade-out'); } }, 200);
+                        fadeTimeout = setTimeout(() => { if (errGen !== _drawGen) return; if (!isDrawing && !_isRewinding) { clearDrawLayer(); drawLayer.classList.remove('fade-out'); } }, 200);
                     }
                 }, 250);
             }
@@ -2932,11 +2940,23 @@
         // ===================================================================
 
         if (kanjiContainer) {
-            const blockAppGestures = (e) => {
+            if (window._kanjiBlockAppGestures && window._kanjiBlockAppGesturesEl) {
+                ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+                    window._kanjiBlockAppGesturesEl.removeEventListener(evt, window._kanjiBlockAppGestures, { passive: false });
+                });
+            }
+            window._kanjiBlockAppGestures = (e) => {
                 if (e.target.closest('.settings-overlay') || e.target.closest('.gear-btn')) return;
                 e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                // On AnkiMobile, also preventDefault to suppress native swipe-to-flip.
+                // Only needed during active drawing (touchmove) or when a stroke
+                // has started (touchstart while isDrawing) to avoid blocking taps.
+                if (e.cancelable !== false) {
+                    if (e.type === 'touchmove' || isDrawing) e.preventDefault();
+                }
             };
-            ['touchstart', 'touchmove', 'touchend'].forEach(evt => { kanjiContainer.addEventListener(evt, blockAppGestures, { passive: false }); });
+            window._kanjiBlockAppGesturesEl = kanjiContainer;
+            ['touchstart', 'touchmove', 'touchend'].forEach(evt => { kanjiContainer.addEventListener(evt, window._kanjiBlockAppGestures, { passive: false }); });
         }
 
         // Clean up previous drawLayer listeners & timers
@@ -2974,8 +2994,12 @@
 
         window._kanjiDrawCleanup = () => {
             clearTimeout(errorTimeout); clearTimeout(fadeTimeout);
+            clearTimeout(_saveStateTimer.id); _saveStateTimer.id = null;
             skipTimeouts.forEach(clearTimeout); skipTimeouts = [];
             _drawGen++;
+            _isRewinding = false;
+            if (_svgRafId) { cancelAnimationFrame(_svgRafId); _svgRafId = null; }
+            if (_canvasRafId) { cancelAnimationFrame(_canvasRafId); _canvasRafId = null; }
             drawLayer.removeEventListener('pointerdown', startDrawing);
             drawLayer.removeEventListener('pointermove', draw);
             drawLayer.removeEventListener('pointerleave', stopDrawingOnLeave);
@@ -2984,6 +3008,12 @@
             ['touchstart', 'touchmove', 'touchend'].forEach(evt => { drawLayer.removeEventListener(evt, touchPreventDefault); });
             if (_touchStartFallback) { drawLayer.removeEventListener('touchstart', _touchStartFallback); _touchStartFallback = null; }
             if (_touchMoveFallback) { drawLayer.removeEventListener('touchmove', _touchMoveFallback); _touchMoveFallback = null; }
+            if (window._kanjiBlockAppGestures && window._kanjiBlockAppGesturesEl) {
+                ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+                    window._kanjiBlockAppGesturesEl.removeEventListener(evt, window._kanjiBlockAppGestures, { passive: false });
+                });
+                window._kanjiBlockAppGestures = null; window._kanjiBlockAppGesturesEl = null;
+            }
         };
 
         // ===================================================================
@@ -2994,6 +3024,7 @@
 
         const guidedResetAction = () => {
             _drawGen++;
+            const _guidedResetGen = _drawGen;
             currentStroke = 0; mistakes = 0; userPoints = []; problemStrokes.fill(0); saveState();
             skipTimeouts.forEach(clearTimeout); skipTimeouts = [];
             const strokeColor = getCSSVar('--stroke-active') || '';
@@ -3059,7 +3090,7 @@
                 pendingHalos.forEach(_h => {
                     _h.style.setProperty('stroke-dashoffset', '105', 'important');
                     _h.style.setProperty('transition', haloTransition, 'important');
-                    setTimeout(() => { if (_h.parentNode) _h.parentNode.removeChild(_h); }, ANIMATION_DURATION_MS);
+                    setTimeout(() => { if (_guidedResetGen !== _drawGen) return; if (_h.parentNode) _h.parentNode.removeChild(_h); }, ANIMATION_DURATION_MS);
                 });
             }
             clearTimeout(errorTimeout); clearTimeout(fadeTimeout); drawLayer.classList.remove('fade-out'); clearDrawLayer();
@@ -3128,6 +3159,7 @@
         const freeUndoAction = () => {
             if (!freeStrokes.length) return;
             _drawGen++;
+            const undoGen = _drawGen;
             const lastPath = freeSVGPaths[freeSVGPaths.length - 1];
             freeStrokes.pop();
             freeSVGPaths.pop();
@@ -3146,9 +3178,8 @@
                     lastPath.style.transition = 'stroke-dashoffset 0.25s ease-in, opacity 0.25s ease-in';
                     lastPath.style.strokeDashoffset = len + '';
                     lastPath.style.opacity = '0';
-                    const capturedGen = _drawGen;
                     setTimeout(() => {
-                        if (capturedGen !== _drawGen) return;
+                        if (undoGen !== _drawGen) return;
                         if (lastPath.parentNode) lastPath.parentNode.removeChild(lastPath);
                     }, 280);
                 });
@@ -3159,8 +3190,12 @@
         const freeResetAction = () => {
             _drawGen++;
             const _freeResetGen = _drawGen;
-            // Reverse animation: rewind ALL drawn strokes simultaneously
+            _isRewinding = true;
+            // Snapshot state at reset time so cleanup only undoes what existed then.
+            const _strokeCountAtReset = currentStroke; // guided-mode progress at reset
+            // Snapshot which paths exist NOW (before reset) so we only remove these later.
             const drawnPaths = Array.from(drawLayer.querySelectorAll('path:not(.gel-halo)'));
+            const drawnNodes = new Set(Array.from(drawLayer.childNodes)); // all current children
             // Remove gel halos and fade ink groups immediately
             drawLayer.querySelectorAll('.gel-halo').forEach(h => h.parentNode.removeChild(h));
             drawLayer.querySelectorAll('g').forEach(g => { g.style.transition = 'opacity 0.25s ease-out'; g.style.opacity = '0'; });
@@ -3197,23 +3232,47 @@
                             prevH.style.setProperty('stroke-dashoffset', '105', 'important');
                             prevH.style.setProperty('transition', 'stroke-dashoffset 0.7s ease-in-out', 'important');
                             const _h = prevH;
-                            setTimeout(() => { if (_h.parentNode) _h.parentNode.removeChild(_h); }, 700);
+                            setTimeout(() => { if (_freeResetGen !== _drawGen) return; if (_h.parentNode) _h.parentNode.removeChild(_h); }, 700);
                         }
                     }
                 });
             });
             setTimeout(() => {
-                if (_drawGen !== _freeResetGen) return; // card navigated — abort
-                freeStrokes = []; freeSVGPaths = []; userPoints = []; problemStrokes.fill(0); currentStroke = 0; saveState();
-                drawLayer.innerHTML = ''; currentSVGPath = null;
+                if (_drawGen !== _freeResetGen) { _isRewinding = false; return; } // card navigated — abort
+                // Remove only the nodes that existed when the reset started.
+                // Any new strokes drawn during the animation stay intact.
+                drawnNodes.forEach(n => { if (n.parentNode === drawLayer) drawLayer.removeChild(n); });
+                // Drop only the free-stroke entries that were present at reset time.
+                // (new strokes appended during the animation are at the end of the arrays)
+                const resetCount = drawnPaths.length; // # of user paths snapshotted
+                freeStrokes.splice(0, resetCount);
+                freeSVGPaths.splice(0, resetCount);
+                // Reset state only when no new strokes have been drawn in the meantime
+                if (freeStrokes.length === 0) {
+                    userPoints = []; problemStrokes.fill(0);
+                    // Only reset currentStroke to 0 if no guided strokes were drawn during animation
+                    if (currentStroke === _strokeCountAtReset) currentStroke = 0;
+                }
+                if (currentSVGPath && !currentSVGPath.parentNode) currentSVGPath = null;
                 _gelHalo = null;
                 if (_useCanvas) _clearCanvas();
-                paths.forEach(p => {
-                    p.classList.remove('stroke-complete', 'hint-active', 'animate-draw', 'rewind-anim');
-                    p.style.removeProperty('stroke');
-                    const prevH = p.previousElementSibling;
-                    if (prevH && prevH.classList.contains('gel-halo')) prevH.parentNode.removeChild(prevH);
+                // Only reset reference paths that had stroke-complete at reset time.
+                // Paths completed DURING the animation (index >= _strokeCountAtReset) keep
+                // their stroke-complete class and visual state.
+                paths.forEach((p, i) => {
+                    if (i < _strokeCountAtReset) {
+                        p.classList.remove('stroke-complete', 'hint-active', 'animate-draw', 'rewind-anim');
+                        p.style.removeProperty('stroke');
+                        const prevH = p.previousElementSibling;
+                        if (prevH && prevH.classList.contains('gel-halo')) prevH.parentNode.removeChild(prevH);
+                    } else {
+                        // Remove only the rewind-anim class (added during animation) but
+                        // preserve stroke-complete / hint-active set by new strokes.
+                        p.classList.remove('rewind-anim');
+                    }
                 });
+                saveState();
+                _isRewinding = false;
                 if (actionButtons) actionButtons.style.display = 'flex';
                 _updateUndoBtn();
                 ['sessionStorage', 'localStorage'].forEach(s => {

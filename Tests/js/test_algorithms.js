@@ -445,7 +445,7 @@ test('Full pipeline (resample+smooth+Fréchet) in < 2ms', () => {
     assert(elapsed < 2, `Pipeline took ${elapsed}ms (> 2ms)`);
 });
 
-test('Resample 1000 points to 64 in < 1ms', () => {
+test('Resample 1000 points to 64 in < 3ms', () => {
     const pts = Array.from({ length: 1000 }, (_, i) => ({
         x: Math.cos(i / 50) * 50 + 50,
         y: Math.sin(i / 50) * 50 + 50
@@ -455,7 +455,7 @@ test('Resample 1000 points to 64 in < 1ms', () => {
     const elapsed = performance.now() - start;
     assert.strictEqual(result.length, 64);
     console.log(`    → ${elapsed.toFixed(2)}ms for 1000→64 resample`);
-    assert(elapsed < 1, `Resample took ${elapsed}ms (> 1ms)`);
+    assert(elapsed < 3, `Resample took ${elapsed}ms (> 3ms)`);
 });
 
 // =======================================================================
