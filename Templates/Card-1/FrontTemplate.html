@@ -591,56 +591,6 @@
                     </div>
                 </label>
             </div>
-            <div class="setting-group-title" id="sbs-title-c2f">Vergleichsansicht</div>
-            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);" id="sbs-grid-c2f">
-                <label><input type="radio" name="opt-side-by-side-c2f" value="off"
-                        onchange="updateFeatureSetting('sideBySide', this.value, 'c2f')">
-                    <div class="visual-option">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                            <line x1="4" y1="4" x2="20" y2="20" />
-                        </svg>
-                        <span>Aus</span>
-                    </div>
-                </label>
-                <label><input type="radio" name="opt-side-by-side-c2f" value="on"
-                        onchange="updateFeatureSetting('sideBySide', this.value, 'c2f')">
-                    <div class="visual-option">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="3" width="9" height="18" rx="2" />
-                            <rect x="13" y="3" width="9" height="18" rx="2" />
-                        </svg>
-                        <span>An</span>
-                    </div>
-                </label>
-            </div>
-            <div class="setting-group-title" id="free-view-title-c2f">Strichansicht</div>
-            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);" id="free-view-grid-c2f">
-                <label><input type="radio" name="opt-free-view-c2f" value="handwriting"
-                        onchange="updateFeatureSetting('freeView', this.value, 'c2f')">
-                    <div class="visual-option">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round">
-                            <path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0" />
-                        </svg>
-                        <span>Handschrift</span>
-                    </div>
-                </label>
-                <label><input type="radio" name="opt-free-view-c2f" value="svg"
-                        onchange="updateFeatureSetting('freeView', this.value, 'c2f')">
-                    <div class="visual-option">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 17 8 8 13 14 18 6 21 10" />
-                            <circle cx="3" cy="17" r="1.5" fill="currentColor" />
-                            <circle cx="21" cy="10" r="1.5" fill="currentColor" />
-                        </svg>
-                        <span>SVG-Pfade</span>
-                    </div>
-                </label>
-            </div>
             <div class="c2-only-setting">
                 <div class="setting-group-title">Strich-Darstellung</div>
                 <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
@@ -1328,8 +1278,6 @@
             'opt-free-view': scopedGet('kanjiOptFreeView', globalConf.freeView),
             'opt-numbers-c2f': safeGetItem('c2f_kanjiOptNumbers', safeGetItem('c2_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', globalConf.numbers || 'on'))),
             'opt-display-style-c2f': safeGetItem('c2f_kanjiOptDisplayStyle', safeGetItem('c2_kanjiOptDisplayStyle', safeGetItem('kanjiOptDisplayStyle', globalConf.displayStyle || 'standard'))),
-            'opt-side-by-side-c2f': safeGetItem('c2f_kanjiOptSideBySide', safeGetItem('c2_kanjiOptSideBySide', safeGetItem('kanjiOptSideBySide', globalConf.sideBySide || 'on'))),
-            'opt-free-view-c2f': safeGetItem('c2f_kanjiOptFreeView', safeGetItem('c2_kanjiOptFreeView', safeGetItem('kanjiOptFreeView', globalConf.freeView || 'handwriting'))),
             'theme-mode': safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system'),
             'theme-accent': safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green'),
             'theme-font-size': safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal'),
