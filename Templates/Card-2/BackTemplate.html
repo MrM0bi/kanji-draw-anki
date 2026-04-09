@@ -1,5 +1,7 @@
+<script>if (typeof anki !== "undefined") anki.aFade = 0;</script>
 <style id="kanji-anti-flicker">
     /* Static rules – applied by the browser IMMEDIATELY on parse, even with innerHTML */
+
     #svg-bg path {
         stroke-dashoffset: 0 !important;
         transition: none !important;
@@ -10,7 +12,7 @@
         visibility: visible !important;
         transition: none !important;
         opacity: 0;
-        animation: fadeAndSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.05s forwards;
     }
 
     .kanji-container {
@@ -21,8 +23,13 @@
 
     .info-btn {
         opacity: 0;
-        animation: fadeAndSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        animation-delay: 0.1s;
+        animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation-delay: 0.08s;
+    }
+
+    /* Elements already visible on front — no animation, instant appearance */
+    .gear-btn {
+        transition: none !important;
     }
 </style>
 <script>
@@ -319,6 +326,8 @@
     function openInfoModal(e) {
         if (e) { e.stopPropagation(); e.preventDefault(); }
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+        var ib = document.querySelector('.info-btn');
+        if (ib) { ib.classList.remove('info-tap'); requestAnimationFrame(function () { ib.classList.add('info-tap'); }); }
         var ol = document.getElementById('info-overlay');
         if (!ol) return;
         var im = ol.querySelector('.info-modal');
@@ -339,6 +348,16 @@
         clearTimeout(ol._pointerEvTimer);
         ol._pointerEvTimer = setTimeout(function () { ol.style.pointerEvents = ''; }, 400);
     }
+
+    // Info button tap feedback cleanup
+    (function () {
+        var ib = document.querySelector('.info-btn');
+        if (ib) {
+            ib.addEventListener('animationend', function (e) {
+                if (e.animationName === 'gearTap') ib.classList.remove('info-tap');
+            });
+        }
+    })();
 
     // --- Radical Tree Renderer [SHARED with c1-back] ---
 
@@ -443,8 +462,8 @@
                 if (!word) return '';
                 let match = word.match(/^(.*?)\s*\((.*?)\)$/);
                 return match
-                    ? `<div class="word-example-item tappable"><div class="word-example-info"><div class="word-jp">${_wesc(match[1])}</div><div class="word-de">${_wesc(match[2])}</div></div></div>`
-                    : `<div class="word-example-item tappable"><div class="word-example-info"><div class="word-jp">${_wesc(word)}</div></div></div>`;
+                    ? `<div class="word-example-item tappable"><div class="word-example-info"><div class="word-jp">${match[1]}</div><div class="word-de">${_wesc(match[2])}</div></div></div>`
+                    : `<div class="word-example-item tappable"><div class="word-example-info"><div class="word-jp">${word}</div></div></div>`;
             }).join('');
             targetWordsEl.addEventListener('click', function (e) {
                 var item = e.target.closest('.word-example-item');

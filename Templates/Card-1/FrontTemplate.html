@@ -30,7 +30,7 @@
                     onclick="switchSettingsTab('c2', event)">Erkennen</div>
             </div>
             <div class="category-list">
-                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-grid')">
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-grid', this)">
                     <div class="category-icon cat-grid">
                         <svg viewBox="0 0 24 24">
                             <path d="M4 6h16M4 12h16M4 18h7"></path>
@@ -46,7 +46,7 @@
                     </svg>
                 </div>
                 <div role="button" tabindex="0" class="category-card c1-only-setting"
-                    onclick="navigateToPage('page-front')">
+                    onclick="navigateToPage('page-front', this)">
                     <div class="category-icon cat-front">
                         <svg viewBox="0 0 24 24">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -63,7 +63,7 @@
                     </svg>
                 </div>
                 <div role="button" tabindex="0" class="category-card c2-only-setting" style="display:none"
-                    onclick="navigateToPage('page-front-c2')">
+                    onclick="navigateToPage('page-front-c2', this)">
                     <div class="category-icon cat-front">
                         <svg viewBox="0 0 24 24">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -79,7 +79,7 @@
                         <path d="M9 18l6-6-6-6"></path>
                     </svg>
                 </div>
-                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-back')">
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-back', this)">
                     <div class="category-icon cat-back">
                         <svg viewBox="0 0 24 24">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -99,7 +99,7 @@
             </div>
             <div class="setting-group-title">Allgemein</div>
             <div class="category-list">
-                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-theme')">
+                <div role="button" tabindex="0" class="category-card" onclick="navigateToPage('page-theme', this)">
                     <div class="category-icon cat-theme">
                         <svg viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -672,7 +672,7 @@
                     <div class="visual-option">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M13 13a10 10 0 0 0 14 14 14 14 0 0 1-14-14Z"></path>
+                            <path d="M28 24.5A10 10 0 1 1 15.5 12a8 8 0 0 0 12.5 12.5Z"></path>
                         </svg>
                         <span>Dunkel</span>
                     </div>
@@ -1225,23 +1225,32 @@
 
     var _lastNavTime = 0;
 
-    function navigateToPage(pageId) {
+    function navigateToPage(pageId, sourceCard) {
         var mainEl = document.getElementById(_currentSettingsPage);
         var pageEl = document.getElementById(pageId);
         if (!mainEl || !pageEl) return;
         _lastNavTime = Date.now();
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-        mainEl.classList.remove('active');
-        mainEl.style.display = 'none';
-        pageEl.style.display = '';
-        pageEl.classList.add('active', 'slide-in-right', 'hover-frozen');
-        if (_settingsModal) _settingsModal.scrollTop = 0;
-        pageEl.addEventListener('animationend', function onPageSlideIn() {
-            pageEl.classList.remove('slide-in-right');
-            pageEl.removeEventListener('animationend', onPageSlideIn);
-        });
-        setTimeout(function () { pageEl.classList.remove('hover-frozen'); }, 300);
-        _currentSettingsPage = pageId;
+        // Tap feedback: briefly highlight the category card before navigating
+        var doNav = function () {
+            mainEl.classList.remove('active');
+            mainEl.style.display = 'none';
+            pageEl.style.display = '';
+            pageEl.classList.add('active', 'slide-in-right', 'hover-frozen');
+            if (_settingsModal) _settingsModal.scrollTop = 0;
+            pageEl.addEventListener('animationend', function onPageSlideIn() {
+                pageEl.classList.remove('slide-in-right');
+                pageEl.removeEventListener('animationend', onPageSlideIn);
+            });
+            setTimeout(function () { pageEl.classList.remove('hover-frozen'); }, 300);
+            _currentSettingsPage = pageId;
+        };
+        if (sourceCard) {
+            sourceCard.classList.add('tap-active');
+            setTimeout(function () { sourceCard.classList.remove('tap-active'); doNav(); }, 120);
+        } else {
+            doNav();
+        }
     }
 
     function navigateBack() {
@@ -1788,7 +1797,12 @@
             if (mainPage) { mainPage.style.display = ''; mainPage.classList.add('active'); }
             _currentSettingsPage = 'settings-main';
         }
-        if (_gearBtn) _gearBtn.classList.add('no-hover-fx');
+        // Gear tap feedback — delay no-hover-fx so animation is visible
+        if (_gearBtn) {
+            _gearBtn.classList.remove('gear-tap');
+            requestAnimationFrame(function () { _gearBtn.classList.add('gear-tap'); });
+            setTimeout(function () { _gearBtn.classList.add('no-hover-fx'); }, 300);
+        }
         if (_settingsModal) _settingsModal.scrollTop = 0;
         _settingsOverlay.classList.add('active');
         updateModeDisabledSettings();
@@ -1931,7 +1945,18 @@
 
     if (window.kanjiTouchStartHandler) document.removeEventListener('touchstart', window.kanjiTouchStartHandler, { passive: false });
     window.kanjiTouchStartHandler = function (e) {
-        if (document.body.classList.contains('no-scroll') && e.touches.length > 1) e.preventDefault();
+        if (!document.body.classList.contains('no-scroll')) return;
+        // Block multi-touch zoom
+        if (e.touches.length > 1) { e.preventDefault(); return; }
+        // On AnkiMobile, prevent ALL touchstart on the card body to suppress
+        // native swipe gestures (swipe-right = back to deck list).
+        // Allow taps on interactive elements to propagate normally.
+        if (e.target.closest('.settings-overlay') || e.target.closest('.info-overlay') ||
+            e.target.closest('.gear-btn') || e.target.closest('.action-buttons') ||
+            e.target.closest('#addon-hint') || e.target.closest('#legacy-gesture-warning') ||
+            e.target.closest('button') || e.target.closest('a') ||
+            e.target.closest('input') || e.target.closest('label')) return;
+        e.preventDefault();
     };
     document.addEventListener('touchstart', window.kanjiTouchStartHandler, { passive: false });
 
@@ -2115,6 +2140,7 @@
         const paths = document.querySelectorAll('.svg-stroke');
         const actionButtons = document.querySelector('.action-buttons');
         let problemStrokes = new Array(paths.length).fill(0);
+        let _kanjiSkippedAny = false;
         const svgBg = document.getElementById('svg-bg');
         if (!svgBg) return;
 
@@ -2349,6 +2375,7 @@
 
         // Add gel halo to a completed SVG reference path
         const _addGelHaloToPath = (refPath) => {
+            if (!refPath || !refPath.parentNode) return;
             const ss = safeGetItem('kanjiThemeStrokeStyle', 'standard');
             if (ss !== 'gel') return;
             // Remove existing halo for this path if any
@@ -2410,7 +2437,12 @@
             const snapGen = _drawGen;
             const tick = (now) => {
                 _snapRafId = null;
-                if (!drawnPath.parentNode || snapGen !== _drawGen) { onDone(); return; }
+                if (!drawnPath.parentNode) { onDone(); return; }
+                if (snapGen !== _drawGen) {
+                    if (drawnPath.parentNode) drawnPath.parentNode.removeChild(drawnPath);
+                    if (gelHalo && gelHalo.parentNode) gelHalo.parentNode.removeChild(gelHalo);
+                    onDone(); return;
+                }
                 let t = Math.min(1, (now - t0) / dur);
                 t = 1 - (1 - t) * (1 - t) * (1 - t); // ease-out cubic
                 let d = 'M';
@@ -2728,7 +2760,7 @@
         };
 
         const stopDrawing = (e) => {
-            if (!isDrawing) return;
+            if (!isDrawing) { if (e && e.cancelable !== false) e.preventDefault(); return; }
             if (e && e.pointerId) { try { drawLayer.releasePointerCapture(e.pointerId); } catch (err) { } }
             if (e && e.cancelable !== false) { e.preventDefault(); e.stopPropagation(); }
             isDrawing = false;
@@ -2834,6 +2866,7 @@
                 paths[si].classList.remove('hint-active', 'rewind-anim');
                 paths[si].style.removeProperty('stroke');
                 paths[si].style.removeProperty('opacity');
+                _gelColorCache.delete(paths[si]);
                 currentStroke++; saveState(); currentSVGPath = null; _gelHalo = null;
                 const afterSnapGen = _drawGen;
                 const afterSnap = () => {
@@ -2853,13 +2886,17 @@
                     if (dp && dp.parentNode) dp.parentNode.removeChild(dp);
                     if (gh && gh.parentNode) gh.parentNode.removeChild(gh);
                     if (afterSnapGen !== _drawGen) return; // skip completion check only
-                    if (currentStroke >= paths.length) { if (actionButtons) actionButtons.style.display = 'none'; playCompletionAnimation().then(() => triggerAutoFlip()); }
+                    if (currentStroke >= paths.length) {
+                        _setSkipDisabled(true);
+                        if (actionButtons) actionButtons.style.display = 'none';
+                        playCompletionAnimation().then(() => triggerAutoFlip());
+                    }
                 };
                 if (dp && up.length >= 2) {
                     // Gel: pass halo to snap so it morphs in sync
                     snapToReference(dp, paths[si], up, afterSnap, gh);
                 }
-                else { paths[si].classList.add('stroke-complete'); paths[si].classList.remove('rewind-anim'); paths[si].style.removeProperty('stroke-dashoffset'); paths[si].style.removeProperty('stroke-dasharray'); paths[si].style.removeProperty('transition'); paths[si].style.removeProperty('stroke'); paths[si].style.removeProperty('opacity'); _addGelHaloToPath(paths[si]); clearDrawLayer(); if (currentStroke >= paths.length) { if (actionButtons) actionButtons.style.display = 'none'; playCompletionAnimation().then(() => triggerAutoFlip()); } }
+                else { paths[si].classList.add('stroke-complete'); paths[si].classList.remove('rewind-anim'); paths[si].style.removeProperty('stroke-dashoffset'); paths[si].style.removeProperty('stroke-dasharray'); paths[si].style.removeProperty('transition'); paths[si].style.removeProperty('stroke'); paths[si].style.removeProperty('opacity'); _addGelHaloToPath(paths[si]); clearDrawLayer(); if (currentStroke >= paths.length) { _setSkipDisabled(true); if (actionButtons) actionButtons.style.display = 'none'; playCompletionAnimation().then(() => triggerAutoFlip()); } }
             } else {
                 mistakes++;
                 if (mistakes > problemStrokes[currentStroke]) { problemStrokes[currentStroke] = mistakes; saveState(); }
@@ -2932,11 +2969,12 @@
             window._kanjiBlockAppGestures = (e) => {
                 if (e.target.closest('.settings-overlay') || e.target.closest('.gear-btn') || e.target.closest('#addon-hint') || e.target.closest('#legacy-gesture-warning')) return;
                 e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-                // On AnkiMobile, also preventDefault to suppress native swipe-to-flip.
-                // Only needed during active drawing (touchmove) or when a stroke
-                // has started (touchstart while isDrawing) to avoid blocking taps.
+                // On AnkiMobile, preventDefault on ALL touch events within the drawing
+                // area to suppress native swipe gestures (swipe-right = back to deck list).
+                // touchstart must also be prevented — otherwise iOS recognizes horizontal
+                // swipes before the drawing engine can set isDrawing=true.
                 if (e.cancelable !== false) {
-                    if (e.type === 'touchmove' || isDrawing) e.preventDefault();
+                    e.preventDefault();
                 }
             };
             window._kanjiBlockAppGesturesEl = kanjiContainer;
@@ -2973,6 +3011,7 @@
             drawLayer.addEventListener('mousedown', startDrawing); drawLayer.addEventListener('mousemove', draw);
             drawLayer.addEventListener('touchstart', _touchStartFallback, { passive: false });
             drawLayer.addEventListener('touchmove', _touchMoveFallback, { passive: false });
+            drawLayer.addEventListener('touchend', touchPreventDefault, { passive: false });
             document.addEventListener('mouseup', window.kanjiStopDrawingHandler); document.addEventListener('touchend', window.kanjiStopDrawingHandler); document.addEventListener('touchcancel', window.kanjiStopDrawingHandler);
         }
 
@@ -2985,6 +3024,8 @@
             if (_svgRafId) { cancelAnimationFrame(_svgRafId); _svgRafId = null; }
             if (_canvasRafId) { cancelAnimationFrame(_canvasRafId); _canvasRafId = null; }
             if (_snapRafId) { cancelAnimationFrame(_snapRafId); _snapRafId = null; }
+            _ctx = null; _canvasEl = null;
+            if (window._kanjiSparkleCleanup) { window._kanjiSparkleCleanup(); window._kanjiSparkleCleanup = null; }
             drawLayer.removeEventListener('pointerdown', startDrawing);
             drawLayer.removeEventListener('pointermove', draw);
             drawLayer.removeEventListener('pointerleave', stopDrawingOnLeave);
@@ -3008,9 +3049,10 @@
         const revealAction = () => { guideSvg.classList.toggle('is-visible'); };
 
         const guidedResetAction = () => {
+            if (_isRewinding) return;
             _drawGen++;
             const _guidedResetGen = _drawGen;
-            currentStroke = 0; mistakes = 0; userPoints = []; problemStrokes.fill(0); saveState();
+            currentStroke = 0; mistakes = 0; userPoints = []; problemStrokes.fill(0); _kanjiSkippedAny = false; saveState();
             skipTimeouts.forEach(clearTimeout); skipTimeouts = [];
             // H1/M5: Clean up celebration state that may have been left behind
             // when _drawGen changed during the completion animation timeout.
@@ -3022,6 +3064,15 @@
             const hintColor = getCSSVar('--stroke-hint') || strokeColor;
             // Collect halo elements for batched reflow (avoid O(n) forced layouts in loop)
             const pendingHalos = [];
+            // Batch-read: capture all current halo offsets BEFORE any DOM writes
+            const haloOffsets = new Map();
+            paths.forEach((p) => {
+                const prevH = p.previousElementSibling;
+                if (prevH && prevH.classList.contains('gel-halo') &&
+                    (p.classList.contains('hint-active') || p.classList.contains('stroke-complete') || p.classList.contains('animate-draw'))) {
+                    haloOffsets.set(prevH, getComputedStyle(prevH).strokeDashoffset || '0');
+                }
+            });
             paths.forEach((p) => {
                 const isHint = p.classList.contains('hint-active');
                 if (isHint || p.classList.contains('stroke-complete') || p.classList.contains('animate-draw')) {
@@ -3029,44 +3080,29 @@
                     if (col) p.style.setProperty('stroke', col, 'important');
                     p.classList.remove('stroke-complete', 'hint-active', 'animate-draw');
                     p.classList.add('rewind-anim');
-                    // Collect halo for batched reflow — write initial state here
                     const prevH = p.previousElementSibling;
                     if (prevH && prevH.classList.contains('gel-halo')) {
                         prevH.setAttribute('stroke-dasharray', '105');
-                        prevH.style.setProperty('stroke-dashoffset', '0', 'important');
+                        prevH.style.setProperty('stroke-dashoffset', haloOffsets.get(prevH) || '0', 'important');
                         prevH.style.setProperty('transition', 'none', 'important');
                         pendingHalos.push(prevH);
                     }
-                    // Clean up exactly when the CSS transition ends — avoids the 1-frame linecap dot
-                    // Remove any stale listener from a previous reset before attaching a new one.
+                    // Pre-hide 50ms before rewind ends so the linecap dot never flashes
                     const _p = p;
                     const _capturedGen = _drawGen;
                     if (_p._rewindEndHandler) _p.removeEventListener('transitionend', _p._rewindEndHandler);
-                    const onRewindEnd = (e) => {
-                        if (e.propertyName !== 'stroke-dashoffset') return;
-                        if (_capturedGen !== _drawGen) { _p.removeEventListener('transitionend', onRewindEnd); return; }
-                        _p.removeEventListener('transitionend', onRewindEnd);
-                        _p._rewindEndHandler = null;
-                        // Hide immediately before class removal to prevent any flash
-                        _p.style.setProperty('opacity', '0', 'important');
-                        _p.style.setProperty('stroke', 'none', 'important');
-                        requestAnimationFrame(() => {
-                            _p.classList.remove('rewind-anim');
-                            _p.style.removeProperty('stroke');
-                            _p.style.removeProperty('opacity');
-                        });
-                    };
-                    _p._rewindEndHandler = onRewindEnd;
-                    p.addEventListener('transitionend', onRewindEnd);
-                    // Fallback in case transitionend never fires (e.g. reduced motion / hidden tab)
-                    const _rewindFallbackGen = _drawGen;
+                    _p._rewindEndHandler = null;
                     setTimeout(() => {
-                        if (_rewindFallbackGen !== _drawGen) return; // card navigated away
-                        p.removeEventListener('transitionend', onRewindEnd);
-                        _p._rewindEndHandler = null;
-                        p.style.setProperty('opacity', '0', 'important');
-                        requestAnimationFrame(() => { p.classList.remove('rewind-anim'); p.style.removeProperty('stroke'); p.style.removeProperty('opacity'); });
-                    }, ANIMATION_DURATION_MS + 100);
+                        if (_capturedGen !== _drawGen) return;
+                        _p.style.setProperty('transition', 'stroke-dashoffset 0.7s ease-in-out, opacity 0.15s ease-out', 'important');
+                        _p.style.setProperty('opacity', '0', 'important');
+                    }, ANIMATION_DURATION_MS - 150);
+                    setTimeout(() => {
+                        if (_capturedGen !== _drawGen) return;
+                        _p.classList.remove('rewind-anim');
+                        _p.style.removeProperty('stroke');
+                        _p.style.removeProperty('opacity');
+                    }, ANIMATION_DURATION_MS + 50);
                 } else {
                     p.classList.remove('stroke-complete', 'hint-active', 'animate-draw', 'rewind-anim');
                     p.style.removeProperty('stroke');
@@ -3087,6 +3123,7 @@
             clearTimeout(errorTimeout); clearTimeout(fadeTimeout); drawLayer.classList.remove('fade-out'); clearDrawLayer();
             guideSvg.classList.remove('is-visible');
             if (actionButtons) actionButtons.style.display = 'flex';
+            _setSkipDisabled(false);
             const fakeBack = document.getElementById("answer-fallback"); if (fakeBack) fakeBack.style.display = "none";
         };
 
@@ -3095,7 +3132,7 @@
             // Resolve any pending skip animations immediately before clearing timers
             skipTimeouts.forEach(clearTimeout); skipTimeouts = [];
             paths.forEach(p => { if (p.classList.contains('animate-draw')) { p.classList.remove('animate-draw'); p.classList.add('stroke-complete'); _addGelHaloToPath(p); } });
-            const pathToAnimate = paths[currentStroke]; problemStrokes[currentStroke] = 3;
+            const pathToAnimate = paths[currentStroke]; problemStrokes[currentStroke] = 3; _kanjiSkippedAny = true;
 
             // If the hint (green stroke) was visible, clone it so it fades out while the
             // skip animation draws the active-colored stroke on top from scratch.
@@ -3142,8 +3179,11 @@
             clearTimeout(errorTimeout); clearTimeout(fadeTimeout); drawLayer.classList.add('fade-out');
             fadeTimeout = setTimeout(() => { if (skipGen !== _drawGen) return; clearDrawLayer(); drawLayer.classList.remove('fade-out'); }, 300);
             if (currentStroke >= paths.length) {
-                if (actionButtons) actionButtons.style.display = 'none';
-                const flipTimer = setTimeout(() => { if (skipGen !== _drawGen) return; playCompletionAnimation().then(() => triggerAutoFlip()); }, ANIMATION_DURATION_MS); skipTimeouts.push(flipTimer);
+                _setSkipDisabled(true);
+                if (!_kanjiSkippedAny) {
+                    if (actionButtons) actionButtons.style.display = 'none';
+                    const flipTimer = setTimeout(() => { if (skipGen !== _drawGen) return; playCompletionAnimation().then(() => triggerAutoFlip()); }, ANIMATION_DURATION_MS); skipTimeouts.push(flipTimer);
+                }
             }
         };
 
@@ -3179,6 +3219,7 @@
         };
 
         const freeResetAction = () => {
+            if (_isRewinding) return;
             _drawGen++;
             const _freeResetGen = _drawGen;
             _isRewinding = true;
@@ -3191,9 +3232,9 @@
             const _strokeCountAtReset = currentStroke; // guided-mode progress at reset
             // Snapshot which paths exist NOW (before reset) so we only remove these later.
             const drawnPaths = Array.from(drawLayer.querySelectorAll('path:not(.gel-halo)'));
+            const drawnHalos = Array.from(drawLayer.querySelectorAll('.gel-halo'));
             const drawnNodes = new Set(Array.from(drawLayer.childNodes)); // all current children
-            // Remove gel halos and fade ink groups immediately
-            drawLayer.querySelectorAll('.gel-halo').forEach(h => h.parentNode.removeChild(h));
+            // Fade ink groups immediately
             drawLayer.querySelectorAll('g').forEach(g => { g.style.transition = 'opacity 0.25s ease-out'; g.style.opacity = '0'; });
             drawnPaths.forEach(p => {
                 const len = p.getTotalLength ? (p._cachedTotalLength !== undefined ? p._cachedTotalLength : (p._cachedTotalLength = p.getTotalLength())) : 200;
@@ -3201,15 +3242,39 @@
                 p.style.strokeDashoffset = '0';
                 p.style.transition = 'none';
             });
+            // Prepare drawn halos for dashoffset-based rewind
+            drawnHalos.forEach(h => {
+                const len = h.getTotalLength ? h.getTotalLength() : 200;
+                h.setAttribute('stroke-dasharray', len + '');
+                h.style.setProperty('stroke-dashoffset', '0', 'important');
+                h.style.setProperty('transition', 'none', 'important');
+            });
+            if (drawnHalos.length) drawnHalos[0].getBoundingClientRect(); // commit initial state
             // Also rewind the guide SVG if visible
             guideSvg.classList.remove('is-visible');
             // Simultaneously rewind all paths + reference strokes
             requestAnimationFrame(() => {
+                // Rewind drawn strokes (same 0.7s as reference strokes for consistent look)
                 drawnPaths.forEach(p => {
                     const len = parseFloat(p.style.strokeDasharray) || 200;
-                    p.style.transition = 'stroke-dashoffset 0.35s ease-in';
+                    p.style.transition = 'stroke-dashoffset 0.7s ease-in-out';
                     p.style.strokeDashoffset = len + '';
                 });
+                // Pre-hide drawn strokes with fade before transition ends to prevent linecap dot flash
+                setTimeout(() => {
+                    if (_freeResetGen !== _drawGen) return;
+                    drawnPaths.forEach(p => { p.style.transition = 'stroke-dashoffset 0.7s ease-in-out, opacity 0.15s ease-out'; p.style.opacity = '0'; });
+                }, ANIMATION_DURATION_MS - 150);
+                // Rewind drawn gel halos via dashoffset (initial state committed before rAF)
+                if (drawnHalos.length) {
+                    const haloTransition = 'stroke-dashoffset ' + (ANIMATION_DURATION_MS / 1000) + 's ease-in-out';
+                    drawnHalos.forEach(h => {
+                        const len = parseFloat(h.getAttribute('stroke-dasharray')) || 200;
+                        h.style.setProperty('stroke-dashoffset', len + '', 'important');
+                        h.style.setProperty('transition', haloTransition, 'important');
+                        setTimeout(() => { if (_freeResetGen !== _drawGen) return; if (h.parentNode) h.parentNode.removeChild(h); }, ANIMATION_DURATION_MS);
+                    });
+                }
                 // Also rewind visible reference strokes (from Strich einblenden)
                 const pendingHalos = [];
                 paths.forEach(p => {
@@ -3219,6 +3284,19 @@
                         if (col) p.style.setProperty('stroke', col, 'important');
                         p.classList.remove('stroke-complete', 'hint-active', 'animate-draw');
                         p.classList.add('rewind-anim');
+                        // Pre-hide reference strokes before rewind ends
+                        const _rp = p;
+                        setTimeout(() => {
+                            if (_freeResetGen !== _drawGen) return;
+                            _rp.style.setProperty('transition', 'stroke-dashoffset 0.7s ease-in-out, opacity 0.15s ease-out', 'important');
+                            _rp.style.setProperty('opacity', '0', 'important');
+                        }, ANIMATION_DURATION_MS - 150);
+                        setTimeout(() => {
+                            if (_freeResetGen !== _drawGen) return;
+                            _rp.classList.remove('rewind-anim');
+                            _rp.style.removeProperty('stroke');
+                            _rp.style.removeProperty('opacity');
+                        }, ANIMATION_DURATION_MS + 50);
                         // Collect gel halos for batched reflow
                         const prevH = p.previousElementSibling;
                         if (prevH && prevH.classList.contains('gel-halo')) {
@@ -3251,7 +3329,7 @@
                 freeSVGPaths.splice(0, resetCount);
                 // Reset state only when no new strokes have been drawn in the meantime
                 if (freeStrokes.length === 0) {
-                    userPoints = []; problemStrokes.fill(0);
+                    userPoints = []; problemStrokes.fill(0); _kanjiSkippedAny = false;
                     // Only reset currentStroke to 0 if no guided strokes were drawn during animation
                     if (currentStroke === _strokeCountAtReset) currentStroke = 0;
                 }
@@ -3282,7 +3360,7 @@
                 });
                 window._kanjiFreeStrokes = null;
                 const fakeBack = document.getElementById("answer-fallback"); if (fakeBack) fakeBack.style.display = "none";
-            }, 400);
+            }, ANIMATION_DURATION_MS + 50);
         };
 
         // Delegate click handlers (bind once, action is swappable)
@@ -3303,6 +3381,13 @@
             btnUndo.disabled = !hasStrokes;
             btnUndo.style.opacity = hasStrokes ? '' : '0.35';
             btnUndo.style.pointerEvents = hasStrokes ? '' : 'none';
+        };
+
+        const _setSkipDisabled = (disabled) => {
+            if (!btnSkip) return;
+            btnSkip.disabled = disabled;
+            btnSkip.style.opacity = disabled ? '0.35' : '';
+            btnSkip.style.pointerEvents = disabled ? 'none' : '';
         };
 
         const bindModeButtons = () => {
@@ -3353,6 +3438,36 @@
             btn.classList.remove('btn-flash');
             requestAnimationFrame(function () { btn.classList.add('btn-flash'); });
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+        });
+        ab.addEventListener('animationend', function (e) {
+            if (e.animationName === 'btnFlash') e.target.classList.remove('btn-flash');
+        });
+    })();
+
+    // Gear button animationend cleanup
+    if (_gearBtn) {
+        _gearBtn.addEventListener('animationend', function (e) {
+            if (e.animationName === 'gearTap') _gearBtn.classList.remove('gear-tap');
+        });
+    }
+
+    // Settings item tap feedback — event delegation on settings modal
+    (function () {
+        var sm = document.querySelector('.settings-modal');
+        if (!sm) return;
+        sm.addEventListener('click', function (e) {
+            var el = e.target.closest('.category-card') ||
+                e.target.closest('.segment-btn') ||
+                e.target.closest('.close-settings') ||
+                e.target.closest('.back-btn');
+            if (!el) return;
+            el.classList.remove('tap-flash');
+            requestAnimationFrame(function () { el.classList.add('tap-flash'); });
+        });
+        sm.addEventListener('animationend', function (e) {
+            if (e.animationName === 'settingsTap' || e.animationName === 'controlTap') {
+                e.target.classList.remove('tap-flash');
+            }
         });
     })();
 

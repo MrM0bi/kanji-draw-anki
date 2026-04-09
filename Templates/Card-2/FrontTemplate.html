@@ -673,7 +673,7 @@
                     <div class="visual-option">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M13 13a10 10 0 0 0 14 14 14 14 0 0 1-14-14Z"></path>
+                            <path d="M28 24.5A10 10 0 1 1 15.5 12a8 8 0 0 0 12.5 12.5Z"></path>
                         </svg>
                         <span>Dunkel</span>
                     </div>
@@ -1909,7 +1909,14 @@
 
     if (window.kanjiTouchStartHandlerC2) document.removeEventListener('touchstart', window.kanjiTouchStartHandlerC2, { passive: false });
     window.kanjiTouchStartHandlerC2 = function (e) {
-        if (document.body.classList.contains('no-scroll') && e.touches.length > 1) e.preventDefault();
+        if (!document.body.classList.contains('no-scroll')) return;
+        if (e.touches.length > 1) { e.preventDefault(); return; }
+        if (e.target.closest('.settings-overlay') || e.target.closest('.info-overlay') ||
+            e.target.closest('.gear-btn') || e.target.closest('.action-buttons') ||
+            e.target.closest('#addon-hint') || e.target.closest('#legacy-gesture-warning') ||
+            e.target.closest('button') || e.target.closest('a') ||
+            e.target.closest('input') || e.target.closest('label')) return;
+        e.preventDefault();
     };
     document.addEventListener('touchstart', window.kanjiTouchStartHandlerC2, { passive: false });
 
