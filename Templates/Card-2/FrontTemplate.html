@@ -157,6 +157,7 @@
                         </svg><span>Voll</span></div>
                 </label>
             </div>
+            <div id="grid-sub-options">
             <div class="setting-group-title">Linienstil</div>
             <div class="visual-options-grid">
                 <label><input type="radio" name="grid-style" value="dotted"
@@ -221,6 +222,7 @@
                         </svg><span>Stark</span></div>
                 </label>
             </div>
+            </div><!-- /grid-sub-options -->
             <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
@@ -1296,6 +1298,7 @@
             if (radioValues[r.name] !== undefined) r.checked = (r.value === radioValues[r.name]);
         });
         updateModeDisabledSettings();
+        _updateGridSubOptionsState(radioValues['grid-type'] || 'cross');
     }
 
     function updateModeDisabledSettings() {
@@ -1712,8 +1715,17 @@
     function updateGridSetting(category, val) {
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
         safeSetItem(_activeTab + '_kanjiGrid' + category.charAt(0).toUpperCase() + category.slice(1), val);
+        if (category === 'type') _updateGridSubOptionsState(val);
         if (_activeTab === _hostCard) updateGridDisplay();
         else refreshSettingsRadios();
+    }
+
+    function _updateGridSubOptionsState(typeVal) {
+        var sub = document.getElementById('grid-sub-options');
+        if (!sub) return;
+        var disabled = typeVal === 'none';
+        sub.style.opacity = disabled ? '0.35' : '';
+        sub.style.pointerEvents = disabled ? 'none' : '';
     }
 
     function updateFeatureSetting(category, val, scopeOverride) {
