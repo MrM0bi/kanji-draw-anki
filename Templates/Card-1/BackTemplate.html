@@ -456,7 +456,7 @@
             });
         }
 
-        const _esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        const _esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
         function renderNode(node) {
             if (!node || !node.value) return '';
@@ -517,7 +517,7 @@
         const targetWordsEl = document.getElementById('formatted-hint-words');
         if (rawWordsEl && targetWordsEl) {
             let words = rawWordsEl.innerHTML.split(/\s*,\s*(?![^\(\)]*\))/);
-            const _wesc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            const _wesc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             targetWordsEl.innerHTML = words.map(word => {
                 word = word.trim();
                 if (!word) return '';
