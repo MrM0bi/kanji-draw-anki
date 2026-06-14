@@ -109,6 +109,10 @@
     --tag-kun-bg: #eef6eb;
     --tag-kun-text: #2d6a1e;
 
+    /* Primitives */
+    --prim-text: #525250;
+    --prim-bg: #f0f0ed;
+
     /* Accent */
     --accent: #56a83a;
     --accent-hover: #4a9432;
@@ -207,6 +211,8 @@ html.is-ankiweb .info-modal {
     --tag-on-text: #d0d0cc;
     --tag-kun-bg: #1e3318;
     --tag-kun-text: #6ace54;
+    --prim-bg: #333330;
+    --prim-text: #d0d0cc;
     --accent: #6abe4e;
     --accent-hover: #5cac40;
     --accent-bg: #1e3315;
@@ -307,6 +313,54 @@ html.is-ankimobile:has(.info-overlay.active) .card {
     -webkit-backface-visibility: hidden;
     line-height: 1.3;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Primitive meaning(s) shown alongside the keyword in the title (PrimitivBedeutung-DE).
+   One .primitive-box per comma-separated word; a single .primitive-label sits on the group.
+   Boxes/label are built from the raw field by a small script in the front templates. */
+.primitive-group {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+    /* Nudge up to optically center the box+label cluster: the .primitive-label
+       overhangs the top, so a geometrically centered box reads as sitting low. */
+    transform: translateY(-2px);
+}
+
+.primitive-box {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 4px 12px;
+    border-radius: var(--border-rad-sm);
+    background: var(--prim-bg);
+    color: var(--prim-text);
+    font-size: 0.72em;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.primitive-label {
+    position: absolute;
+    top: -11px;
+    right: -7px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--prim-bg);
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: 0 0 0 2px var(--surface), var(--filter-soft);
 }
 
 /* --------------------------------------------------------------------------
@@ -1857,6 +1911,156 @@ svg#svg-guide path,
     padding: 10px 12px;
     border-radius: var(--border-rad-sm);
     border-left: 3px solid var(--accent);
+}
+
+/* ==========================================================================
+   Inlined info area — collapsible sections (replaces the former info modal)
+   ========================================================================== */
+.info-inline {
+    width: var(--dynamic-size);
+    margin: 24px auto 0 auto;
+    box-sizing: border-box;
+}
+
+.info-inline .info-tags {
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.kd-section {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-main);
+    box-shadow: var(--filter-soft);
+    margin-bottom: 12px;
+    overflow: hidden;
+    text-align: left;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.kd-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease;
+}
+
+.kd-section-header:active,
+.kd-section-header.tap-active {
+    background: var(--bg-main);
+}
+
+.kd-section-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--text-main);
+}
+
+.kd-section-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: 0.2px;
+}
+
+.kd-section-chevron {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transform: rotate(90deg);
+    transition: transform 0.25s ease;
+}
+
+.kd-section.collapsed .kd-section-chevron {
+    transform: rotate(0deg);
+}
+
+/* max-height is driven inline by JS (set to scrollHeight) for a smooth, content-sized
+   ease-in-out. border-box keeps padding inside the animated height so it collapses cleanly. */
+.kd-section-body {
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 16px 16px 16px;
+    transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Neutralize legacy inner spacing — the section body controls padding now */
+.kd-section-body > :first-child {
+    margin-top: 0;
+}
+
+.kd-section-body > :last-child {
+    margin-bottom: 0;
+}
+
+.kd-section-body .tree-container {
+    margin: 0;
+    padding-top: 4px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.kd-section-body .word-example-list,
+.kd-section-body .readings-container--backside,
+.kd-section-body .info-text-story {
+    margin-bottom: 0;
+}
+
+/* 2px of headroom so the hover-raised top border of the first word item isn't clipped */
+.kd-section-body .word-example-list {
+    padding-top: 2px;
+}
+
+.kd-section-body .link-grid {
+    margin-top: 0;
+}
+
+/* Story boxes inside "Eselsbrücken" — dark box with accent left border (reuses the
+   former MerkhilfeVisuell look). Bold title row + italic story text. */
+.story-box {
+    background: var(--bg-main);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--border-rad-sm);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+.story-box:last-child {
+    margin-bottom: 0;
+}
+
+.story-box-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.story-box-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--text-main);
+}
+
+.story-box-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--text-main);
 }
 
 .word-example-list {

@@ -21,7 +21,7 @@
         transition: none !important;
     }
 
-    .info-btn {
+    .info-inline {
         opacity: 0;
         animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         animation-delay: 0.08s;
@@ -72,21 +72,7 @@
 
 {{FrontSide}}
 
-<button class="info-btn" onclick="openInfoModal(event)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-    </svg>
-    Info & Merkhilfe
-</button>
-
-<div class="info-overlay" id="info-overlay" onclick="closeInfoModal(event)">
-    <div class="info-modal" onclick="event.stopPropagation()">
-
-        <div class="info-modal-header">
-            <span class="info-modal-title">Übersicht</span>
-            <span class="info-modal-meaning">{{Bedeutung-DE}}</span>
-        </div>
+<div class="info-inline" id="info-inline">
 
         <div class="info-tags">
             {{#JLPT-Level}}
@@ -110,89 +96,188 @@
                 {{Häufigkeit}}
             </span>
             {{/Häufigkeit}}
+            {{#Kanjinummer-BuchEN-Edition-6}}
+            <span class="info-tag tag-id">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="9" x2="20" y2="9"></line>
+                    <line x1="4" y1="15" x2="20" y2="15"></line>
+                    <line x1="10" y1="3" x2="8" y2="21"></line>
+                    <line x1="16" y1="3" x2="14" y2="21"></line>
+                </svg>
+                {{Kanjinummer-BuchEN-Edition-6}}
+            </span>
+            {{/Kanjinummer-BuchEN-Edition-6}}
         </div>
 
         {{#Radikale}}
-        <script id="raw-tree-data" type="text/plain">{{Radikale}}</script>
-        <div class="tree-container custom-tree-box">
-            <div class="tree-root-kanji">{{Kanji}}</div>
-            <div class="tree-children" id="tree-render-target"></div>
+        <div class="kd-section" data-sec="elemente">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <svg class="kd-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span class="kd-section-title">Elemente</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+            <div class="kd-section-body">
+                <script id="raw-tree-data" type="text/plain">{{Radikale}}</script>
+                <div class="tree-container custom-tree-box">
+                    <div class="tree-root-kanji">{{Kanji}}</div>
+                    <div class="tree-children" id="tree-render-target"></div>
+                </div>
+            </div>
         </div>
         {{/Radikale}}
 
-        {{#Eselsbrücke}}
-        <div class="info-section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 18h6" />
-                <path d="M10 22h4" />
-                <path
-                    d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
-            </svg>
-            Eselsbrücke
+        <div class="kd-section" data-sec="eselsbruecken">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <svg class="kd-section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18h6" />
+                    <path d="M10 22h4" />
+                    <path
+                        d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+                </svg>
+                <span class="kd-section-title">Eselsbrücken</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+            <div class="kd-section-body">
+                {{#Merksatz-Override}}
+                <!-- Story box: Merksatz-Override — replace icon/title as desired -->
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <!-- Custom Icon from https://feathericons.com/ -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Eigener Merksatz
+                    </div>
+                    <p class="story-box-text">{{Merksatz-Override}}</p>
+                </div>
+                {{/Merksatz-Override}}
+                {{#Merksatz-DE}}
+                <!-- Story box: Merksatz-DE — replace icon/title as desired -->
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <svg class="story-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                        Merksatz
+                    </div>
+                    <p class="story-box-text">{{Merksatz-DE}}</p>
+                </div>
+                {{/Merksatz-DE}}
+                {{#BuchBeschreibung}}
+                <!-- Story box: BuchBeschreibung — replace icon/title as desired -->
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <!-- Custom Icon from https://feathericons.com/ -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Heisig - Kanji Beschreibung
+                    </div>
+                    <p class="story-box-text">{{BuchBeschreibung}}</p>
+                </div>
+                {{/BuchBeschreibung}}
+                {{#BuchPrimitivBeschreibung}}
+                <!-- Story box: BuchPrimitivBeschreibung — replace icon/title as desired -->
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <!-- Custom Icon from https://feathericons.com/ -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Heisig - Primitiv Beschreibung
+                    </div>
+                    <p class="story-box-text">{{BuchPrimitivBeschreibung}}</p>
+                </div>
+                {{/BuchPrimitivBeschreibung}}
+            </div>
         </div>
-        {{/Eselsbrücke}}
-
-        {{#MerkhilfeVisuell}}
-        <div class="visuell-hinweis">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-            </svg>
-            {{MerkhilfeVisuell}}
-        </div>
-        {{/MerkhilfeVisuell}}
-
-        {{#Eselsbrücke}}
-        <p class="info-text-story">{{Eselsbrücke}}</p>
-        {{/Eselsbrücke}}
 
         {{#Wortbeispiel}}
-        <div class="info-section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-            </svg>
-            Wortbeispiele
-        </div>
-        <div class="hint-word-box">
-            <div id="raw-hint-words" style="display:none;">{{furigana:Wortbeispiel}}</div>
-            <div id="formatted-hint-words" class="word-example-list"></div>
+        <div class="kd-section" data-sec="wortbeispiele">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <svg class="kd-section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span class="kd-section-title">Wortbeispiele</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+            <div class="kd-section-body">
+                <div class="hint-word-box">
+                    <div id="raw-hint-words" style="display:none;">{{furigana:Wortbeispiel}}</div>
+                    <div id="formatted-hint-words" class="word-example-list"></div>
+                </div>
+            </div>
         </div>
         {{/Wortbeispiel}}
 
-        <div class="info-section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            Lesungen
-        </div>
-        <div class="readings-container readings-container--backside">
-            {{#Onyomi}}
-            <div class="reading-row">
-                <span class="reading-label onyomi-label">ON</span><span class="reading-value">{{Onyomi}}</span>
+        <div class="kd-section" data-sec="lesungen">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <svg class="kd-section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="kd-section-title">Lesungen</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
             </div>
-            {{/Onyomi}}
-            {{#Kunyomi}}
-            <div class="reading-row">
-                <span class="reading-label kunyomi-label">KUN</span><span class="reading-value">{{Kunyomi}}</span>
+            <div class="kd-section-body">
+                <div class="readings-container readings-container--backside">
+                    {{#Onyomi}}
+                    <div class="reading-row">
+                        <span class="reading-label onyomi-label">ON</span><span class="reading-value">{{Onyomi}}</span>
+                    </div>
+                    {{/Onyomi}}
+                    {{#Kunyomi}}
+                    <div class="reading-row">
+                        <span class="reading-label kunyomi-label">KUN</span><span class="reading-value">{{Kunyomi}}</span>
+                    </div>
+                    {{/Kunyomi}}
+                </div>
             </div>
-            {{/Kunyomi}}
         </div>
 
-        <div class="info-section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            Externe Links
-        </div>
-        <div class="link-grid">
+        <div class="kd-section" data-sec="links">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <svg class="kd-section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span class="kd-section-title">Externe Links</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+            <div class="kd-section-body">
+                <div class="link-grid">
             <a class="link-btn" href="https://jisho.org/search/{{Kanji}}%20%23kanji" target="_blank">
                 Jisho <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width:14px; height:14px; opacity:0.6;">
@@ -222,9 +307,10 @@
                     <polyline points="7 7 17 7 17 17" />
                 </svg>
             </a>
+                </div>
+            </div>
         </div>
-        <div role="button" tabindex="0" class="close-settings" onclick="closeInfoModal(event)">Schließen</div>
-    </div>
+
 </div>
 
 <script>
@@ -255,8 +341,9 @@
             var _fsMap = {
                 '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
                 '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
-                '.info-section-title': [13, 11, 15], '.info-text-story': [15, 13, 17],
-                '.visuell-hinweis': [14, 12, 16], '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
+                '.info-section-title': [13, 11, 15], '.kd-section-title': [15, 13, 17], '.info-text-story': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17],
+                '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
                 '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
                 '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
                 '.tree-node-char': [28, 24, 32], '.tree-node-tooltip': [13, 11, 15],
@@ -323,40 +410,44 @@
 
     // Provided by FrontSide injection: getGlobalConfig(), SVG path setup
 
-    function openInfoModal(e) {
-        if (e) { e.stopPropagation(); e.preventDefault(); }
-        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-        var ib = document.querySelector('.info-btn');
-        if (ib) { ib.classList.remove('info-tap'); requestAnimationFrame(function () { ib.classList.add('info-tap'); }); }
-        var ol = document.getElementById('info-overlay');
-        if (!ol) return;
-        var im = ol.querySelector('.info-modal');
-        if (im) im.scrollTop = 0;
-        ol.classList.add('active');
-    }
-
-    function closeInfoModal(e) {
-        if (e) { e.stopPropagation(); e.preventDefault(); }
-        var ol = document.getElementById('info-overlay');
-        // For backdrop clicks, verify pointerdown was also on the overlay itself.
-        if (e && e.target === ol && !ol._bgPointerDown) return;
-        ol._bgPointerDown = false;
-        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-        ol.classList.remove('active');
-        // Keep overlay clickable briefly to absorb S-Pen/stylus ghost clicks
-        ol.style.pointerEvents = 'auto';
-        clearTimeout(ol._pointerEvTimer);
-        ol._pointerEvTimer = setTimeout(function () { ol.style.pointerEvents = ''; }, 400);
-    }
-
-    // Info button tap feedback cleanup
+    // --- Collapsible sections (inlined info) [SHARED with c1-back] ---
+    // Replaces the former info modal. Each .kd-section[data-sec] remembers its
+    // collapsed state via safeGetItem/safeSetItem (from FrontSide): '1' = collapsed.
     (function () {
-        var ib = document.querySelector('.info-btn');
-        if (ib) {
-            ib.addEventListener('animationend', function (e) {
-                if (e.animationName === 'gearTap') ib.classList.remove('info-tap');
+        var sections = document.querySelectorAll('.kd-section[data-sec]');
+        if (!sections.length) return;
+        sections.forEach(function (sec) {
+            var key = 'kdSec_' + sec.getAttribute('data-sec');
+            var body = sec.querySelector('.kd-section-body');
+            var header = sec.querySelector('.kd-section-header');
+            if (!body || !header) return;
+            // Initial state: collapsed -> max-height 0; expanded -> 'none' so it can reflow freely.
+            if (safeGetItem(key, '0') === '1') { sec.classList.add('collapsed'); body.style.maxHeight = '0px'; }
+            else { body.style.maxHeight = 'none'; }
+            // After an expand transition, release the cap so dynamic content (tooltips) can grow.
+            body.addEventListener('transitionend', function (e) {
+                if (e.propertyName === 'max-height' && !sec.classList.contains('collapsed')) body.style.maxHeight = 'none';
             });
-        }
+            var toggle = function (e) {
+                if (e) { e.stopPropagation(); e.preventDefault(); }
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8);
+                var willCollapse = !sec.classList.contains('collapsed');
+                if (willCollapse) {
+                    body.style.maxHeight = body.scrollHeight + 'px'; // pin current height
+                    void body.offsetHeight;                          // force reflow so 0 animates
+                    sec.classList.add('collapsed');
+                    body.style.maxHeight = '0px';
+                } else {
+                    sec.classList.remove('collapsed');
+                    body.style.maxHeight = body.scrollHeight + 'px'; // animate up to content height
+                }
+                try { safeSetItem(key, willCollapse ? '1' : '0'); } catch (err) { }
+            };
+            header.addEventListener('click', toggle);
+            header.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') toggle(e);
+            });
+        });
     })();
 
     // --- Radical Tree Renderer [SHARED with c1-back] ---
@@ -483,10 +574,16 @@
     (() => {
         const rc = document.querySelector('.readings-container--backside');
         if (rc && !rc.querySelector('.reading-row')) {
-            rc.style.display = 'none';
-            const prev = rc.previousElementSibling;
-            if (prev && prev.classList.contains('info-section-title')) prev.style.display = 'none';
+            const sec = rc.closest('.kd-section');
+            if (sec) sec.style.display = 'none';
+            else rc.style.display = 'none';
         }
+    })();
+
+    // --- Hide "Eselsbrücken" if no story boxes were rendered [SHARED with c1-back] ---
+    (() => {
+        const sec = document.querySelector('.kd-section[data-sec="eselsbruecken"]');
+        if (sec && !sec.querySelector('.story-box')) sec.style.display = 'none';
     })();
 
     // --- Back Side Features (stroke colors, numbers, colorOrder) ---
@@ -738,23 +835,21 @@
                         clearTimeout(window._kanjiModalEatTimer);
                         window._kanjiModalEatClick = null;
                     }
-                    if (handler === 'info') openInfoModal(e);
-                    else openSettings(e);
+                    openSettings(e);
                     window._kanjiModalEatClick = function (ev) { ev.stopPropagation(); ev.stopImmediatePropagation(); ev.preventDefault(); document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; };
                     document.addEventListener('click', window._kanjiModalEatClick, true);
                     window._kanjiModalEatTimer = setTimeout(function () { if (window._kanjiModalEatClick) { document.removeEventListener('click', window._kanjiModalEatClick, true); window._kanjiModalEatClick = null; } }, 300);
                 });
             });
         }
-        addPenHandler('.info-btn', 'info');
         addPenHandler('.gear-btn', 'gear');
 
-        var infoModal = document.querySelector('.info-modal');
-        if (infoModal && !infoModal._ankiPenDelegateFixed) {
-            infoModal._ankiPenDelegateFixed = true;
-            infoModal.addEventListener('pointerup', function (e) {
+        var infoInline = document.getElementById('info-inline');
+        if (infoInline && !infoInline._ankiPenDelegateFixed) {
+            infoInline._ankiPenDelegateFixed = true;
+            infoInline.addEventListener('pointerup', function (e) {
                 if (e.pointerType !== 'pen') return;
-                var tappable = e.target.closest('.tree-node, .word-example-item, .tappable');
+                var tappable = e.target.closest('.kd-section-header, .tree-node, .word-example-item, .tappable');
                 if (!tappable) return;
                 e.preventDefault(); e.stopPropagation();
                 tappable.click();

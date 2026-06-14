@@ -900,7 +900,22 @@
     </div>
 </div>
 
-<h2 class="card-title" style="visibility: hidden;">{{Bedeutung-DE}}</h2>
+<h2 class="card-title" style="visibility: hidden;">{{Bedeutung-DE}}{{#PrimitivBedeutung-DE}}<span class="primitive-group">{{PrimitivBedeutung-DE}}</span>{{/PrimitivBedeutung-DE}}</h2>
+<script>
+    // Split PrimitivBedeutung-DE (comma-separated) into one .primitive-box per word + a single label.
+    // Runs on the front and, via {{FrontSide}}, on the back.
+    (function () {
+        document.querySelectorAll('.primitive-group').forEach(function (g) {
+            if (g._kdPrimDone) return; g._kdPrimDone = true;
+            var raw = (g.textContent || '').trim();
+            if (!raw) { g.style.display = 'none'; return; }
+            var esc = function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+            var words = raw.split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+            g.innerHTML = words.map(function (w) { return '<span class="primitive-box">' + esc(w) + '</span>'; }).join('') +
+                '<span class="primitive-label">Primitive</span>';
+        });
+    })();
+</script>
 
 <!-- SVG filter definitions for neon glow -->
 <svg id="neon-defs" style="width:0;height:0;position:absolute;overflow:hidden" aria-hidden="true">
