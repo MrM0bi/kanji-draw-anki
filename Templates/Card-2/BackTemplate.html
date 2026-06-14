@@ -85,20 +85,20 @@
 
         <div class="info-modal-header">
             <span class="info-modal-title">Übersicht</span>
-            <span class="info-modal-meaning">{{Bedeutung}}</span>
+            <span class="info-modal-meaning">{{Bedeutung-DE}}</span>
         </div>
 
         <div class="info-tags">
-            {{#JLPT}}
+            {{#JLPT-Level}}
             <span class="info-tag">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                     <path d="M6 12v5c3 3 9 3 12 0v-5" />
                 </svg>
-                {{JLPT}}
+                {{JLPT-Level}}
             </span>
-            {{/JLPT}}
+            {{/JLPT-Level}}
             {{#Häufigkeit}}
             <span class="info-tag tag-frequency">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -133,16 +133,16 @@
         </div>
         {{/Eselsbrücke}}
 
-        {{#Merkhilfe}}
+        {{#MerkhilfeVisuell}}
         <div class="visuell-hinweis">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
             </svg>
-            {{Merkhilfe}}
+            {{MerkhilfeVisuell}}
         </div>
-        {{/Merkhilfe}}
+        {{/MerkhilfeVisuell}}
 
         {{#Eselsbrücke}}
         <p class="info-text-story">{{Eselsbrücke}}</p>

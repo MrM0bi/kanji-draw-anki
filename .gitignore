@@ -21,3 +21,6 @@ Backup/
 node_modules/
 __pycache__/
 *.pyc
+
+# AI 
+CLAUDE.md
