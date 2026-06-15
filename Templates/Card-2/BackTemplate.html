@@ -12,7 +12,7 @@
         visibility: visible !important;
         transition: none !important;
         opacity: 0;
-        animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.05s forwards;
+        animation: fadeAndSlideIn 0.1s cubic-bezier(0.4, 0, 0.2, 1) 0.05s forwards;
     }
 
     .kanji-container {
@@ -23,7 +23,7 @@
 
     .info-inline {
         opacity: 0;
-        animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: fadeAndSlideIn 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         animation-delay: 0.08s;
     }
 
@@ -127,7 +127,15 @@
             <div class="kd-section-body">
                 <script id="raw-tree-data" type="text/plain">{{Radikale}}</script>
                 <div class="tree-container custom-tree-box">
-                    <div class="tree-root-kanji">{{Kanji}}</div>
+                    <!-- Root kanji + Handschriftbeispiele in one row. The font-x samples share the
+                         root's style (only the font differs) and appear when the setting is on
+                         (.is-visible added by JS). -->
+                    <div class="kanji-font-examples">
+                        <div class="tree-root-kanji">{{Kanji}}</div>
+                        <div class="kanji-font-example font-2" title="Kai">{{Kanji}}</div>
+                        <div class="kanji-font-example font-3" title="Handschrift">{{Kanji}}</div>
+                        <div class="kanji-font-example font-4" title="Gyōsho">{{Kanji}}</div>
+                    </div>
                     <div class="tree-children" id="tree-render-target"></div>
                 </div>
             </div>
@@ -346,6 +354,7 @@
                 '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
                 '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
                 '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
+                '.kanji-font-example': [36, 32, 40],
                 '.tree-node-char': [28, 24, 32], '.tree-node-tooltip': [13, 11, 15],
                 '.no-tree-data': [13, 11, 15], '.side-by-side-label': [11, 10, 12],
                 '.setting-group-title': [11, 10, 12], '.segment-btn': [12, 10, 14],
@@ -421,12 +430,20 @@
             var body = sec.querySelector('.kd-section-body');
             var header = sec.querySelector('.kd-section-header');
             if (!body || !header) return;
-            // Initial state: collapsed -> max-height 0; expanded -> 'none' so it can reflow freely.
-            if (safeGetItem(key, '0') === '1') { sec.classList.add('collapsed'); body.style.maxHeight = '0px'; }
-            else { body.style.maxHeight = 'none'; }
-            // After an expand transition, release the cap so dynamic content (tooltips) can grow.
+            // Initial state, applied without animating (suppress the transition for one frame).
+            // Collapsed: the .collapsed CSS rule owns max-height:0 + padding:0 so nothing peeks.
+            // Expanded: leave max-height auto so content flows freely.
+            if (safeGetItem(key, '0') === '1') {
+                body.style.transition = 'none';
+                sec.classList.add('collapsed');
+                void body.offsetHeight;       // commit before re-enabling transitions
+                body.style.transition = '';
+            }
+            // After a height transition, settle into a clean steady state so no half-set inline
+            // cap lingers: collapsed -> clear inline and let the CSS rule govern; expanded -> 'none'.
             body.addEventListener('transitionend', function (e) {
-                if (e.propertyName === 'max-height' && !sec.classList.contains('collapsed')) body.style.maxHeight = 'none';
+                if (e.propertyName !== 'max-height') return;
+                body.style.maxHeight = sec.classList.contains('collapsed') ? '' : 'none';
             });
             var toggle = function (e) {
                 if (e) { e.stopPropagation(); e.preventDefault(); }
@@ -435,11 +452,20 @@
                 if (willCollapse) {
                     body.style.maxHeight = body.scrollHeight + 'px'; // pin current height
                     void body.offsetHeight;                          // force reflow so 0 animates
-                    sec.classList.add('collapsed');
+                    sec.classList.add('collapsed');                  // CSS eases padding -> 0
                     body.style.maxHeight = '0px';
                 } else {
+                    // Measure the true expanded height with padding restored (probe without animating),
+                    // then animate from 0 up to it so the final frame isn't clipped by the padding.
                     sec.classList.remove('collapsed');
-                    body.style.maxHeight = body.scrollHeight + 'px'; // animate up to content height
+                    body.style.transition = 'none';
+                    body.style.maxHeight = 'none';
+                    var target = body.scrollHeight;
+                    body.style.maxHeight = '0px';
+                    void body.offsetHeight;
+                    body.style.transition = '';
+                    void body.offsetHeight;
+                    body.style.maxHeight = target + 'px';            // animate up to content height
                 }
                 try { safeSetItem(key, willCollapse ? '1' : '0'); } catch (err) { }
             };
@@ -584,6 +610,20 @@
     (() => {
         const sec = document.querySelector('.kd-section[data-sec="eselsbruecken"]');
         if (sec && !sec.querySelector('.story-box')) sec.style.display = 'none';
+    })();
+
+    // --- Handschriftbeispiele: show the kanji in alternative fonts when enabled ---
+    // Per-card-type setting (c2 here); re-applied live via kanjiSettingsGlobalHandlerC2.
+    (function () {
+        function apply() {
+            var list = document.querySelector('.kanji-font-examples');
+            if (!list) return;
+            var on = safeGetItem('c2_kanjiOptHandwriting',
+                safeGetItem('kanjiOptHandwriting', getGlobalConfig().handwriting)) === 'on';
+            list.classList.toggle('is-visible', on);
+        }
+        window._kanjiApplyHandwriting = apply;
+        apply();
     })();
 
     // --- Back Side Features (stroke colors, numbers, colorOrder) ---
@@ -763,6 +803,8 @@
         applyBackFeatures();
 
         window.kanjiSettingsGlobalHandlerC2 = () => {
+            // Re-read handwriting-samples visibility (setting may have changed)
+            if (window._kanjiApplyHandwriting) window._kanjiApplyHandwriting();
             // Re-read and apply stroke style class (may have changed)
             var _ss = (typeof safeGetItem === 'function')
                 ? safeGetItem('kanjiThemeStrokeStyle', 'standard')

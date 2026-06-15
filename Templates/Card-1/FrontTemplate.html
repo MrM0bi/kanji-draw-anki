@@ -544,6 +544,31 @@
                     </label>
                 </div>
             </div>
+            <!-- Handschriftbeispiele: Kanji zusätzlich in anderen Schriftarten (beide Kartentypen).-->
+            <div class="setting-group-title">Handschriftbeispiele</div>
+            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <label><input type="radio" name="opt-handwriting" value="off"
+                        onchange="updateFeatureSetting('handwriting', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" overflow="visible" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16.6273 25.9196C16.2554 24.9936 15.5764 24.227 14.7065 23.7512C13.8366 23.2753 12.8299 23.1197 11.8589 23.3111C10.8879 23.5025 10.0131 24.029 9.38411 24.8003C8.75517 25.5716 8.41131 26.5399 8.41143 27.5391C8.41143 27.9815 8.32148 28.4192 8.14716 28.825C7.97283 29.2308 7.71785 29.5961 7.39801 29.8983C7.07817 30.2005 6.7003 30.4331 6.2878 30.5818C5.87531 30.7304 5.43698 30.7919 5 30.7624C5.70282 31.9956 6.78905 32.96 8.09007 33.5058C9.39109 34.0516 10.8341 34.1483 12.1951 33.7809C13.5561 33.4135 14.759 32.6025 15.6169 31.4739C16.4749 30.3453 16.94 28.9621 16.94 27.5391C16.94 26.9663 16.8291 26.4192 16.6273 25.9196ZM16.6273 25.9196C18.3174 25.338 19.9338 24.5573 21.4431 23.5937M14.2748 23.5578C14.8508 21.847 15.6247 20.2109 16.5804 18.6834M21.4417 23.5937C24.1372 21.8735 26.4443 19.5998 28.2133 16.9203L33.7228 8.5729C33.9338 8.25497 34.0291 7.87289 33.9923 7.49191C33.9554 7.11094 33.7888 6.75469 33.5208 6.48402C33.2528 6.21335 32.9001 6.04504 32.523 6.00783C32.1458 5.97062 31.7675 6.06682 31.4528 6.28001L23.1886 11.8464C20.5355 13.6327 18.284 15.9626 16.5804 18.6849"/>
+                            <path d="M7 7L33.6667 33.6667"/>
+                        </svg>
+                        <span>Aus</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="opt-handwriting" value="on"
+                        onchange="updateFeatureSetting('handwriting', this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 40 40" overflow="visible" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16.6273 25.9196C16.2554 24.9936 15.5764 24.227 14.7065 23.7512C13.8366 23.2753 12.8299 23.1197 11.8589 23.3111C10.8879 23.5025 10.0131 24.029 9.38411 24.8003C8.75517 25.5716 8.41131 26.5399 8.41143 27.5391C8.41143 27.9815 8.32148 28.4192 8.14716 28.825C7.97283 29.2308 7.71785 29.5961 7.39801 29.8983C7.07817 30.2005 6.7003 30.4331 6.2878 30.5818C5.87531 30.7304 5.43698 30.7919 5 30.7624C5.70282 31.9956 6.78905 32.96 8.09007 33.5058C9.39109 34.0516 10.8341 34.1483 12.1951 33.7809C13.5561 33.4135 14.759 32.6025 15.6169 31.4739C16.4749 30.3453 16.94 28.9621 16.94 27.5391C16.94 26.9663 16.8291 26.4192 16.6273 25.9196ZM16.6273 25.9196C18.3174 25.338 19.9338 24.5573 21.4431 23.5937M14.2748 23.5578C14.8508 21.847 15.6247 20.2109 16.5804 18.6834M21.4417 23.5937C24.1372 21.8735 26.4443 19.5998 28.2133 16.9203L33.7228 8.5729C33.9338 8.25497 34.0291 7.87289 33.9923 7.49191C33.9554 7.11094 33.7888 6.75469 33.5208 6.48402C33.2528 6.21335 32.9001 6.04504 32.523 6.00783C32.1458 5.97062 31.7675 6.06682 31.4528 6.28001L23.1886 11.8464C20.5355 13.6327 18.284 15.9626 16.5804 18.6849"/>
+                        </svg>
+                        <span>An</span>
+                    </div>
+                </label>
+            </div>
             <div role="button" tabindex="0" class="close-settings" onclick="closeSettings(event)">Schließen</div>
         </div>
 
@@ -1304,6 +1329,7 @@
             'opt-draw-mode': scopedGet('kanjiOptDrawMode', globalConf.drawMode),
             'opt-side-by-side': scopedGet('kanjiOptSideBySide', globalConf.sideBySide),
             'opt-free-view': scopedGet('kanjiOptFreeView', globalConf.freeView),
+            'opt-handwriting': scopedGet('kanjiOptHandwriting', globalConf.handwriting),
             'opt-numbers-c2f': safeGetItem('c2f_kanjiOptNumbers', safeGetItem('c2_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', globalConf.numbers || 'on'))),
             'opt-display-style-c2f': safeGetItem('c2f_kanjiOptDisplayStyle', safeGetItem('c2_kanjiOptDisplayStyle', safeGetItem('kanjiOptDisplayStyle', globalConf.displayStyle || 'standard'))),
             'theme-mode': safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system'),
@@ -1378,6 +1404,7 @@
             drawMode: getVar('--default-opt-draw-mode', 'guided'),
             sideBySide: getVar('--default-opt-side-by-side', 'on'),
             freeView: getVar('--default-opt-free-view', 'handwriting'),
+            handwriting: getVar('--default-opt-handwriting', 'off'),
             themeMode: getVar('--default-theme-mode', 'system'),
             themeAccent: getVar('--default-theme-accent', 'green'),
             themeFontSize: getVar('--default-theme-font-size', 'normal'),

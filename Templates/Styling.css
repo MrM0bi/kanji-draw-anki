@@ -53,6 +53,9 @@
     /* Strichansicht (Nur Zeichnen-Karte, Frei-Modus): 'handwriting' (Handschrift), 'svg' (SVG-Pfade) */
     --default-opt-free-view: handwriting;
 
+    /* Handschriftbeispiele (Rückseite): 'on' (An), 'off' (Aus) — Kanji zusätzlich in anderen Schriftarten */
+    --default-opt-handwriting: off;
+
     /* --- 3. ERSCHEINUNGSBILD (Appearance) --- */
 
     /* Modus: 'system' (System), 'light' (Hell), 'dark' (Dunkel) */
@@ -1984,12 +1987,21 @@ svg#svg-guide path,
 }
 
 /* max-height is driven inline by JS (set to scrollHeight) for a smooth, content-sized
-   ease-in-out. border-box keeps padding inside the animated height so it collapses cleanly. */
+   ease-in-out. The collapsed steady state is owned by the .collapsed rule below (not the
+   inline cap) so nothing can peek; padding is zeroed there too because border-box can't
+   shrink an element below its own padding, which otherwise leaves a sliver of content. */
 .kd-section-body {
     box-sizing: border-box;
     overflow: hidden;
     padding: 0 16px 16px 16px;
-    transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kd-section.collapsed .kd-section-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 /* Neutralize legacy inner spacing — the section body controls padding now */
@@ -2317,7 +2329,7 @@ ruby rt {
     background: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: var(--border-rad-main);
-    padding: 16px 12px;
+    padding: 0px 12px;
     margin: 16px 0 24px 0;
     box-shadow: var(--shadow-soft);
     width: 100%;
@@ -2325,11 +2337,75 @@ ruby rt {
 }
 
 .tree-root-kanji {
-    font-size: 36px;
+    font-size: 40px !important;
     font-weight: 500;
     color: var(--text-main);
     text-align: center;
     line-height: 1;
+}
+
+/* Handschriftbeispiele — the same kanji rendered in alternative fonts, shown in one row
+   beside the root kanji when the "Handschriftbeispiele" setting is on.
+   Font files live in the Anki media collection (leading underscore = not auto-purged). */
+@font-face {
+    font-family: kanji_font2;
+    src: url("_kanji_font2_kai08.otf");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: kanji_font3;
+    src: url("_kanji_font3_ArmedBanana.ttf");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: kanji_font4;
+    src: url("_kanji_font4_KouzanGyousho.otf");
+    font-display: swap;
+}
+
+/* Row holding the root kanji plus the alternative-font samples. Always a flex row so the
+   root kanji stays centered; the samples themselves toggle on the "Handschriftbeispiele"
+   setting (.is-visible added by JS). */
+.kanji-font-examples {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Samples share the root kanji's look (size/weight/color via .tree-root-kanji + _fsMap);
+   only the font differs. Hidden until the setting turns them on. */
+.kanji-font-example {
+    color: var(--text-main);
+    font-weight: 500;
+    text-align: center;
+    line-height: 1;
+    display: none;
+}
+
+.kanji-font-examples.is-visible .kanji-font-example {
+    display: block;
+}
+
+.kanji-font-example.font-2 {
+    font-family: kanji_font2;
+    font-size: 50px !important;
+}
+
+.kanji-font-example.font-3 {
+    font-family: kanji_font3;
+    font-size: 50px !important;
+}
+
+.kanji-font-example.font-4 {
+    font-family: kanji_font4;
+    font-size: 50px !important;
 }
 
 .tree-children {
