@@ -620,6 +620,9 @@
             if (!list) return;
             var on = safeGetItem('c2_kanjiOptHandwriting',
                 safeGetItem('kanjiOptHandwriting', getGlobalConfig().handwriting)) === 'on';
+            // Primitives without a glyph use the "[name]" notation: no font samples for a word.
+            var root = list.querySelector('.tree-root-kanji');
+            if (root && /^\s*\[/.test(root.textContent)) on = false;
             list.classList.toggle('is-visible', on);
         }
         window._kanjiApplyHandwriting = apply;
