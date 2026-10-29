@@ -612,6 +612,15 @@
         if (sec && !sec.querySelector('.story-box')) sec.style.display = 'none';
     })();
 
+    // --- Primitives without a glyph ("[name]" notation): no root/font row in "Elemente", no empty section [SHARED with c1-back] ---
+    (() => {
+        const root = document.querySelector('.tree-root-kanji');
+        if (!root || !/^\s*\[/.test(root.textContent)) return;
+        root.closest('.custom-tree-box').classList.add('is-primitive');
+        // Nothing left to show (the field only names the primitive itself): hide the whole section.
+        if (!document.querySelector('#tree-render-target > *')) root.closest('.kd-section').style.display = 'none';
+    })();
+
     // --- Handschriftbeispiele: show the kanji in alternative fonts when enabled ---
     // Per-card-type setting (c2 here); re-applied live via kanjiSettingsGlobalHandlerC2.
     (function () {
@@ -620,9 +629,6 @@
             if (!list) return;
             var on = safeGetItem('c2_kanjiOptHandwriting',
                 safeGetItem('kanjiOptHandwriting', getGlobalConfig().handwriting)) === 'on';
-            // Primitives without a glyph use the "[name]" notation: no font samples for a word.
-            var root = list.querySelector('.tree-root-kanji');
-            if (root && /^\s*\[/.test(root.textContent)) on = false;
             list.classList.toggle('is-visible', on);
         }
         window._kanjiApplyHandwriting = apply;

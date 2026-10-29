@@ -2344,6 +2344,17 @@ ruby rt {
     line-height: 1;
 }
 
+/* Primitives without a glyph ("[name]"): the word is already the card's subject, so the
+   root/font row is hidden and the components stand alone (.is-primitive added by JS). */
+.custom-tree-box.is-primitive .kanji-font-examples {
+    display: none;
+}
+
+.custom-tree-box.is-primitive .tree-children {
+    margin-top: 0;
+    border-top: none;
+}
+
 /* Handschriftbeispiele — the same kanji rendered in alternative fonts, shown in one row
    beside the root kanji when the "Handschriftbeispiele" setting is on.
    Font files live in the Anki media collection (leading underscore = not auto-purged). */
