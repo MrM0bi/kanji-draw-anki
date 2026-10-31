@@ -285,6 +285,31 @@
             </div>
         </div>
 
+        <!-- fork: "Notiz" section (personal note), shown only when the field has visible content -->
+        {{#Notiz}}
+        <div class="kd-section" data-sec="notiz">
+            <div class="kd-section-header" role="button" tabindex="0">
+                <!-- Icon "file-text" from https://feathericons.com/ -->
+                <svg class="kd-section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span class="kd-section-title">Notiz</span>
+                <svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+            <div class="kd-section-body">
+                <div class="kd-note-box">{{Notiz}}</div>
+            </div>
+        </div>
+        {{/Notiz}}
+
         {{#Wortbeispiel}}
         <div class="kd-section" data-sec="wortbeispiele">
             <div class="kd-section-header" role="button" tabindex="0">
@@ -332,6 +357,12 @@
                         <span class="reading-label kunyomi-label">KUN</span><span class="reading-value">{{Kunyomi}}</span>
                     </div>
                     {{/Kunyomi}}
+                    <!-- fork: Nanori as a third, secondary reading -->
+                    {{#Nanori}}
+                    <div class="reading-row">
+                        <span class="reading-label kd-nanori-label">NANORI</span><span class="reading-value">{{Nanori}}</span>
+                    </div>
+                    {{/Nanori}}
                 </div>
             </div>
         </div>
@@ -422,7 +453,7 @@
                 '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
                 '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
                 '.info-section-title': [13, 11, 15], '.kd-section-title': [15, 13, 17], '.info-text-story': [15, 13, 17],
-                '.visuell-hinweis': [14, 12, 16], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17], '.kd-note-box': [15, 13, 17],
                 '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
                 '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
                 '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
@@ -688,6 +719,13 @@
     (() => {
         const sec = document.querySelector('.kd-section[data-sec="eselsbruecken"]');
         if (sec && !sec.querySelector('.story-box')) sec.style.display = 'none';
+    })();
+
+    // --- fork: Hide "Notiz" if the field only holds invisible leftovers (<br>, &nbsp;) [SHARED with c2-back] ---
+    (() => {
+        const box = document.querySelector('.kd-section[data-sec="notiz"] .kd-note-box');
+        if (box && !box.textContent.replace(/\u00a0/g, ' ').trim() && !box.querySelector('img, video, audio, svg'))
+            box.closest('.kd-section').style.display = 'none';
     })();
 
     // --- Primitives without a glyph ("[name]" notation): no root/font row in "Elemente", no empty section [SHARED with c2-back] ---

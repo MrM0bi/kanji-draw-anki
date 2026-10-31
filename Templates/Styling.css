@@ -2075,6 +2075,21 @@ svg#svg-guide path,
     color: var(--text-main);
 }
 
+/* fork: "Notiz" box — same shape as .story-box, but a muted stripe, upright text, no title row */
+.kd-note-box {
+    background: var(--bg-main);
+    border-left: 3px solid var(--text-muted);
+    border-radius: var(--border-rad-sm);
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.kd-note-box > :first-child { margin-top: 0; }
+.kd-note-box > :last-child { margin-bottom: 0; }
+
 .word-example-list {
     display: grid;
     grid-template-columns: 1fr;
@@ -2206,6 +2221,13 @@ ruby rt {
 .kunyomi-label {
     background-color: var(--tag-kun-bg);
     color: var(--tag-kun-text);
+}
+
+/* fork: Nanori is less important than ON/KUN -> outlined, muted pill */
+.kd-nanori-label {
+    background-color: transparent;
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--border-color);
 }
 
 .reading-value {
