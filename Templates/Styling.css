@@ -2075,6 +2075,21 @@ svg#svg-guide path,
     color: var(--text-main);
 }
 
+/* fork: the Heisig boxes sit under a small label and get a muted stripe, so the Merksätze stand out.
+   The stripe is mixed in the rule (not in :root) because the accent vars are set inline by JS on the theme targets. */
+.kd-story-group-ref .story-box {
+    border-left-color: color-mix(in srgb, var(--accent) 60%, var(--border-color));
+}
+
+.kd-story-group-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 4px 0 6px 2px;
+}
+
 /* fork: "Notiz" box — same shape as .story-box, but a muted stripe, upright text, no title row */
 .kd-note-box {
     background: var(--bg-main);

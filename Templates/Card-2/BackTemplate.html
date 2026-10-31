@@ -186,36 +186,40 @@
                     <p class="story-box-text">{{Merksatz-DE}}</p>
                 </div>
                 {{/Merksatz-DE}}
-                {{#BuchBeschreibung}}
-                <!-- Story box: BuchBeschreibung — replace icon/title as desired -->
-                <div class="story-box">
-                    <div class="story-box-title">
-                        <!-- Custom Icon from https://feathericons.com/ -->
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        Heisig - Kanji Beschreibung
+                <!-- fork: Heisig boxes grouped under a label, set apart from the Merksätze -->
+                <div class="kd-story-group-ref">
+                    <div class="kd-story-group-label">Heisig</div>
+                    {{#BuchBeschreibung}}
+                    <!-- Story box: BuchBeschreibung — replace icon/title as desired -->
+                    <div class="story-box">
+                        <div class="story-box-title">
+                            <!-- Custom Icon from https://feathericons.com/ -->
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                            Kanji Beschreibung
+                        </div>
+                        <p class="story-box-text">{{BuchBeschreibung}}</p>
                     </div>
-                    <p class="story-box-text">{{BuchBeschreibung}}</p>
-                </div>
-                {{/BuchBeschreibung}}
-                {{#BuchPrimitivBeschreibung}}
-                <!-- Story box: BuchPrimitivBeschreibung — replace icon/title as desired -->
-                <div class="story-box">
-                    <div class="story-box-title">
-                        <!-- Custom Icon from https://feathericons.com/ -->
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        Heisig - Primitiv Beschreibung
+                    {{/BuchBeschreibung}}
+                    {{#BuchPrimitivBeschreibung}}
+                    <!-- Story box: BuchPrimitivBeschreibung — replace icon/title as desired -->
+                    <div class="story-box">
+                        <div class="story-box-title">
+                            <!-- Custom Icon from https://feathericons.com/ -->
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                            Primitiv Beschreibung
+                        </div>
+                        <p class="story-box-text">{{BuchPrimitivBeschreibung}}</p>
                     </div>
-                    <p class="story-box-text">{{BuchPrimitivBeschreibung}}</p>
+                    {{/BuchPrimitivBeschreibung}}
                 </div>
-                {{/BuchPrimitivBeschreibung}}
             </div>
         </div>
 
@@ -381,7 +385,7 @@
                 '.card': [16, 14, 18], '.card-title': [26, 23, 29], '.info-modal-header': [18, 16, 20],
                 '.info-modal-title': [13, 11, 15], '.info-modal-meaning': [14, 12, 16],
                 '.info-section-title': [13, 11, 15], '.kd-section-title': [15, 13, 17], '.info-text-story': [15, 13, 17],
-                '.visuell-hinweis': [14, 12, 16], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17], '.kd-note-box': [15, 13, 17],
+                '.visuell-hinweis': [14, 12, 16], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17], '.kd-story-group-label': [11, 10, 12], '.kd-note-box': [15, 13, 17],
                 '.word-jp': [20, 18, 22], '.word-de': [13, 11, 15],
                 '.reading-row': [16, 14, 18], '.reading-label': [11, 10, 12], '.info-btn': [15, 13, 17],
                 '.info-tag': [12, 10, 14], '.link-btn': [14, 12, 16], '.tree-root-kanji': [36, 32, 40],
@@ -635,6 +639,12 @@
             if (sec) sec.style.display = 'none';
             else rc.style.display = 'none';
         }
+    })();
+
+    // --- fork: drop the "Heisig" group (and its label) when neither Heisig field is filled [SHARED with c1-back] ---
+    (() => {
+        const grp = document.querySelector('.kd-story-group-ref');
+        if (grp && !grp.querySelector('.story-box')) grp.remove();
     })();
 
     // --- Hide "Eselsbrücken" if no story boxes were rendered [SHARED with c1-back] ---
