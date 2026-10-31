@@ -925,9 +925,9 @@
     </div>
 </div>
 
-<h2 class="card-title" style="visibility: hidden;">{{Bedeutung-DE}}{{#PrimitivBedeutung-DE}}<span class="primitive-group">{{PrimitivBedeutung-DE}}</span>{{/PrimitivBedeutung-DE}}</h2>
+<h2 class="card-title" style="visibility: hidden;"><!-- fork: *-Override fields replace the book meaning when filled -->{{#Bedeutung-Override}}{{Bedeutung-Override}}{{/Bedeutung-Override}}{{^Bedeutung-Override}}{{Bedeutung-DE}}{{/Bedeutung-Override}}{{#PrimitivBedeutung-Override}}<span class="primitive-group">{{PrimitivBedeutung-Override}}</span>{{/PrimitivBedeutung-Override}}{{^PrimitivBedeutung-Override}}{{#PrimitivBedeutung-DE}}<span class="primitive-group">{{PrimitivBedeutung-DE}}</span>{{/PrimitivBedeutung-DE}}{{/PrimitivBedeutung-Override}}</h2>
 <script>
-    // Split PrimitivBedeutung-DE (comma-separated) into one .primitive-box per word + a single label.
+    // Split PrimitivBedeutung-Override or -DE (comma-separated) into one .primitive-box per word + a single label.
     // Runs on the front and, via {{FrontSide}}, on the back.
     (function () {
         document.querySelectorAll('.primitive-group').forEach(function (g) {
