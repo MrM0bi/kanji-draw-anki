@@ -36,6 +36,28 @@
         } catch (e) { }
     })();
 </script>
+<script>
+    // [KD-SRC front/kd-fork-design-early.js]
+    // fork: design switch (docs/fork/v3-migration.md D25). Sets html.kd-design-minimal before the first paint.
+    // Global setting kanjiThemeDesign ('kd' | 'minimal'), CSS default --default-theme-design. Same storage
+    // chain as safeGetItem (add-on _ks, cookie _k, single cookie, localStorage), which isn't defined yet here.
+    (function () {
+        try {
+            var R = document.documentElement, k = 'kanjiThemeDesign', v = null;
+            if (window._ks && window._ks[k] !== undefined) v = window._ks[k];
+            if (v == null) try {
+                var cs = document.cookie.split('; '), i;
+                if (location.protocol !== 'file:') for (i = 0; i < cs.length; i++) if (cs[i].indexOf('_k=') === 0) { var o = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (o[k] !== undefined) v = o[k]; break; }
+                if (v == null) for (i = cs.length - 1; i >= 0; i--) if (cs[i].indexOf(k + '=') === 0) { v = decodeURIComponent(cs[i].substring(k.length + 1)); break; }
+            } catch (e) { }
+            if (v == null) try { v = localStorage.getItem(k); } catch (e) { }
+            if (v == null) v = (getComputedStyle(R).getPropertyValue('--default-theme-design') || '').replace(/['"\s]/g, '');
+            R.classList.toggle('kd-design-minimal', v === 'minimal');
+            window._kdDesign = v === 'minimal' ? 'minimal' : 'kd';
+        } catch (e) { }
+    })();
+    // [/KD-SRC front/kd-fork-design-early.js]
+</script>
 <button class="gear-btn" onclick="openSettings(event)" title="Einstellungen" tabindex="-1">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
         <path class="fi-gold"
@@ -827,6 +849,32 @@
                     </svg>
                 </button>
                 <h3>Erscheinungsbild</h3>
+            </div>
+            <!-- fork: Design switch (whole UI): v3 "KanjiDraw" or the pre-v3 minimal look -->
+            <div class="setting-group-title">Design</div>
+            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <label><input type="radio" name="theme-design" value="kd" onchange="kdSetDesign(this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="3" class="fi-cream" />
+                            <path d="M3 16l5-5 4 4 3-3 6 6" class="fi-teal" />
+                            <circle cx="16.5" cy="8.5" r="1.8" class="fi-gold" />
+                        </svg>
+                        <span>KanjiDraw</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="theme-design" value="minimal" onchange="kdSetDesign(this.value)">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2" />
+                            <line x1="7" y1="9" x2="17" y2="9" />
+                            <line x1="7" y1="13" x2="13" y2="13" />
+                        </svg>
+                        <span>Minimal</span>
+                    </div>
+                </label>
             </div>
             <div class="setting-group-title">Erscheinungsmodus</div>
             <div class="visual-options-grid">
@@ -7103,6 +7151,7 @@
             'opt-numbers-c2f': safeGetItem('c2f_kanjiOptNumbers', safeGetItem('c2_kanjiOptNumbers', safeGetItem('kanjiOptNumbers', globalConf.numbers || 'on'))),
             'opt-display-style-c2f': safeGetItem('c2f_kanjiOptDisplayStyle', safeGetItem('c2_kanjiOptDisplayStyle', safeGetItem('kanjiOptDisplayStyle', globalConf.displayStyle || 'standard'))),
             'theme-mode': safeGetItem('kanjiThemeMode', globalConf.themeMode || 'system'),
+            'theme-design': safeGetItem('kanjiThemeDesign', globalConf.themeDesign || 'kd'), // fork
             'theme-accent': safeGetItem('kanjiThemeAccent', globalConf.themeAccent || 'green'),
             'theme-font-size': safeGetItem('kanjiThemeFontSize', globalConf.themeFontSize || 'normal'),
             'theme-primary': safeGetItem('kanjiThemePrimary', globalConf.themePrimary || 'neutral'),
@@ -7188,6 +7237,7 @@
             startHint: getVar('--default-opt-start-hint', 'off'),
             startHintDelay: getVar('--default-opt-start-hint-delay', 'instant'),
             themeMode: getVar('--default-theme-mode', 'system'),
+            themeDesign: getVar('--default-theme-design', 'kd'), // fork
             themeAccent: getVar('--default-theme-accent', 'green'),
             themeFontSize: getVar('--default-theme-font-size', 'normal'),
             themePrimary: getVar('--default-theme-primary', 'neutral'),
@@ -9835,4 +9885,56 @@
     var userJs1 = function () { var b = document.getElementById('button-reveal'); if (b && b._kanjiAction) b._kanjiAction(); };
     var userJs2 = function () { var b = document.getElementById('button-reset'); if (b && b._kanjiAction) b._kanjiAction(); };
     var userJs3 = function () { if (!_settingsReady) _settingsReady = true; openSettings(new Event('userJs')); };
+</script>
+
+<script>
+    // [KD-SRC front/kd-fork-design.js]
+    // fork: design switch, second part (D25). In the minimal design the icons of known elements go back to the
+    // pre-v3 outline icons (the original markup is kept on the element and restored when switching back);
+    // everything else is restyled by the html.kd-design-minimal block in Styling.css. Runs at the end of the
+    // front (all markup exists) and, via FrontSide, again on the back.
+    (function () {
+        var GEAR = '<circle cx="12" cy="12" r="3"><' + '/circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"><' + '/path>';
+        var ICONS = [
+            ['.gear-btn > svg', GEAR],
+            ['.settings-main-title > svg', GEAR],
+            ['#button-reveal > svg', '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"><' + '/path><circle cx="12" cy="12" r="3"><' + '/circle>'],
+            ['#button-undo > svg', '<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"><' + '/path><path d="M22 21H7"><' + '/path><path d="m5 11 9 9"><' + '/path>'],
+            ['#button-skip > svg', '<path d="M12 20h9"><' + '/path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"><' + '/path>'],
+            ['#button-reset > svg', '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"><' + '/path><path d="M3 3v5h5"><' + '/path>'],
+            ['.category-icon.cat-grid > svg', '<path d="M4 6h16M4 12h16M4 18h7"><' + '/path>'],
+            ['.category-icon.cat-front > svg', '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"><' + '/path><polyline points="22 4 12 14.01 9 11.01"><' + '/polyline>'],
+            ['.category-icon.cat-back > svg', '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"><' + '/rect><path d="M9 18l6-6-6-6" transform="rotate(180 12 12)"><' + '/path>'],
+            ['.category-icon.cat-theme > svg', '<circle cx="12" cy="12" r="10"><' + '/circle><path d="M12 2a10 10 0 0 1 0 20z"><' + '/path>'],
+            ['.category-icon.cat-sound > svg', '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"><' + '/polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"><' + '/path>']
+        ];
+
+        window._kdApplyDesign = function (design) {
+            var R = document.documentElement;
+            if (design) window._kdDesign = design;
+            var min = window._kdDesign === 'minimal';
+            R.classList.toggle('kd-design-minimal', min);
+            ICONS.forEach(function (p) {
+                document.querySelectorAll(p[0]).forEach(function (svg) {
+                    if (min) {
+                        if (svg._kdOrig == null) svg._kdOrig = svg.innerHTML;
+                        svg.innerHTML = p[1];
+                    } else if (svg._kdOrig != null) {
+                        svg.innerHTML = svg._kdOrig;
+                        svg._kdOrig = null;
+                    }
+                });
+            });
+            if (window._kdSectionIcons) window._kdSectionIcons();
+        };
+
+        window.kdSetDesign = function (val) {
+            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+            try { safeSetItem('kanjiThemeDesign', val); } catch (e) { }
+            window._kdApplyDesign(val);
+        };
+
+        window._kdApplyDesign();
+    })();
+    // [/KD-SRC front/kd-fork-design.js]
 </script>

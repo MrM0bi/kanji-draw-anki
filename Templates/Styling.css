@@ -60,6 +60,9 @@
 
     /* --- 3. ERSCHEINUNGSBILD (Appearance) --- */
 
+    /* fork: Design: 'kd' (KanjiDraw, v3) oder 'minimal' (schlichtes Design vor v3) */
+    --default-theme-design: kd;
+
     /* Modus: 'system' (System), 'light' (Hell), 'dark' (Dunkel) */
     --default-theme-mode: system;
 
@@ -6605,3 +6608,382 @@ body.reduce-motion *::after {
 .settings-page.hover-frozen {
     pointer-events: none;
 }
+/* ==========================================================================
+   fork: minimal design (D25) – the pre-v3 look as a switchable skin.
+   Active when html.kd-design-minimal is set (setting "Design" on "Erscheinungsbild", key kanjiThemeDesign).
+   Values come from the fork's Styling.css before v3. Only overrides; upstream rules stay untouched.
+   Colours: the classic neutral palette below wins over the v3 Japan-Theme colours, which JS writes
+   inline on <html> and <body> (hence !important on the variables). html.kd-minimal-theme keeps the
+   Japan-Theme colours instead (colour variant under evaluation, D25).
+   ========================================================================== */
+html.kd-design-minimal:not(.kd-minimal-theme),
+html.kd-design-minimal:not(.kd-minimal-theme) body {
+    --bg-main: #f7f7f5 !important;
+    --surface: #ffffff !important;
+    --border-color: #e2e2df !important;
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --filter-soft: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+    --filter-hover: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --text-main: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-faint: #9a9a9a;
+    --grid-color: #b0b0a8;
+    --tag-on-bg: #f0f0ed;
+    --tag-on-text: #525250;
+    --tag-kun-bg: #eef6eb;
+    --tag-kun-text: #2d6a1e;
+    --prim-text: #525250;
+    --prim-bg: #f0f0ed;
+    --border-rad-main: 10px;
+    --border-rad-sm: 7px;
+}
+
+html.kd-design-minimal:not(.kd-minimal-theme).nightMode,
+html.kd-design-minimal:not(.kd-minimal-theme).night_mode,
+html.kd-design-minimal:not(.kd-minimal-theme) body.nightMode,
+html.kd-design-minimal:not(.kd-minimal-theme) body.night_mode {
+    --bg-main: #1a1a1a !important;
+    --surface: #252525 !important;
+    --border-color: #363636 !important;
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+    --filter-soft: 0 2px 6px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+    --filter-hover: 0 4px 16px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+    --text-main: #e8e8e4;
+    --text-muted: #9a9a96;
+    --text-faint: #666664;
+    --grid-color: #7a7a74;
+    --tag-on-bg: #333330;
+    --tag-on-text: #d0d0cc;
+    --tag-kun-bg: #1e3318;
+    --tag-kun-text: #6ace54;
+    --prim-bg: #333330;
+    --prim-text: #d0d0cc;
+}
+
+/* --- Page: no landscape, plain background, system font --- */
+/* v3 also writes the theme colour inline as background-color on <html>/<body> (not on Anki Desktop,
+   which keeps its own --canvas there and paints the backdrop with .card::before) */
+html.kd-design-minimal:not(.kd-minimal-theme):not(.is-ankidesktop),
+html.kd-design-minimal:not(.kd-minimal-theme):not(.is-ankidesktop) body {
+    background-color: var(--bg-main) !important;
+}
+
+html.kd-design-minimal .forest-scenery {
+    display: none !important;
+}
+
+html.kd-design-minimal .card {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Icons: outline only (v3's pastel fills off) --- */
+html.kd-design-minimal [class^="fi-"],
+html.kd-design-minimal [class*=" fi-"] {
+    fill: none !important;
+}
+
+/* --- Title: plain text, primitive meanings as grey boxes with a corner tag --- */
+html.kd-design-minimal .card-title {
+    display: block;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--text-main);
+    font-size: 26px;
+    letter-spacing: -0.3px;
+    line-height: 1.3;
+    min-width: 0;
+}
+
+html.kd-design-minimal .kd-title-row {
+    gap: 6px 10px;
+}
+
+html.kd-design-minimal .primitive-group {
+    padding: 14px 8px 0 0;
+    transform: translateY(-7px);
+    gap: 8px;
+}
+
+html.kd-design-minimal .primitive-box {
+    padding: 4px 12px;
+    background: var(--prim-bg);
+    color: var(--prim-text);
+    border: none;
+    border-radius: var(--border-rad-sm);
+    box-shadow: none;
+    font-size: 18px;
+}
+
+html.kd-design-minimal .primitive-label {
+    background: var(--prim-bg);
+    color: var(--text-muted);
+    box-shadow: 0 0 0 2px var(--bg-main);
+}
+
+/* --- Drawing area and buttons --- */
+html.kd-design-minimal .kanji-container {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-main);
+    box-shadow: var(--shadow-elevated);
+}
+
+html.kd-design-minimal .action-buttons button {
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-main);
+    color: var(--text-muted);
+    box-shadow: var(--filter-soft);
+}
+
+html.kd-design-minimal .action-buttons button svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    color: currentColor;
+    stroke-width: 2;
+}
+
+html.kd-design-minimal .gear-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    color: var(--text-faint);
+    box-shadow: var(--filter-soft);
+}
+
+html.kd-design-minimal .gear-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    color: currentColor;
+    stroke-width: 2;
+}
+
+/* --- Settings window --- */
+html.kd-design-minimal .settings-modal {
+    border: 2px solid var(--active-tab-color);
+    border-radius: var(--border-rad-main);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.kd-design-minimal .settings-main-title,
+html.kd-design-minimal .subpage-header {
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+html.kd-design-minimal .settings-main-title svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor;
+    color: currentColor;
+    stroke-width: 2;
+}
+
+html.kd-design-minimal .subpage-header h3 {
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+html.kd-design-minimal .back-btn {
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--border-color);
+    background: var(--surface);
+    border-radius: 8px;
+    color: var(--active-tab-color, var(--accent));
+}
+
+html.kd-design-minimal .back-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+html.kd-design-minimal .settings-about-btn {
+    background: transparent;
+    color: var(--text-faint);
+}
+
+html.kd-design-minimal .settings-about-btn svg {
+    stroke: currentColor;
+}
+
+html.kd-design-minimal .category-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    color: #ffffff;
+}
+
+html.kd-design-minimal .category-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    stroke: #ffffff;
+}
+
+html.kd-design-minimal .category-icon.cat-grid { background: #3478f6; }
+html.kd-design-minimal .category-icon.cat-front { background: #34c759; }
+html.kd-design-minimal .category-icon.cat-back { background: #ff9500; }
+html.kd-design-minimal .category-icon.cat-theme { background: #ff2d55; }
+html.kd-design-minimal .category-icon.cat-sound { background: #af52de; }
+
+html.kd-design-minimal .category-name {
+    font-weight: 600;
+}
+
+html.kd-design-minimal .setting-group-title {
+    text-transform: none;
+    letter-spacing: 0.5px;
+}
+
+html.kd-design-minimal .visual-option svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-muted);
+    color: var(--text-muted);
+    stroke-width: 2;
+}
+
+html.kd-design-minimal .visual-options-grid label input[type="radio"]:checked+.visual-option svg {
+    stroke: var(--active-tab-color, var(--accent));
+    color: var(--active-tab-color, var(--accent));
+    transform: none;
+}
+
+html.kd-design-minimal .visual-option span {
+    font-weight: 600;
+}
+
+html.kd-design-minimal .close-settings {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--border-rad-sm);
+    box-shadow: none;
+    font-weight: 700;
+}
+
+/* --- Back: info tags, sections, content --- */
+html.kd-design-minimal .info-tag {
+    background: var(--tag-on-bg);
+    color: var(--tag-on-text);
+    border: none;
+    box-shadow: none;
+    padding: 5px 12px;
+    font-weight: 700;
+}
+
+html.kd-design-minimal .info-tag svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    color: currentColor;
+}
+
+html.kd-design-minimal .kd-section {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-main);
+    box-shadow: var(--filter-soft);
+}
+
+html.kd-design-minimal .kd-section-icon {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    color: var(--text-main);
+    stroke: currentColor;
+}
+
+html.kd-design-minimal .kd-section-title {
+    font-size: 15px;
+    color: var(--text-main);
+    text-transform: none;
+    letter-spacing: 0.2px;
+}
+
+html.kd-design-minimal .tree-container {
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+}
+
+html.kd-design-minimal .word-example-item {
+    border: 1px solid var(--border-color);
+    border-left-width: 4px;
+    border-radius: var(--border-rad-sm);
+    box-shadow: var(--filter-soft);
+}
+
+html.kd-design-minimal .link-btn {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-rad-sm);
+    box-shadow: none;
+    font-weight: 600;
+}
+
+html.kd-design-minimal .reading-label {
+    border: none;
+    box-shadow: none;
+    padding: 4px 10px;
+}
+
+html.kd-design-minimal .reading-label.onyomi-label {
+    background: var(--tag-on-bg);
+    color: var(--tag-on-text);
+}
+
+html.kd-design-minimal .reading-label.kunyomi-label {
+    background: var(--tag-kun-bg);
+    color: var(--tag-kun-text);
+}
+
+html.kd-design-minimal .reading-label.kd-nanori-label {
+    background: transparent;
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+/* KanjiDraw hint: a light box like the story boxes instead of v3's dark speech bubble */
+html.kd-design-minimal .visuell-hinweis {
+    background: var(--bg-main);
+    color: var(--text-main);
+    border: none;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--border-rad-sm);
+    box-shadow: none;
+    font-weight: 700;
+}
+
+html.kd-design-minimal .visuell-hinweis::after {
+    display: none;
+}
+
+html.kd-design-minimal .visuell-hinweis svg {
+    stroke: currentColor;
+    color: currentColor;
+}
+
+html.kd-design-minimal .info-text-story {
+    border: none;
+    box-shadow: none;
+}
+
+/* the hint is light now: the component colours use their light-surface variants (v3 lightens them for the dark bubble) */
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c1 { color: #13719e; background: rgba(42, 167, 224, 0.14); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c2 { color: #9b33b3; background: rgba(212, 107, 232, 0.14); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c3 { color: #9a5a06; background: rgba(240, 160, 48, 0.16); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c4 { color: #1c7f53; background: rgba(63, 191, 134, 0.15); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c5 { color: #b8372f; background: rgba(232, 98, 92, 0.14); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c6 { color: #5546c8; background: rgba(138, 124, 240, 0.15); }
+html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-k { color: color-mix(in srgb, var(--accent) 70%, #000); background: var(--accent-bg); }

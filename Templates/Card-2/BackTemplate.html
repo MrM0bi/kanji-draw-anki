@@ -359,6 +359,28 @@
                 '<line x1="2" y1="12" x2="22" y2="12"></line>'
         };
 
+        // Minimal design (D25): the pre-v3 outline icons (feathericons.com)
+        var ICON_MIN = {
+            elemente: '<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline>',
+            strichfolge: '<circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon>',
+            eselsbruecken: '<path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>',
+            notiz: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
+            schreibfehler: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+            wortbeispiele: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>',
+            lesungen: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+            links: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>'
+        };
+        var iconFor = function (key) {
+            var set = document.documentElement.classList.contains('kd-design-minimal') ? ICON_MIN : ICON;
+            return set[key] || '';
+        };
+        window._kdSectionIcons = function () {
+            document.querySelectorAll('#kd-info-inline .kd-section[data-sec]').forEach(function (sec) {
+                var svg = sec.querySelector('.kd-section-icon');
+                if (svg) svg.innerHTML = iconFor(sec.getAttribute('data-sec'));
+            });
+        };
+
         var KD_SECTIONS = [
             { key: 'elemente', title: 'Elemente' },
             { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
@@ -461,7 +483,7 @@
             header.setAttribute('role', 'button');
             header.setAttribute('tabindex', '0');
             header.innerHTML = '<svg class="kd-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                (ICON[cfg.key] || '') + '<' + '/svg><span class="kd-section-title"><' + '/span>' + CHEVRON;
+                iconFor(cfg.key) + '<' + '/svg><span class="kd-section-title"><' + '/span>' + CHEVRON;
             header.querySelector('.kd-section-title').textContent = cfg.title;
             sec.insertBefore(header, body);
 
