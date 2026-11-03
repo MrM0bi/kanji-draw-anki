@@ -343,7 +343,7 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
       adjust hard-coded paths, e.g. `KANJI_DRAW_ADDON`)
 - [ ] 3.2 Render harness: real notes (kanji e.g. 一 右 語 派 籠, primitive e.g. `[spazierstock]`) × Card 1/2 ×
       front/back in headless Chromium. Screenshots, console errors, timings.
-- [ ] 3.3 Same measurement for pure upstream v3 (baseline for the +50 ms budget)
+- [~] 3.3 Same measurement for pure upstream v3 (baseline for the +50 ms budget)
 - [ ] 3.4 Fix what's found. Add a short how-to for the harness to this file.
 
 ### Phase 4 – Data migration (scripts in `fix-kanji-deck`, dry run / `--apply` / `--undo`, value check, backup)
@@ -386,6 +386,12 @@ _Update this section before you stop._
   phone/desktop width): no console errors.
 - **Next:** Phase 3. 3.1 test collection (headless Anki) is optional for rendering; the render harness (below)
   already covers 3.2 roughly. Then 3.3 upstream baseline timing and the +50 ms budget.
+- **3.3 first timing (2026-11-03, inconclusive):** `loadEventEnd` of the rendered back pages, 15 loads each, 412 px,
+  headless Chrome. Upstream v3 (modal, upstream field names, v3 values) vs. fork (inline), 学/語 × C1/C2:
+  medians up 913/908/759/808 ms vs. fork 883/870/978/794 ms; minimums up 741/711/670/650 vs. fork 751/775/762/666.
+  The server had load ~6.7 on 4 cores, so the noise (±100 ms) is larger than the 50 ms budget. Redo on an idle
+  machine (or measure in-page script time with `performance.mark`) before deciding. Script: `/tmp/kd-time.py`
+  pattern = Playwright, new context per load, median of `performance.getEntriesByType('navigation')[0].loadEventEnd`.
 - **Blocked / waiting for user:** nothing. A visual review of the new back by the user would be useful
   (screenshots can be made with the harness).
 - **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
@@ -412,3 +418,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (PC/WSL) · Private repo MrM0bi/fix-kanji-deck created and pushed with `tools/v3/` (0.5). User decided: no AnkiConnect API key, use Tailscale only.
 - 2026-11-03 · Claude (server) · 0.6/0.7 verified (repos, files, AnkiConnect over Tailscale, uv, node 22). Merged upstream v3.0.0, conflicts taken from upstream (1.1, `edf1045`). Baseline recorded (1.2).
 - 2026-11-03 · Claude (server) · Phase 2: field names (2.1), overrides + chips (2.2), inline sections with tree, player, Eselsbrücken groups, Notiz, Schreibfehler, Lesungen/Nanori, links (2.3–2.9, `faece31`), Handschriftbeispiele (2.10), reveal speed + font-size map (2.11/2.12), FORK.md (2.13). Decisions D16–D24.
+- 2026-11-03 · Claude (server) · 3.3 first timing run, inconclusive because the server was under load (numbers in §7).
