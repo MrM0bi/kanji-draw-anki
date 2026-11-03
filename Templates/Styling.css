@@ -2013,44 +2013,83 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     text-align: center;
 }
 
-/* fork: primitive meaning(s) next to the keyword in the title pill (PrimitivBedeutung-DE / -Override).
-   One .primitive-box per comma-separated word, one .primitive-label on the group; built by
-   src/front/kd-fork-primitive-chips.js. Colours derive from the title pill, so every theme follows. */
-.primitive-group {
-    display: inline-flex;
+/* fork: primitive meaning(s) as separate pills next to the keyword pill (PrimitivBedeutung-DE / -Override).
+   src/front/kd-fork-primitive-chips.js moves the group out of the h2 into .kd-title-row. The pills echo the
+   title pill (border, lip) in a lighter, secondary style; colours derive from --title-*, so themes follow. */
+.kd-title-row {
+    position: relative;
+    z-index: 2;
+    display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 4px 5px;
-    vertical-align: middle;
-    margin-left: 8px;
-    transform: translateY(-2px);
+    gap: 10px 12px;
+    max-width: calc(100vw - 140px);
+    margin: 0 auto 18px auto;
+}
+
+.kd-title-row > .card-title {
+    margin: 0;
+}
+
+.primitive-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
 }
 
 .primitive-box {
-    padding: 2px 10px;
+    padding: 3px 14px;
+    background: var(--surface);
+    color: var(--title-bg);
+    border: 2px solid var(--title-bg);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--title-text) 16%, transparent);
-    color: var(--title-text);
-    font-size: 0.68em;
+    box-shadow: 0 3px 0 var(--title-bg);
     font-weight: 800;
+    font-size: 16px;
     line-height: 1.3;
-    letter-spacing: 0;
     white-space: nowrap;
 }
 
+.nightMode .primitive-box,
+.night_mode .primitive-box {
+    color: var(--title-text);
+    border-color: var(--title-border);
+    box-shadow: 0 3px 0 var(--title-lip);
+}
+
+/* One small tag on the group, overhanging its top-right corner (as before v3) */
 .primitive-label {
-    order: -1;
+    position: absolute;
+    top: -10px;
+    right: -8px;
     padding: 1px 7px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--title-text) 78%, transparent);
-    color: var(--title-bg);
+    background: var(--title-bg);
+    color: var(--title-text);
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     line-height: 1.4;
     white-space: nowrap;
+}
+
+html.kd-enter .kd-title-row .primitive-group {
+    animation: kdRiseIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s backwards;
+}
+
+/* Card 2 hides the title on its front and reveals it on the back (anti-flicker style there); the
+   pills follow. On the back the FrontSide markup comes after #is-back-side-marker. */
+#is-back-side-marker ~ .kd-title-row .primitive-group {
+    visibility: visible !important;
+}
+
+body.card2 #is-back-side-marker ~ .kd-title-row .primitive-group {
+    opacity: 0;
+    animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
 }
 
 /* --------------------------------------------------------------------------
@@ -5427,6 +5466,21 @@ html.is-ankiweb .kd-info-inline {
 
 html:has(.kd-info-inline .tree-fullscreen) {
     overflow: hidden !important;
+}
+
+/* The back is taller than one screen: the landscape sits at the bottom of the page (not of the
+   viewport) and the sections leave room for it. .card is position:relative and at least 100vh tall. */
+.card:has(#kd-info-inline) .forest-scenery {
+    position: absolute;
+}
+
+html.is-ankimobile .card:has(#kd-info-inline) .forest-scenery {
+    top: auto !important;
+    bottom: 0 !important;
+}
+
+.kd-info-inline {
+    margin-bottom: clamp(90px, 18vw, 160px);
 }
 
 /* Story boxes in "Eselsbrücken": accent stripe, bold title row, italic text */
