@@ -2013,6 +2013,13 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     text-align: center;
 }
 
+/* fork: long one-word keywords hyphenate (lang="de" set by kd-fork-primitive-chips.js); where the platform
+   has no German dictionary, that script shrinks the font until the pill fits its width limit */
+.card-title {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
 /* fork: primitive meaning(s) as separate pills next to the keyword pill (PrimitivBedeutung-DE / -Override).
    src/front/kd-fork-primitive-chips.js moves the group out of the h2 into .kd-title-row. The pills echo the
    title pill (border, lip) in a lighter, secondary style; colours derive from --title-*, so themes follow. */
@@ -2023,7 +2030,7 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 10px 12px;
+    gap: 14px 12px;
     max-width: calc(100vw - 140px);
     margin: 0 auto 18px auto;
 }
@@ -2032,12 +2039,16 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     margin: 0;
 }
 
+/* The group reserves room for its tag (padding top/right), so the tag never covers a pill, the keyword
+   pill or the gear button; translateY re-centres the pills on the keyword without changing the layout box. */
 .primitive-group {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
+    padding: 16px 10px 0 0;
+    transform: translateY(-8px);
 }
 
 .primitive-box {
@@ -2060,11 +2071,11 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     box-shadow: 0 3px 0 var(--title-lip);
 }
 
-/* One small tag on the group, overhanging its top-right corner (as before v3) */
+/* One small tag on the group, top right, above the pills (in the group's own padding) */
 .primitive-label {
     position: absolute;
-    top: -10px;
-    right: -8px;
+    top: 0;
+    right: 0;
     padding: 1px 7px;
     border-radius: 999px;
     background: var(--title-bg);
@@ -2088,8 +2099,15 @@ html.kd-enter .kd-title-row .primitive-group {
 }
 
 body.card2 #is-back-side-marker ~ .kd-title-row .primitive-group {
-    opacity: 0;
-    animation: fadeAndSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+    animation: kdPillsIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
+}
+
+/* no "to" frame: it ends on the group's own transform (fadeAndSlideIn would reset it to 0) */
+@keyframes kdPillsIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
 }
 
 /* --------------------------------------------------------------------------
