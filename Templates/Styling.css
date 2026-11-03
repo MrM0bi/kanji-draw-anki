@@ -60,7 +60,7 @@
 
     /* --- 3. ERSCHEINUNGSBILD (Appearance) --- */
 
-    /* fork: Design: 'kd' (KanjiDraw, v3) oder 'minimal' (schlichtes Design vor v3) */
+    /* fork: Design: 'kd' (Verspielt, v3-Design) oder 'minimal' (Minimal, schlichtes Design vor v3) */
     --default-theme-design: kd;
 
     /* Modus: 'system' (System), 'light' (Hell), 'dark' (Dunkel) */
@@ -2085,10 +2085,11 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     position: relative;
 }
 
-/* offsets are from the pill's padding edge: -14/-16 here (2px pill border), -12/-14 in the minimal design */
+/* offsets are from the pill's padding edge. This pill has a 2px border, so the tag reaches a bit further in
+   (-10px, ~7px overlap) to visibly overlap it like in the minimal design (-12px, borderless, ~3px). */
 .primitive-label {
     position: absolute;
-    top: -14px;
+    top: -10px;
     right: -16px;
     padding: 1px 7px;
     border-radius: 999px;
