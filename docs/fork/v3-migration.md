@@ -287,16 +287,16 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 0.3 This plan + `FORK.md` committed and pushed on `t3/reconcile-v3-fork`
 - [x] 0.4 Local `AGENTS.md` updated (points here; upstream state; server move)
 - [x] 0.5 `fix-kanji-deck`: v3 analysis scripts in `tools/v3/`, private repo github.com/MrM0bi/fix-kanji-deck created and pushed
-- [ ] 0.6 **User (manual):** move the project to the server. Clone both repos and copy the files from §2
+- [x] 0.6 **User (manual):** move the project to the server. Clone both repos and copy the files from §2
       "Files to copy by hand". Set up Tailscale. Expose AnkiConnect to the tailnet (§2, `tailscale serve`) and
       set `ANKICONNECT_URL` on the server.
-- [ ] 0.7 Server prerequisites (§2): uv, node 22, chromium, `uv sync` in `fix-kanji-deck`, check
+- [x] 0.7 Server prerequisites (§2): uv, node 22, chromium, `uv sync` in `fix-kanji-deck`, check
       `ANKICONNECT_URL` with a read-only `version` call
 
 ### Phase 1 – Merge upstream
-- [ ] 1.1 `git merge upstream/main`. Take upstream's version for all conflicted template/CSS files. Keep the fork's
+- [x] 1.1 `git merge upstream/main`. Take upstream's version for all conflicted template/CSS files. Keep the fork's
       `.gitignore` lines. Commit the merge (the message lists which fork features are now missing).
-- [ ] 1.2 `npm ci && npm test` in `Tests/js`, `python3 Tools/build.py --check`. Record the baseline (failures that
+- [x] 1.2 `npm ci && npm test` in `Tests/js`, `python3 Tools/build.py --check`. Record the baseline (failures that
       already exist upstream) in §7.
 
 ### Phase 2 – Rebuild fork features on v3 (Card 1 + Card 2, src/ where possible)
@@ -358,12 +358,19 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-03):** Phase 0 docs written and pushed. Nothing merged yet; the branch equals fork `main` @
-  `4a330c0` plus docs.
-- **Next:** the user moves the project to the server (0.6). After that, 0.7 → Phase 1.
-- **Blocked / waiting for user:** 0.6 move.
-- **Test baseline:** before the merge, fork `main` had 1 known failure in `test_stroke_styles_v2.js` ("C2-Back gel
-  halos use getComputedStyle"). Upstream v3 contains a fix for that test. Re-check in 1.2.
+- **State (2026-11-03, server):** Phase 0 and 1 done. Merge commit `edf1045`: the tree equals `upstream/main`
+  (`b853acf`) plus `FORK.md`, `docs/fork/` and the fork's `.gitignore` lines. **All fork features F1–F12 are
+  currently missing** from the templates.
+- **Next:** Phase 2, starting with 2.1.
+- **Blocked / waiting for user:** nothing.
+- **Environment (server):** repos in `~/Repos/kanji-draw-anki` and `~/Repos/fix-kanji-deck`. `ANKICONNECT_URL` is
+  a fish universal variable; bash subshells don't see it, so read it with `fish -c 'echo $ANKICONNECT_URL'` and
+  export it. `version` answers 6 over Tailscale. Browser: `/usr/bin/google-chrome` (Playwright not checked yet).
+  Python 3.14 system, `uv sync --group anki --group analysis` in `fix-kanji-deck` works.
+- **Test baseline (after the merge):** `npm test` 11/11 files pass, `Tools/build.py --check` ok,
+  `Tools/check_scripts.py` ok. The old `test_stroke_styles_v2.js` failure is fixed upstream. **Flaky:**
+  `test_algorithms.js` timing checks ("< 2ms", "< 3ms") sometimes fail when `node --test` runs files in parallel on
+  the loaded 4-core server. They pass alone (`node test_algorithms.js`). Not a regression.
 
 ---
 
@@ -373,3 +380,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 
 - 2026-11-03 · Claude (PC/WSL) · Analysis + grill session, plan and FORK.md written (0.1–0.4).
 - 2026-11-03 · Claude (PC/WSL) · Private repo MrM0bi/fix-kanji-deck created and pushed with `tools/v3/` (0.5). User decided: no AnkiConnect API key, use Tailscale only.
+- 2026-11-03 · Claude (server) · 0.6/0.7 verified (repos, files, AnkiConnect over Tailscale, uv, node 22). Merged upstream v3.0.0, conflicts taken from upstream (1.1, `edf1045`). Baseline recorded (1.2).
