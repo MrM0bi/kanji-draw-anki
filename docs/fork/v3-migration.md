@@ -274,6 +274,29 @@ and who decided (user / agent).
 - **D14 Infra:** the project moves to a remote Linux server. AnkiConnect is reached over Tailscale through env
   `ANKICONNECT_URL` (never committed). No API key, so access is limited to the tailnet (§2).
 - **D15 Later (post-release):** a setting to hide and reorder the back sections (Phase 9).
+- **D16 (agent, 2026-11-03) Modal removal:** upstream's `.back-actions` info button and `#info-overlay` markup are
+  replaced by the inline block in one contiguous hunk per back template. Upstream's modal JS
+  (`openInfoModal`, `navigateInfo*`, …) stays and no-ops without its elements. Impact: a future upstream change
+  to the modal markup conflicts in that one hunk.
+- **D17 (agent) Section config:** headers (title, icon, chevron), order and default state are built by JS from
+  `KD_SECTIONS` in `src/back/kd-fork-sections.js`. The section bodies stay as HTML in both backs, duplicated,
+  because `Tools/build.py` forbids `{{` in `src/` files. The block is marked `fork:` and must stay identical in
+  both backs.
+- **D18 (agent) One upstream line patched:** `src/back/primitive-tree.js` (`treeModalEl`) falls back to
+  `document.scrollingElement` inside `.kd-info-inline`, so a vertical drag over the tree scrolls the page (the tree
+  blocks native touch scrolling and proxies it to its scroller). Without it the tree would trap scrolling on phones.
+- **D19 (agent) Lazy Schreibfehler:** the data element is `#kd-raw-pitfalls-data` (not upstream's
+  `#raw-pitfalls-data`), so upstream's eager IIFE skips it; `KD_SECTIONS` calls `_kanjiRenderPitfalls` on first open.
+- **D20 (agent) Strichfolge autoplay:** the player starts when its section opens, and also on card show when the
+  user left the section open (upstream autoplays when its modal page opens).
+- **D21 (agent) Handschriftbeispiele placement:** v3's tree draws the root in its SVG, so there is no root row any
+  more. The three font samples sit in a row above the tree. The setting is on v3's "Rückseite" settings page.
+- **D22 (agent) F6 kept:** the inline area fades in over 0.1s, opacity only (a transform would trap the fixed tree
+  fullscreen). Upstream's info button used 0.35s.
+- **D23 (agent) Primitive chips on v3's title pill:** colours derive from `--title-*`, the group wraps under the
+  keyword on narrow screens, and the "Primitive" label sits inline before the chips (an overhanging label collided
+  with the keyword when wrapping).
+- **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 
 ---
 
@@ -300,20 +323,20 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
       already exist upstream) in §7.
 
 ### Phase 2 – Rebuild fork features on v3 (Card 1 + Card 2, src/ where possible)
-- [ ] 2.1 F1/D2 field mapping (incl. `Nummer` → `Kanjinummer-BuchDE-Edition-4`, `Eselsbrücke` → `Merksatz-KI`)
-- [ ] 2.2 F9 meaning overrides + F4 primitive chips on both fronts
-- [ ] 2.3 D3 inline section scaffold on both backs: header, ordered section list, collapse + state, no info
+- [x] 2.1 F1/D2 field mapping (incl. `Nummer` → `Kanjinummer-BuchDE-Edition-4`, `Eselsbrücke` → `Merksatz-KI`)
+- [x] 2.2 F9 meaning overrides + F4 primitive chips on both fronts
+- [x] 2.3 D3 inline section scaffold on both backs: header, ordered section list, collapse + state, no info
       button/modal for this content. Remove or hide the upstream modal entry point with minimal diff.
-- [ ] 2.4 Section Elemente: v3 tree (zoom, fullscreen, stroke colouring) inline, F7 primitive handling
-- [ ] 2.5 Section Strichfolge: player inline, lazy init on first expand
-- [ ] 2.6 Section Eselsbrücken: D6 boxes + groups (F3, F11), v3 `kd-kw` styling active in all boxes
-- [ ] 2.7 Section Notiz (F10)
-- [ ] 2.8 Section Schreibfehler: pitfalls inline, lazy, only with `Stolperfallen`
-- [ ] 2.9 Sections Wortbeispiele, Lesungen (+ Nanori, F10), Links
-- [ ] 2.10 F5 Handschriftbeispiele setting (placed on the matching v3 settings subpage)
-- [ ] 2.11 F6 reveal speed: measure v3, then decide (log the decision)
-- [ ] 2.12 Font-size map / themes / dark mode / left-hand mode: check that all fork classes follow v3 settings
-- [ ] 2.13 Tests green (or baseline), `build.py --check` green, update `FORK.md`
+- [x] 2.4 Section Elemente: v3 tree (zoom, fullscreen, stroke colouring) inline, F7 primitive handling
+- [x] 2.5 Section Strichfolge: player inline, lazy init on first expand
+- [x] 2.6 Section Eselsbrücken: D6 boxes + groups (F3, F11), v3 `kd-kw` styling active in all boxes
+- [x] 2.7 Section Notiz (F10)
+- [x] 2.8 Section Schreibfehler: pitfalls inline, lazy, only with `Stolperfallen`
+- [x] 2.9 Sections Wortbeispiele, Lesungen (+ Nanori, F10), Links
+- [x] 2.10 F5 Handschriftbeispiele setting (placed on the matching v3 settings subpage)
+- [x] 2.11 F6 reveal speed: measure v3, then decide (log the decision)
+- [x] 2.12 Font-size map / themes / dark mode / left-hand mode: check that all fork classes follow v3 settings
+- [x] 2.13 Tests green (or baseline), `build.py --check` green, update `FORK.md`
 
 ### Phase 3 – Headless verification
 - [ ] 3.1 Test collection on the server from the user's `.apkg` (`fix-kanji-deck/tools/setup_test_anki.py`,
@@ -358,19 +381,26 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-03, server):** Phase 0 and 1 done. Merge commit `edf1045`: the tree equals `upstream/main`
-  (`b853acf`) plus `FORK.md`, `docs/fork/` and the fork's `.gitignore` lines. **All fork features F1–F12 are
-  currently missing** from the templates.
-- **Next:** Phase 2, starting with 2.1.
-- **Blocked / waiting for user:** nothing.
+- **State (2026-11-03, server):** Phases 0–2 done. All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
+  merge `edf1045`, see §8). Rendered with real notes (kanji, primitive, both cards, light/dark,
+  phone/desktop width): no console errors.
+- **Next:** Phase 3. 3.1 test collection (headless Anki) is optional for rendering; the render harness (below)
+  already covers 3.2 roughly. Then 3.3 upstream baseline timing and the +50 ms budget.
+- **Blocked / waiting for user:** nothing. A visual review of the new back by the user would be useful
+  (screenshots can be made with the harness).
+- **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
+  `/tmp/kd-apkg/mine_samples.json` (user notes via read-only AnkiConnect `notesInfo`), `/tmp/kd-apkg/v3.json`
+  (v3 `.apkg` notes via sqlite), the three handwriting fonts copied next to the output pages (`retrieveMediaFile`).
+  It simulates the post-migration fields (v3 `Stolperfallen`, `Merkhilfe`, `Merksatz-KI` <- `Eselsbrücke`,
+  `Radikale` <- v3 until Phase 4) and drives `/usr/bin/google-chrome` through Playwright:
+  `uv run --with playwright python -I render_cards.py <repo> <samples> <v3> <outdir> --only 語 --ls '{"kdSec_strichfolge":"0"}' --js "…" --viewport-shot`.
 - **Environment (server):** repos in `~/Repos/kanji-draw-anki` and `~/Repos/fix-kanji-deck`. `ANKICONNECT_URL` is
   a fish universal variable; bash subshells don't see it, so read it with `fish -c 'echo $ANKICONNECT_URL'` and
-  export it. `version` answers 6 over Tailscale. Browser: `/usr/bin/google-chrome` (Playwright not checked yet).
-  Python 3.14 system, `uv sync --group anki --group analysis` in `fix-kanji-deck` works.
-- **Test baseline (after the merge):** `npm test` 11/11 files pass, `Tools/build.py --check` ok,
-  `Tools/check_scripts.py` ok. The old `test_stroke_styles_v2.js` failure is fixed upstream. **Flaky:**
-  `test_algorithms.js` timing checks ("< 2ms", "< 3ms") sometimes fail when `node --test` runs files in parallel on
-  the loaded 4-core server. They pass alone (`node test_algorithms.js`). Not a regression.
+  export it. `version` answers 6 over Tailscale. Python 3.14 system, `uv sync --group anki --group analysis` in
+  `fix-kanji-deck` works.
+- **Test baseline:** `npm test` 11/11 files pass, `Tools/build.py --check` ok, `Tools/check_scripts.py` ok.
+  **Flaky:** `test_algorithms.js` timing checks ("< 2ms", "< 3ms") sometimes fail when `node --test` runs files in
+  parallel on the loaded 4-core server. They pass alone. Not a regression.
 
 ---
 
@@ -381,3 +411,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (PC/WSL) · Analysis + grill session, plan and FORK.md written (0.1–0.4).
 - 2026-11-03 · Claude (PC/WSL) · Private repo MrM0bi/fix-kanji-deck created and pushed with `tools/v3/` (0.5). User decided: no AnkiConnect API key, use Tailscale only.
 - 2026-11-03 · Claude (server) · 0.6/0.7 verified (repos, files, AnkiConnect over Tailscale, uv, node 22). Merged upstream v3.0.0, conflicts taken from upstream (1.1, `edf1045`). Baseline recorded (1.2).
+- 2026-11-03 · Claude (server) · Phase 2: field names (2.1), overrides + chips (2.2), inline sections with tree, player, Eselsbrücken groups, Notiz, Schreibfehler, Lesungen/Nanori, links (2.3–2.9, `faece31`), Handschriftbeispiele (2.10), reveal speed + font-size map (2.11/2.12), FORK.md (2.13). Decisions D16–D24.

@@ -11,9 +11,9 @@ The fork tries to stay as close to upstream as possible so upstream updates can 
 - Upstream code isn't refactored or reformatted.
 - Upstream updates come in with `git merge upstream/main`.
 
-> **Status (2026-11-03):** `main` is still based on upstream before v3. The upgrade to upstream **v3.0.0** is in
-> progress on branch `t3/reconcile-v3-fork`, see [`docs/fork/v3-migration.md`](docs/fork/v3-migration.md) there.
-> The list below describes `main`.
+> **Status (2026-11-03):** `main` is still based on upstream before v3. This branch (`t3/reconcile-v3-fork`) has
+> merged upstream **v3.0.0** and rebuilt the fork changes on top, see
+> [`docs/fork/v3-migration.md`](docs/fork/v3-migration.md). The list below describes the v3 version.
 
 ## Fields
 
@@ -26,9 +26,9 @@ The templates use this fork's field names instead of upstream's:
 | `Nummer` | `Kanjinummer-BuchDE-Edition-4` (from v3 on) |
 | `Eselsbrücke` | `Merksatz-KI` (from v3 on) |
 
-Additional fields used by the templates: `PrimitivBedeutung-DE`, `PrimitivBedeutung-Override`, `Merksatz-DE`,
-`Merksatz-Custom`, `BuchBeschreibung`, `BuchPrimitivBeschreibung`, `Nanori`, `Notiz`,
-`Kanjinummer-BuchEN-Edition-6` (before v3).
+Upstream's `Merkhilfe` and `Stolperfallen` keep their names. Additional fields used by the templates:
+`PrimitivBedeutung-DE`, `PrimitivBedeutung-Override`, `Merksatz-DE`, `Merksatz-Custom`, `BuchBeschreibung`,
+`BuchPrimitivBeschreibung`, `Nanori`, `Notiz`.
 
 The deck also contains **primitive notes**. Their `Kanji` field holds a bracketed name such as `[Spazierstock]`
 instead of a glyph. The templates detect them by the leading `[`.
@@ -37,15 +37,15 @@ instead of a glyph. The templates detect them by the leading `[`.
 
 | Change | Description |
 |---|---|
-| Inline back side | Instead of the 📖 info modal, the back shows the info directly as collapsible sections. Each section remembers whether it's open. |
-| Several mnemonics | The "Eselsbrücken" section shows a custom Merksatz, the German Merksatz, and the book descriptions under a muted `HEISIG` label. |
+| Inline back side | Instead of upstream's info modal, the back shows everything as collapsible sections: Elemente (component tree with zoom/fullscreen), Strichfolge (player), Eselsbrücken, Notiz, Schreibfehler, Wortbeispiele, Lesungen, Externe Links. Each section remembers whether it's open. Strichfolge and Schreibfehler start closed and load on first open. Order and titles come from one list (`KD_SECTIONS` in `Templates/src/back/kd-fork-sections.js`). The header shows JLPT, frequency and the book number. |
+| Several mnemonics | "Eselsbrücken" shows a custom Merksatz, the German Merksatz, a `KANJIDRAW` group (upstream's hint and mnemonic) and the book descriptions under a muted `HEISIG` label. |
 | Notiz | A free-form note section, hidden when empty. |
 | Nanori | A third reading row with a muted `NANORI` label. |
-| Primitive meanings | Primitive meanings are shown as chips next to the keyword on the front. |
+| Primitive meanings | Primitive meanings are shown as chips next to the keyword in the title. |
 | Meaning overrides | `Bedeutung-Override` / `PrimitivBedeutung-Override` replace the keyword when filled. |
-| Handschriftbeispiele | An optional setting that shows the kanji in three more fonts. The fonts are collection media files (`_kanji_font2_kai08.otf`, `_kanji_font3_ArmedBanana.ttf`, `_kanji_font4_KouzanGyousho.otf`) and are not part of this repo. |
-| Primitive notes | No font samples or tree root row for primitives. "Elemente" is hidden when it only names the primitive itself. |
-| Faster reveal | The answer reveal animation was shortened (0.35 s → 0.1 s). |
+| Handschriftbeispiele | An optional setting (page "Rückseite") that shows the kanji in three more fonts above the tree. The fonts are collection media files (`_kanji_font2_kai08.otf`, `_kanji_font3_ArmedBanana.ttf`, `_kanji_font4_KouzanGyousho.otf`) and are not part of this repo. |
+| Primitive notes | No font samples for primitives. "Elemente" is hidden when it only names the primitive itself. |
+| Faster reveal | The info area fades in over 0.1 s. |
 
 ## License and attribution
 
