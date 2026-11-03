@@ -355,7 +355,7 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 ### Phase 2b – Option: old minimal design (D25; after Phase 3, before Phase 6 so the user tests both)
 - [x] 2b.1 Agree the scope with the user. Proposal:
-      - a setting "Design: KanjiDraw (neu) / Minimal" on the "Erscheinungsbild" page, key `kanjiThemeDesign`
+      - a setting "Design: Verspielt (v3) / Minimal" on the "Erscheinungsbild" page, key `kanjiThemeDesign`
         (`kd` / `minimal`), CSS default `--default-theme-design: kd`, applied as `html.kd-design-minimal` by an early
         script (no flicker, like the theme classes)
       - minimal = no landscape scenery, plain background, the pre-v3 flat title (keyword as text, grey primitive
@@ -459,3 +459,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · Accent "Schlicht" + palette rule (D29), tag back on its pill's corner, minimal fixes.
 - 2026-11-03 · Claude (server) · Minimal + coloured accent: primitive pills are surface-coloured with a theme border instead of grey (user found the grey odd; compared 4 options).
 - 2026-11-03 · Claude (server) · Primitive tag lifted up/right: covers only the pill edge (3px), attached to the top-right pill (user).
+- 2026-11-03 · Claude (server) · v3-design tag overlaps the pill edge (~7px); design options renamed "Verspielt" / "Minimal" (user asked for e.g. "Cute"; German label chosen).

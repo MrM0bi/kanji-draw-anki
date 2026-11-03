@@ -46,7 +46,7 @@ instead of a glyph. The templates detect them by the leading `[`.
 | Handschriftbeispiele | An optional setting (page "Rückseite") that shows the kanji in three more fonts above the tree. The fonts are collection media files (`_kanji_font2_kai08.otf`, `_kanji_font3_ArmedBanana.ttf`, `_kanji_font4_KouzanGyousho.otf`) and are not part of this repo. |
 | Primitive notes | No font samples for primitives. "Elemente" is hidden when it only names the primitive itself. |
 | Faster reveal | The info area fades in over 0.1 s. |
-| Minimal design | A global setting ("Design" on "Erscheinungsbild") switches the whole UI to the plain pre-v3 look with the old icons. All v3 features stay. With the accent "Schlicht" it is black/white; with other accents it keeps the Japan-Theme colours. |
+| Minimal design | A global setting ("Design: Verspielt / Minimal" on "Erscheinungsbild") switches the whole UI to the plain pre-v3 look with the old icons. All v3 features stay. With the accent "Schlicht" it is black/white; with other accents it keeps the Japan-Theme colours. |
 | Accent "Schlicht" | A black/white accent colour. |
 | Long keywords | Long one-word keywords hyphenate or shrink to fit the title pill instead of running into the gear button. |
 | Landscape on the back | The back is taller than one screen, so the landscape sits at the bottom of the page instead of the screen. |
