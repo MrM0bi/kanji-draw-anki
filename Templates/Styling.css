@@ -49,6 +49,9 @@
     /* Strichansicht (Nur Zeichnen-Karte, Frei-Modus): 'handwriting' (Handschrift), 'svg' (SVG-Pfade) */
     --default-opt-free-view: handwriting;
 
+    /* fork: Handschriftbeispiele (Rückseite): 'on' (An), 'off' (Aus) – Kanji zusätzlich in anderen Schriftarten */
+    --default-opt-handwriting: off;
+
     /* Startpunkt-Hilfe (Nur Zeichnen-Karte, Geführt-Modus): 'on' (An), 'off' (Aus) */
     --default-opt-start-hint: off;
 

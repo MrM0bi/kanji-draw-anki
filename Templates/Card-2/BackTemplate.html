@@ -437,6 +437,17 @@
             if (top <= 1 && t.indexOf('{') === -1) hide('elemente');
         }
 
+        // --- Handschriftbeispiele: per-card setting (c1_/c2_kanjiOptHandwriting), re-applied live from the settings radios ---
+        window._kdApplyHandwriting = function () {
+            var fe = document.querySelector('#kd-info-inline .kanji-font-examples');
+            if (!fe) return;
+            var card = typeof _hostCard === 'string' ? _hostCard : 'c1';
+            var def = 'off';
+            try { def = getGlobalConfig().handwriting || 'off'; } catch (e) { }
+            fe.classList.toggle('is-visible', get(card + '_kanjiOptHandwriting', get('kanjiOptHandwriting', def)) === 'on');
+        };
+        window._kdApplyHandwriting();
+
         // --- Headers, order and collapse state ---
         var CHEVRON = '<svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>';
         var initialOpen = [];

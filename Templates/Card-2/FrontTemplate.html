@@ -708,6 +708,33 @@
                     </label>
                 </div>
             </div>
+            <!-- fork: Handschriftbeispiele (the kanji in three more fonts above the Elemente tree) -->
+            <div class="setting-group-title">Handschriftbeispiele</div>
+            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <label><input type="radio" name="opt-handwriting" value="off"
+                        onchange="updateFeatureSetting('handwriting', this.value); if (window._kdApplyHandwriting) window._kdApplyHandwriting()">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="3.2" class="fi-cream" />
+                            <path d="M8 9h8M12 7v10M8.5 13.5h7" />
+                        </svg>
+                        <span>Aus</span>
+                    </div>
+                </label>
+                <label><input type="radio" name="opt-handwriting" value="on"
+                        onchange="updateFeatureSetting('handwriting', this.value); if (window._kdApplyHandwriting) window._kdApplyHandwriting()">
+                    <div class="visual-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2.5" y="7" width="5.6" height="10" rx="1.6" class="fi-gold" />
+                            <rect x="9.2" y="7" width="5.6" height="10" rx="1.6" class="fi-teal" />
+                            <rect x="15.9" y="7" width="5.6" height="10" rx="1.6" class="fi-coral" />
+                        </svg>
+                        <span>An</span>
+                    </div>
+                </label>
+            </div>
             <div role="button" tabindex="0" class="close-settings back-to-main" onclick="navigateBack(event)">Zurück zur
                 Übersicht</div>
         </div>
@@ -7055,6 +7082,7 @@
             'opt-color-back': scopedGet('kanjiOptColorBack', globalConf.colorBack),
             'opt-autodraw': scopedGet('kanjiOptAutodraw', globalConf.autodraw),
             'opt-numbers': scopedGet('kanjiOptNumbers', globalConf.numbers),
+            'opt-handwriting': scopedGet('kanjiOptHandwriting', globalConf.handwriting), // fork
             'opt-strictness': scopedGet('kanjiOptStrictness', globalConf.strictness),
             'opt-celebration': scopedGet('kanjiOptCelebration', globalConf.celebration),
             'opt-display-style': scopedGet('kanjiOptDisplayStyle', globalConf.displayStyle),
@@ -7141,6 +7169,7 @@
             colorBack: getVar('--default-opt-color-back', 'on'),
             autodraw: getVar('--default-opt-autodraw', 'on'),
             numbers: getVar('--default-opt-numbers', 'on'),
+            handwriting: getVar('--default-opt-handwriting', 'off'), // fork
             strictness: getVar('--default-opt-strictness', 'normal'),
             celebration: getVar('--default-opt-celebration', 'on'),
             displayStyle: getVar('--default-opt-display-style', 'standard'),
