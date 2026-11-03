@@ -67,11 +67,14 @@ Done when **all** of this holds:
 The whole project moves from the user's Windows PC + WSL to a **remote Linux server** and stays there. The
 user's Anki keeps running on Windows. Its **AnkiConnect will be reachable from the server over Tailscale**.
 
-- AnkiConnect URL and key are **never committed**. Scripts read them from the environment:
-  `ANKICONNECT_URL` (default `http://127.0.0.1:8765`) and `ANKICONNECT_KEY` (optional).
-- Planned AnkiConnect config on Windows (manual step by the user; see checklist 0.6): `webBindAddress` set to the
-  Tailscale interface (or `0.0.0.0` with Windows firewall limited to the tailnet), and an `apiKey` set, because
-  the port is then reachable from the network.
+- The AnkiConnect URL is **never committed**. Scripts read it from env `ANKICONNECT_URL` (default
+  `http://127.0.0.1:8765`). There is **no API key** (user decision 2026-11-03), so the port must only be reachable
+  from the user's own tailnet.
+- AnkiConnect's `webBindAddress` takes **one** address. Recommended setup (manual step by the user, checklist 0.6):
+  keep AnkiConnect on `127.0.0.1` and expose it to the tailnet with
+  `tailscale serve --bg --tcp 8765 tcp://localhost:8765` on the Windows PC. The server then uses
+  `ANKICONNECT_URL=http://<pc-tailnet-name>:8765`. Alternative: `webBindAddress` `0.0.0.0` plus a Windows firewall
+  rule that only allows `127.0.0.1` and the tailnet range `100.64.0.0/10` on port 8765.
 - AnkiConnect only talks to the **profile that is currently open** in the user's Anki.
 
 ### Repos and directories
@@ -79,7 +82,7 @@ user's Anki keeps running on Windows. Its **AnkiConnect will be reachable from t
 | What | Where (PC/WSL before the move) | Committed? |
 |---|---|---|
 | This repo (templates, docs) | `~/kanji-draw-anki` (+ T3 worktrees) | yes, public: origin = github.com/MrM0bi/kanji-draw-anki, upstream = github.com/PawMethod/kanji-draw-anki |
-| Data tooling, migration scripts, review decisions | `~/fix-kanji-deck` (local git repo, no remote yet) | private. Planned: private GitHub repo, scripts only (checklist 0.5) |
+| Data tooling, migration scripts, review decisions | `~/fix-kanji-deck`, branch `master` | private: github.com/MrM0bi/fix-kanji-deck (scripts, `STATUS.md`; `book/ sources/ old-info/ work/ deck/ .anki-test/ .venv` git-ignored) |
 | Headless test Anki | `fix-kanji-deck/.anki-test/` (`tools/setup_test_anki.py`, `tools/anki_headless.sh`) | no, rebuilt from the `.apkg` |
 
 ### Files to copy by hand (not in git)
@@ -269,7 +272,7 @@ and who decided (user / agent).
   on origin. No AnkiWeb publishing.
 - **D13 Upstream:** leave it alone. No PRs.
 - **D14 Infra:** the project moves to a remote Linux server. AnkiConnect is reached over Tailscale through env
-  `ANKICONNECT_URL`/`ANKICONNECT_KEY`. Never commit these.
+  `ANKICONNECT_URL` (never committed). No API key, so access is limited to the tailnet (§2).
 - **D15 Later (post-release):** a setting to hide and reorder the back sections (Phase 9).
 
 ---
@@ -283,11 +286,10 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 0.2 Grill session, decisions D1–D15 (§5)
 - [x] 0.3 This plan + `FORK.md` committed and pushed on `t3/reconcile-v3-fork`
 - [x] 0.4 Local `AGENTS.md` updated (points here; upstream state; server move)
-- [ ] 0.5 `fix-kanji-deck`: put the v3 analysis scripts under `tools/v3/`, review what's tracked, create a
-      **private** GitHub repo and push (**user OK needed before creating the repo**)
+- [x] 0.5 `fix-kanji-deck`: v3 analysis scripts in `tools/v3/`, private repo github.com/MrM0bi/fix-kanji-deck created and pushed
 - [ ] 0.6 **User (manual):** move the project to the server. Clone both repos and copy the files from §2
-      "Files to copy by hand". Set up Tailscale. Configure AnkiConnect on Windows (bind address + `apiKey`) and
-      set `ANKICONNECT_URL`/`ANKICONNECT_KEY` on the server.
+      "Files to copy by hand". Set up Tailscale. Expose AnkiConnect to the tailnet (§2, `tailscale serve`) and
+      set `ANKICONNECT_URL` on the server.
 - [ ] 0.7 Server prerequisites (§2): uv, node 22, chromium, `uv sync` in `fix-kanji-deck`, check
       `ANKICONNECT_URL` with a read-only `version` call
 
@@ -358,9 +360,8 @@ _Update this section before you stop._
 
 - **State (2026-11-03):** Phase 0 docs written and pushed. Nothing merged yet; the branch equals fork `main` @
   `4a330c0` plus docs.
-- **Next:** 0.5 (needs the user's OK to create the private repo), then the user moves the project to the server
-  (0.6). After that, 0.7 → Phase 1.
-- **Blocked / waiting for user:** 0.5 repo creation, 0.6 move.
+- **Next:** the user moves the project to the server (0.6). After that, 0.7 → Phase 1.
+- **Blocked / waiting for user:** 0.6 move.
 - **Test baseline:** before the merge, fork `main` had 1 known failure in `test_stroke_styles_v2.js` ("C2-Back gel
   halos use getComputedStyle"). Upstream v3 contains a fix for that test. Re-check in 1.2.
 
@@ -371,3 +372,4 @@ _Update this section before you stop._
 Newest last. One entry per finished item or session: date, agent/machine, what, commit.
 
 - 2026-11-03 · Claude (PC/WSL) · Analysis + grill session, plan and FORK.md written (0.1–0.4).
+- 2026-11-03 · Claude (PC/WSL) · Private repo MrM0bi/fix-kanji-deck created and pushed with `tools/v3/` (0.5). User decided: no AnkiConnect API key, use Tailscale only.
