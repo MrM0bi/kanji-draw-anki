@@ -309,6 +309,9 @@ and who decided (user / agent).
 - **D28 (agent) Long keywords:** v3's title pill grows past its width limit for long one-word keywords (93 in the
   deck with 13+ letters). Title gets `lang=de` + `hyphens:auto`; without a dictionary the font steps down to fit
   (min 15 px). Generic, could go upstream.
+- **D30 (agent, 2026-11-03) Minimal tools:** retain semantic component/pitfall colours; use flat surfaces,
+  outline player icons, a plain progress line and larger tree/filter touch targets. Danke uses its own star/message
+  icons rather than inheriting appearance/speaker icons from the settings menu. No upstream JS/markup changed.
 - **D26 (user/agent, 2026-11-03) Title and landscape:** primitive meanings are separate pills next to the keyword
   pill, not chips inside it (user). On the back the landscape sits at the bottom of the page, not of the viewport
   (user); implemented with `.card:has(#kd-info-inline) .forest-scenery { position: absolute }`.
@@ -353,7 +356,7 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 2.12 Font-size map / themes / dark mode / left-hand mode: check that all fork classes follow v3 settings
 - [x] 2.13 Tests green (or baseline), `build.py --check` green, update `FORK.md`
 
-### Phase 2b – Option: old minimal design (D25; after Phase 3, before Phase 6 so the user tests both)
+### Phase 2b – Option: old minimal design (D25; before Phase 6 so the user tests both)
 - [x] 2b.1 Agree the scope with the user. Proposal:
       - a setting "Design: Verspielt (v3) / Minimal" on the "Erscheinungsbild" page, key `kanjiThemeDesign`
         (`kd` / `minimal`), CSS default `--default-theme-design: kd`, applied as `html.kd-design-minimal` by an early
@@ -365,16 +368,16 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
         `KD_SECTIONS`; no edits to upstream markup
       **User decisions (2026-11-03):** the **whole design** switches (settings modal, buttons, front controls, card
       content); **one global setting**; colours: explore and show the options (v3 themes vs. the old palette).
-- [~] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive. **Prototype done**
+- [x] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive. **Completed**
       (`2e105c5`): setting, early class, icon swap (`src/front/kd-fork-design*.js`, `KD_SECTIONS` `ICON_MIN`), CSS
       skin (fork block at the end of `Styling.css`). Colours decided (D29): new accent "Schlicht"; minimal +
       Schlicht = neutral palette, minimal + other accents = Japan-Theme colours (`4941859`).
-      Not yet restyled in minimal: Strichfolge controls, Schreibfehler page, sound and "Danke" pages, the tree
-      toolbar (they keep v3 shapes, outline icons).
-- [ ] 2b.3 Tests, `build.py --check`, `FORK.md`
+      Finished the v3 tools: outline player controls/plain progress, flat Schreibfehler surfaces, tree toolbar,
+      sound options and Danke (including correct rating/feedback icons). Category/stroke colours stay semantic.
+- [x] 2b.3 Tests, `build.py --check`, `FORK.md`
 
 ### Phase 3 – Headless verification
-- [ ] 3.1 Test collection on the server from the user's `.apkg` (`fix-kanji-deck/tools/setup_test_anki.py`,
+- [x] 3.1 Test collection on the server from the user's `.apkg` (`fix-kanji-deck/tools/setup_test_anki.py`,
       adjust hard-coded paths, e.g. `KANJI_DRAW_ADDON`)
 - [ ] 3.2 Render harness: real notes (kanji e.g. 一 右 語 派 籠, primitive e.g. `[spazierstock]`) × Card 1/2 ×
       front/back in headless Chromium. Screenshots, console errors, timings.
@@ -419,8 +422,8 @@ _Update this section before you stop._
 - **State (2026-11-03, server):** Phases 0–2 done. All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
   merge `edf1045`, see §8). Rendered with real notes (kanji, primitive, both cards, light/dark,
   phone/desktop width): no console errors.
-- **Next:** Phase 3 (then Phase 2b, the minimal-design option; scope questions are listed there). 3.1 test collection (headless Anki) is optional for rendering; the render harness (below)
-  already covers 3.2 roughly. Then 3.3 upstream baseline timing and the +50 ms budget.
+- **Next:** finish Phase 3 interaction/render checks and paired upstream timing; then Phase 4 data migration tooling.
+  Phase 2b is complete. The real collection is still on pre-v3 templates/data.
 - **3.3 first timing (2026-11-03, inconclusive):** `loadEventEnd` of the rendered back pages, 15 loads each, 412 px,
   headless Chrome. Upstream v3 (modal, upstream field names, v3 values) vs. fork (inline), 学/語 × C1/C2:
   medians up 913/908/759/808 ms vs. fork 883/870/978/794 ms; minimums up 741/711/670/650 vs. fork 751/775/762/666.
@@ -460,3 +463,5 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · Minimal + coloured accent: primitive pills are surface-coloured with a theme border instead of grey (user found the grey odd; compared 4 options).
 - 2026-11-03 · Claude (server) · Primitive tag lifted up/right: covers only the pill edge (3px), attached to the top-right pill (user).
 - 2026-11-03 · Claude (server) · v3-design tag overlaps the pill edge (~7px); design options renamed "Verspielt" / "Minimal" (user asked for e.g. "Cute"; German label chosen).
+
+- 2026-11-03 · Codex (server) · Finished the Minimal skin for v3 tools and settings (2b.2/2b.3); isolated latest-export Anki collection imported (2363 notes, 4726 cards), rendered 40 sample sides through Anki backend, card/revlog hashes unchanged.

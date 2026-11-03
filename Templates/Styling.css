@@ -7020,3 +7020,166 @@ html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c4 
 html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c5 { color: #b8372f; background: rgba(232, 98, 92, 0.14); }
 html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-c6 { color: #5546c8; background: rgba(138, 124, 240, 0.15); }
 html.kd-design-minimal:not(.nightMode):not(.night_mode) .visuell-hinweis .kd-k { color: color-mix(in srgb, var(--accent) 70%, #000); background: var(--accent-bg); }
+
+/* fork: finish the Minimal skin for the v3 tools; category/stroke colours still convey meaning. */
+html.kd-design-minimal .order-stage,
+html.kd-design-minimal .pitfalls-preview-pad {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+html.kd-design-minimal .order-ctrl {
+    border-radius: 7px;
+    color: var(--text-muted);
+    box-shadow: none;
+    font-variant-numeric: tabular-nums;
+}
+
+html.kd-design-minimal .order-ctrl-main {
+    color: var(--accent);
+    background: var(--accent-bg);
+}
+
+/* The player replaces these SVGs on every frame; CSS covers play, pause and replay. */
+html.kd-design-minimal .order-ctrl svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+html.kd-design-minimal #order-progress {
+    font-variant-numeric: tabular-nums;
+    padding: 0;
+    background: none;
+    color: var(--text-muted);
+    border-radius: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+}
+
+html.kd-design-minimal .tree-zoom-btn,
+html.kd-design-minimal .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+html.kd-design-minimal .tree-zoom-btn svg,
+html.kd-design-minimal .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+html.kd-design-minimal .pitfalls-stage {
+    padding: 14px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+html.kd-design-minimal .pitfall-filter-btn {
+    height: auto;
+    min-height: 40px;
+    padding: 6px 10px;
+    border-width: 1px;
+    border-radius: 7px;
+    font-weight: 600;
+}
+
+html.kd-design-minimal .pitfall-card {
+    border-width: 1px;
+    border-left-width: 3px;
+    border-radius: 7px;
+    box-shadow: none;
+}
+
+html.kd-design-minimal .pitfall-card.active {
+    box-shadow: 0 0 0 1px var(--pf-c, var(--accent));
+    transform: none;
+}
+
+html.kd-design-minimal .pitfall-cat-badge,
+html.kd-design-minimal .pitfall-stroke-badge {
+    height: auto;
+    min-height: 22px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: normal;
+}
+
+html.kd-design-minimal .pitfall-cat-badge {
+    background: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+html.kd-design-minimal .pitfall-title {
+    font-weight: 600;
+}
+
+/* Sound reuses the settings controls; keep their choices and all existing icons. */
+html.kd-design-minimal #page-sound .visual-option {
+    border-width: 1px;
+    border-radius: 7px;
+    box-shadow: none;
+}
+
+html.kd-design-minimal .about-kanji {
+    color: var(--text-main);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: 4px;
+}
+
+html.kd-design-minimal .about-brush {
+    display: none;
+}
+
+html.kd-design-minimal .about-reading {
+    margin-top: 8px;
+}
+
+html.kd-design-minimal .settings-about-btn,
+html.kd-design-minimal #page-about.active .about-brush path {
+    animation: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html.kd-design-minimal .order-ctrl:hover,
+    html.kd-design-minimal .tree-zoom-btn:not(.disabled):hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: none;
+    }
+}
+
+html.kd-design-minimal .tree-zoom-btn:active,
+html.kd-design-minimal .pitfall-filter-btn:active {
+    transform: scale(0.96);
+}
+
+/* Tool targets remain comfortably separated on touch screens. */
+@media (pointer: coarse) {
+    html.kd-design-minimal .tree-zoom-btn,
+    html.kd-design-minimal .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    html.kd-design-minimal .pitfall-filter-btn {
+        min-height: 44px;
+    }
+}
