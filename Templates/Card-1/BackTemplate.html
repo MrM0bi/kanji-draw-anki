@@ -621,7 +621,10 @@
                 '.category-name': [15, 13, 17], '.category-desc': [11, 10, 12],
                 '.subpage-header h3': [16, 14, 18], '.settings-main-title': [16, 14, 18],
                 '.visual-option span': [11, 10, 12],
-                '.accent-option span': [10, 9, 11], '.close-settings': [14, 12, 16]
+                '.accent-option span': [10, 9, 11], '.close-settings': [14, 12, 16],
+                // fork: inline back sections
+                '.kd-section-title': [13, 11, 15], '.story-box-title': [14, 12, 16], '.story-box-text': [15, 13, 17],
+                '.kd-story-group-label': [11, 10, 12], '.kd-note-box': [15, 13, 17], '.kd-order-head': [13, 11, 15]
             };
             var _fsIdx = fs === 'small' ? 1 : fs === 'large' ? 2 : 0;
             var _cssRules = Object.keys(_fsMap).map(function (_sel) { return _sel + '{font-size:' + _fsMap[_sel][_fsIdx] + 'px!important}'; }).join('');

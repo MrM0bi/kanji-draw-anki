@@ -5263,7 +5263,7 @@ ruby rt {
     z-index: 2;
     text-align: left;
     /* opacity only: a transform here would trap the fixed-position tree fullscreen */
-    animation: kdInlineIn 0.18s ease-out both;
+    animation: kdInlineIn 0.1s ease-out both; /* F6: fast reveal (upstream fades its info button over 0.35s) */
 }
 
 @keyframes kdInlineIn {
