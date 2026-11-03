@@ -156,13 +156,13 @@
             <div class="info-modal-header">
                 <span class="info-modal-titles">
                     <span class="info-modal-title">Übersicht</span>
-                    {{#Nummer}}<span class="info-modal-number">Nr. {{Nummer}}</span>{{/Nummer}}
+                    {{#Kanjinummer-BuchDE-Edition-4}}<span class="info-modal-number">Nr. {{Kanjinummer-BuchDE-Edition-4}}</span>{{/Kanjinummer-BuchDE-Edition-4}}
                 </span>
-                <span class="info-modal-meaning">{{Bedeutung}}</span>
+                <span class="info-modal-meaning">{{Bedeutung-DE}}</span>
             </div>
 
             <div class="info-tags">
-                {{#JLPT}}
+                {{#JLPT-Level}}
                 <span class="info-tag">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -170,9 +170,9 @@
                         <path d="M6 12v5c3 3 9 3 12 0v-5" class="fi-gold" />
                         <path d="M22 10v6" />
                     </svg>
-                    {{JLPT}}
+                    {{JLPT-Level}}
                 </span>
-                {{/JLPT}}
+                {{/JLPT-Level}}
                 {{#Häufigkeit}}
                 <span class="info-tag tag-frequency">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -221,7 +221,7 @@
                 {{/Stolperfallen}}
             </div>
 
-            {{#Eselsbrücke}}
+            {{#Merksatz-KI}}
             <div class="info-section-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -233,7 +233,7 @@
                 </svg>
                 Eselsbrücke
             </div>
-            {{/Eselsbrücke}}
+            {{/Merksatz-KI}}
 
             {{#Merkhilfe}}
             <div class="visuell-hinweis">
@@ -247,9 +247,9 @@
             </div>
             {{/Merkhilfe}}
 
-            {{#Eselsbrücke}}
-            <p class="info-text-story">{{Eselsbrücke}}</p>
-            {{/Eselsbrücke}}
+            {{#Merksatz-KI}}
+            <p class="info-text-story">{{Merksatz-KI}}</p>
+            {{/Merksatz-KI}}
 
             {{#Wortbeispiel}}
             <div class="info-section-title">
