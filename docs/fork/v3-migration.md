@@ -457,3 +457,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · User feedback: primitive pills separated from the title pill, landscape at the page bottom on the back (`27927b4`). Planned the minimal-design option (D25, Phase 2b).
 - 2026-11-03 · Claude (server) · Primitive tag clearance + long keywords (`ff8e9da`). Minimal-design prototype (`2e105c5`), colour variants A/B rendered for the user.
 - 2026-11-03 · Claude (server) · Accent "Schlicht" + palette rule (D29), tag back on its pill's corner, minimal fixes.
+- 2026-11-03 · Claude (server) · Minimal + coloured accent: primitive pills are surface-coloured with a theme border instead of grey (user found the grey odd; compared 4 options).
