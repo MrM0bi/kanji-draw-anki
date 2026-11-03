@@ -4507,6 +4507,22 @@
             row.appendChild(g);
             if (title.style.visibility) g.style.visibility = title.style.visibility;
         });
+        // The tag belongs on the top-right pill (last pill of the first row). Which pill that is depends on the
+        // wrapping, so it is moved into that pill after layout and again when the window is resized.
+        var placeTags = function () {
+            document.querySelectorAll('.kd-title-row .primitive-group').forEach(function (g) {
+                var tag = g.querySelector('.primitive-label'), boxes = g.querySelectorAll('.primitive-box');
+                if (!tag || !boxes.length) return;
+                var top = Infinity, corner = null;
+                boxes.forEach(function (b) { top = Math.min(top, b.offsetTop); });
+                boxes.forEach(function (b) { if (Math.abs(b.offsetTop - top) < 2) corner = b; });
+                if (corner && tag.parentNode !== corner) corner.appendChild(tag);
+            });
+        };
+        placeTags();
+        if (window._kdTagResize) window.removeEventListener('resize', window._kdTagResize);
+        window._kdTagResize = placeTags;
+        window.addEventListener('resize', placeTags);
     })();
     // [/KD-SRC front/kd-fork-primitive-chips.js]
 </script>
