@@ -379,10 +379,10 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 ### Phase 3 – Headless verification
 - [x] 3.1 Test collection on the server from the user's `.apkg` (`fix-kanji-deck/tools/setup_test_anki.py`,
       adjust hard-coded paths, e.g. `KANJI_DRAW_ADDON`)
-- [ ] 3.2 Render harness: real notes (kanji e.g. 一 右 語 派 籠, primitive e.g. `[spazierstock]`) × Card 1/2 ×
+- [x] 3.2 Render harness: real notes (kanji e.g. 一 右 語 派 籠, primitive e.g. `[spazierstock]`) × Card 1/2 ×
       front/back in headless Chromium. Screenshots, console errors, timings.
-- [~] 3.3 Same measurement for pure upstream v3 (baseline for the +50 ms budget)
-- [ ] 3.4 Fix what's found. Add a short how-to for the harness to this file.
+- [x] 3.3 Same measurement for pure upstream v3 (baseline for the +50 ms budget; cold vs. reused-view results in §7)
+- [x] 3.4 Fix what's found. Add a short how-to for the harness to this file.
 
 ### Phase 4 – Data migration (scripts in `fix-kanji-deck`, dry run / `--apply` / `--undo`, value check, backup)
 - [ ] 4.1 Field-add script (`Stolperfallen` after `Radikale`, `Merkhilfe` after `Merksatz-KI`) via AnkiConnect
@@ -401,7 +401,8 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 ### Phase 6 – Test switch-over (user)
 - [ ] 6.1 **User:** `KanjiTest` profile with the `.apkg`. Agent applies Phase 4/5 + templates there via
       AnkiConnect (profile must be open).
-- [ ] 6.2 **User:** manual test on Windows Desktop + Android (AnkiDroid). Collect feedback → fixes.
+- [ ] 6.2 **User:** manual test on Windows Desktop + Android (AnkiDroid). Check cold-load cost, answer latency/flicker and
+      handwriting fonts as well as features/designs; collect feedback → fixes.
 
 ### Phase 7 – Real switch-over (user OK + backup before each step, D11)
 - [ ] 7.1 Add fields → 7.2 data scripts → 7.3 templates + CSS → 7.4 verify → 7.5 user syncs (full sync upload)
@@ -419,25 +420,56 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-03, server):** Phases 0–2 done. All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
+- **State (2026-11-03, server):** Phases 0–3 headless work complete (timing limitations below). All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
   merge `edf1045`, see §8). Rendered with real notes (kanji, primitive, both cards, light/dark,
   phone/desktop width): no console errors.
-- **Next:** finish Phase 3 interaction/render checks and paired upstream timing; then Phase 4 data migration tooling.
-  Phase 2b is complete. The real collection is still on pre-v3 templates/data.
-- **3.3 first timing (2026-11-03, inconclusive):** `loadEventEnd` of the rendered back pages, 15 loads each, 412 px,
-  headless Chrome. Upstream v3 (modal, upstream field names, v3 values) vs. fork (inline), 学/語 × C1/C2:
-  medians up 913/908/759/808 ms vs. fork 883/870/978/794 ms; minimums up 741/711/670/650 vs. fork 751/775/762/666.
-  The server had load ~6.7 on 4 cores, so the noise (±100 ms) is larger than the 50 ms budget. Redo on an idle
-  machine (or measure in-page script time with `performance.mark`) before deciding. Script: `/tmp/kd-time.py`
-  pattern = Playwright, new context per load, median of `performance.getEntriesByType('navigation')[0].loadEventEnd`.
-- **Blocked / waiting for user:** nothing. A visual review of the new back by the user would be useful
-  (screenshots can be made with the harness).
+- **Next:** Phase 4 data migration tooling in `fix-kanji-deck` (field schema/import/radical-name mapping,
+  then review pages for user decisions). The real collection is still on pre-v3 templates/data. Phase 6 must
+  verify actual Windows/Android latency, flicker, font/media loading and the cold-load cost below.
+- **Cold-load timing (2026-11-03):** Chrome 136, 412 px, 16 alternating rounds (first discarded), fresh
+  contexts, upstream `b853acf` vs. fork `c468b4c`. Median paired first-frame differences (fork minus upstream):
+  学 C1 **+61.6 ms**, 学 C2 **+176.8 ms**, 語 C1 **+97.3 ms**, 語 C2 **+106.4 ms**. All exceed +50 ms;
+  this run does **not** clear the performance gate. Server load peaked above 11 on four cores. Script intervals
+  vary greatly too (they include descheduling); no claim that the differences are only server noise. A simulated
+  reviewer flip in a reused WebView is measured separately, since a cold navigation includes work before the answer.
+- **Simulated reviewer flip timing (2026-11-03):** same Chromium, four fixtures, 12 alternating rounds
+  (first discarded). Load the front, settle for 400 ms, replace `#qa` with the back and execute inline scripts
+  in the same context; measure the next animation frame. No JS exceptions in 96 front→back cycles. Median paired
+  first-frame differences: 学 C1 **−18.5 ms**, 学 C2 **+15.4 ms**, 語 C1 **−19.2 ms**, 語 C2 **+12.6 ms**.
+  These headless **median** differences are within +50 ms. They do not prove a worst-case bound or native
+  Qt/AnkiDroid performance. Keep the cold-load result as a Phase 6 risk; don't dismiss it as noise.
+- **Blocked / waiting for user:** no input needed for Phase 4 tooling. Actual device testing waits until Phase 6.
 - **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
   `/tmp/kd-apkg/mine_samples.json` (user notes via read-only AnkiConnect `notesInfo`), `/tmp/kd-apkg/v3.json`
   (v3 `.apkg` notes via sqlite), the three handwriting fonts copied next to the output pages (`retrieveMediaFile`).
   It simulates the post-migration fields (v3 `Stolperfallen`, `Merkhilfe`, `Merksatz-KI` <- `Eselsbrücke`,
   `Radikale` <- v3 until Phase 4) and drives `/usr/bin/google-chrome` through Playwright:
   `uv run --with playwright python -I render_cards.py <repo> <samples> <v3> <outdir> --only 語 --ls '{"kdSec_strichfolge":"0"}' --js "…" --viewport-shot`.
+- **Functional verification (2026-11-03):** 240 card variants passed across ten notes × four sides × six
+  design/mode/accent/width cases. No console errors or horizontal page overflow. Checks cover design icon restore,
+  lazy player/pitfalls, autoplay/pause/step/speed/close, pitfall filters, handwriting visibility, tree fullscreen,
+  sound/Danke navigation. Additional pointer tests on 語, C1/C2, both designs passed component stroke spotlight
+  and zoom. Checked representative tool/settings screenshots at 320/1100 px.
+- **Isolated Anki verification (2026-11-03):** fresh profile made from the November 3 export (2363 notes,
+  4726 cards), separate from the older `.anki-test`. Anki 26.5 backend accepted the 30-field test model and
+  rendered 40 sample sides after simulated v3 fields/templates were installed in that copy. SHA-256 digests of
+  all `cards` and `revlog` rows stayed identical. Eight actual Anki-rendered sides (語 + primitive, C1/C2,
+  front/back) also loaded without JS exceptions in Chromium. This does **not** replace Windows Qt/Android testing.
+- **Repeatable checks (private tooling):** `fix-kanji-deck/tools/v3/README.md` documents the render,
+  interaction and timing helpers. From an empty directory, with real sample JSON kept outside the public repo:
+  1. `uv run --with playwright python -I <tooling>/tools/v3/render_cards.py <repo> <samples.json> <v3.json> <out>/cards --no-shot`.
+     Copy the three handwriting fonts beside those pages. `--upstream` and a separate upstream template snapshot
+     generate the baseline (only 学/語, `--sides c1_back,c2_back`).
+  2. `uv run --with playwright python -I <tooling>/tools/v3/verify_rendered.py <out>/cards --cases 0,1,2`,
+     then `--cases 3,4,5`. Six cases cover both designs, light/dark, neutral/coloured accents and 320/1100 px.
+     All ten sampled notes, both card types, both sides. JSON/screenshot output stays private.
+  3. Run `benchmark_rendered.py <upstream-cards> <fork-cards> <out>/benchmark` after other render jobs end.
+     Alternating order, 16 rounds, first discarded; record inline-script duration, first frame after parsing and
+     `loadEventEnd` separately. `--resume` continues saved progress if the command runner times out. Also run
+     `benchmark_flip.py <upstream-cards> <fork-cards> <out>/flip` with front AND back inputs to simulate the
+     reviewer lifecycle. The cold and flip measurements answer different questions; retain both.
+  4. A fresh isolated collection can be made with `tools/setup_test_anki.py --base <new-directory> --apkg <latest-export> --kanji-draw-addon <repo>/Addon`.
+     Never reset an existing test profile or use the old default export for the v3 check.
 - **Environment (server):** repos in `~/Repos/kanji-draw-anki` and `~/Repos/fix-kanji-deck`. `ANKICONNECT_URL` is
   a fish universal variable; bash subshells don't see it, so read it with `fish -c 'echo $ANKICONNECT_URL'` and
   export it. `version` answers 6 over Tailscale. Python 3.14 system, `uv sync --group anki --group analysis` in
@@ -464,4 +496,6 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · Primitive tag lifted up/right: covers only the pill edge (3px), attached to the top-right pill (user).
 - 2026-11-03 · Claude (server) · v3-design tag overlaps the pill edge (~7px); design options renamed "Verspielt" / "Minimal" (user asked for e.g. "Cute"; German label chosen).
 
-- 2026-11-03 · Codex (server) · Finished the Minimal skin for v3 tools and settings (2b.2/2b.3); isolated latest-export Anki collection imported (2363 notes, 4726 cards), rendered 40 sample sides through Anki backend, card/revlog hashes unchanged.
+- 2026-11-03 · Codex (server) · Finished the Minimal skin for v3 tools and settings (2b.2/2b.3, `c468b4c`); isolated latest-export Anki collection imported (2363 notes, 4726 cards), rendered 40 sample sides through Anki backend, card/revlog hashes unchanged.
+
+- 2026-11-03 · Codex (server) · Phase 3: 240 card variants passed; component spotlight/zoom and Anki backend output checked. Paired cold loads exceeded +50 ms; reused-view flip medians stayed within it (details §7). Native device/cold-load validation remains Phase 6. Repeatable helpers committed to private tooling (`b0faf5a`, `75199ba`). Next: Phase 4.
