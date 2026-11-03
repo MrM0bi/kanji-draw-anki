@@ -299,6 +299,12 @@ and who decided (user / agent).
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
+- **D27 (user, 2026-11-03) Design switch scope:** the whole design switches (settings, buttons, front, back);
+  one global setting; colours: show variants. Also (user): the Primitive tag must never cover or touch other
+  elements (keyword pill, other pills, gear) — checked with a bounding-box test at 320–1280 px.
+- **D28 (agent) Long keywords:** v3's title pill grows past its width limit for long one-word keywords (93 in the
+  deck with 13+ letters). Title gets `lang=de` + `hyphens:auto`; without a dictionary the font steps down to fit
+  (min 15 px). Generic, could go upstream.
 - **D26 (user/agent, 2026-11-03) Title and landscape:** primitive meanings are separate pills next to the keyword
   pill, not chips inside it (user). On the back the landscape sits at the bottom of the page, not of the viewport
   (user); implemented with `.card:has(#kd-info-inline) .forest-scenery { position: absolute }`.
@@ -344,7 +350,7 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 2.13 Tests green (or baseline), `build.py --check` green, update `FORK.md`
 
 ### Phase 2b – Option: old minimal design (D25; after Phase 3, before Phase 6 so the user tests both)
-- [ ] 2b.1 Agree the scope with the user. Proposal:
+- [x] 2b.1 Agree the scope with the user. Proposal:
       - a setting "Design: KanjiDraw (neu) / Minimal" on the "Erscheinungsbild" page, key `kanjiThemeDesign`
         (`kd` / `minimal`), CSS default `--default-theme-design: kd`, applied as `html.kd-design-minimal` by an early
         script (no flicker, like the theme classes)
@@ -353,10 +359,15 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
       - all v3 features (tree, player, Schreibfehler, colour-coded mnemonics, sound) stay in both designs
       - implementation: fork-only CSS overrides under `html.kd-design-minimal`, and a second icon set in
         `KD_SECTIONS`; no edits to upstream markup
-      Open questions for the user: should the settings modal, buttons and front-side controls also go back to the
-      old look (much larger, touches upstream code), or only the card content? Global or per card type (C1/C2)?
-      Do the accent colour and dark mode follow the v3 themes in minimal mode?
-- [ ] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive
+      **User decisions (2026-11-03):** the **whole design** switches (settings modal, buttons, front controls, card
+      content); **one global setting**; colours: explore and show the options (v3 themes vs. the old palette).
+- [~] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive. **Prototype done**
+      (`2e105c5`): setting, early class, icon swap (`src/front/kd-fork-design*.js`, `KD_SECTIONS` `ICON_MIN`), CSS
+      skin (fork block at the end of `Styling.css`). Waiting for the user: colour variant A (classic palette,
+      default) vs. B (`html.kd-minimal-theme`, v3 Japan-Theme colours); if B or both, expose it as an option. With A
+      the Japan-Theme only changes the sound scene in minimal mode: hide that group there, or keep it?
+      Not yet restyled in minimal: Strichfolge controls, Schreibfehler page, sound and "Danke" pages, the tree
+      toolbar (they keep v3 shapes, outline icons).
 - [ ] 2b.3 Tests, `build.py --check`, `FORK.md`
 
 ### Phase 3 – Headless verification
@@ -441,3 +452,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · Phase 2: field names (2.1), overrides + chips (2.2), inline sections with tree, player, Eselsbrücken groups, Notiz, Schreibfehler, Lesungen/Nanori, links (2.3–2.9, `faece31`), Handschriftbeispiele (2.10), reveal speed + font-size map (2.11/2.12), FORK.md (2.13). Decisions D16–D24.
 - 2026-11-03 · Claude (server) · 3.3 first timing run, inconclusive because the server was under load (numbers in §7).
 - 2026-11-03 · Claude (server) · User feedback: primitive pills separated from the title pill, landscape at the page bottom on the back (`27927b4`). Planned the minimal-design option (D25, Phase 2b).
+- 2026-11-03 · Claude (server) · Primitive tag clearance + long keywords (`ff8e9da`). Minimal-design prototype (`2e105c5`), colour variants A/B rendered for the user.
