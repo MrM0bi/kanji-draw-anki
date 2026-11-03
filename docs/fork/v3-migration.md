@@ -297,6 +297,11 @@ and who decided (user / agent).
   keyword on narrow screens, and the "Primitive" label sits inline before the chips (an overhanging label collided
   with the keyword when wrapping).
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
+- **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
+  minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
+- **D26 (user/agent, 2026-11-03) Title and landscape:** primitive meanings are separate pills next to the keyword
+  pill, not chips inside it (user). On the back the landscape sits at the bottom of the page, not of the viewport
+  (user); implemented with `.card:has(#kd-info-inline) .forest-scenery { position: absolute }`.
 
 ---
 
@@ -337,6 +342,22 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 2.11 F6 reveal speed: measure v3, then decide (log the decision)
 - [x] 2.12 Font-size map / themes / dark mode / left-hand mode: check that all fork classes follow v3 settings
 - [x] 2.13 Tests green (or baseline), `build.py --check` green, update `FORK.md`
+
+### Phase 2b – Option: old minimal design (D25; after Phase 3, before Phase 6 so the user tests both)
+- [ ] 2b.1 Agree the scope with the user. Proposal:
+      - a setting "Design: KanjiDraw (neu) / Minimal" on the "Erscheinungsbild" page, key `kanjiThemeDesign`
+        (`kd` / `minimal`), CSS default `--default-theme-design: kd`, applied as `html.kd-design-minimal` by an early
+        script (no flicker, like the theme classes)
+      - minimal = no landscape scenery, plain background, the pre-v3 flat title (keyword as text, grey primitive
+        boxes), plain section cards with the old feather outline icons instead of the pastel badges, plain info tags
+      - all v3 features (tree, player, Schreibfehler, colour-coded mnemonics, sound) stay in both designs
+      - implementation: fork-only CSS overrides under `html.kd-design-minimal`, and a second icon set in
+        `KD_SECTIONS`; no edits to upstream markup
+      Open questions for the user: should the settings modal, buttons and front-side controls also go back to the
+      old look (much larger, touches upstream code), or only the card content? Global or per card type (C1/C2)?
+      Do the accent colour and dark mode follow the v3 themes in minimal mode?
+- [ ] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive
+- [ ] 2b.3 Tests, `build.py --check`, `FORK.md`
 
 ### Phase 3 – Headless verification
 - [ ] 3.1 Test collection on the server from the user's `.apkg` (`fix-kanji-deck/tools/setup_test_anki.py`,
@@ -384,7 +405,7 @@ _Update this section before you stop._
 - **State (2026-11-03, server):** Phases 0–2 done. All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
   merge `edf1045`, see §8). Rendered with real notes (kanji, primitive, both cards, light/dark,
   phone/desktop width): no console errors.
-- **Next:** Phase 3. 3.1 test collection (headless Anki) is optional for rendering; the render harness (below)
+- **Next:** Phase 3 (then Phase 2b, the minimal-design option; scope questions are listed there). 3.1 test collection (headless Anki) is optional for rendering; the render harness (below)
   already covers 3.2 roughly. Then 3.3 upstream baseline timing and the +50 ms budget.
 - **3.3 first timing (2026-11-03, inconclusive):** `loadEventEnd` of the rendered back pages, 15 loads each, 412 px,
   headless Chrome. Upstream v3 (modal, upstream field names, v3 values) vs. fork (inline), 学/語 × C1/C2:
@@ -419,3 +440,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · 0.6/0.7 verified (repos, files, AnkiConnect over Tailscale, uv, node 22). Merged upstream v3.0.0, conflicts taken from upstream (1.1, `edf1045`). Baseline recorded (1.2).
 - 2026-11-03 · Claude (server) · Phase 2: field names (2.1), overrides + chips (2.2), inline sections with tree, player, Eselsbrücken groups, Notiz, Schreibfehler, Lesungen/Nanori, links (2.3–2.9, `faece31`), Handschriftbeispiele (2.10), reveal speed + font-size map (2.11/2.12), FORK.md (2.13). Decisions D16–D24.
 - 2026-11-03 · Claude (server) · 3.3 first timing run, inconclusive because the server was under load (numbers in §7).
+- 2026-11-03 · Claude (server) · User feedback: primitive pills separated from the title pill, landscape at the page bottom on the back (`27927b4`). Planned the minimal-design option (D25, Phase 2b).

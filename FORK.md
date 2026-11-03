@@ -41,11 +41,12 @@ instead of a glyph. The templates detect them by the leading `[`.
 | Several mnemonics | "Eselsbrücken" shows a custom Merksatz, the German Merksatz, a `KANJIDRAW` group (upstream's hint and mnemonic) and the book descriptions under a muted `HEISIG` label. |
 | Notiz | A free-form note section, hidden when empty. |
 | Nanori | A third reading row with a muted `NANORI` label. |
-| Primitive meanings | Primitive meanings are shown as chips next to the keyword in the title. |
+| Primitive meanings | Primitive meanings are shown as separate pills next to the keyword pill, with a small `PRIMITIVE` tag. |
 | Meaning overrides | `Bedeutung-Override` / `PrimitivBedeutung-Override` replace the keyword when filled. |
 | Handschriftbeispiele | An optional setting (page "Rückseite") that shows the kanji in three more fonts above the tree. The fonts are collection media files (`_kanji_font2_kai08.otf`, `_kanji_font3_ArmedBanana.ttf`, `_kanji_font4_KouzanGyousho.otf`) and are not part of this repo. |
 | Primitive notes | No font samples for primitives. "Elemente" is hidden when it only names the primitive itself. |
 | Faster reveal | The info area fades in over 0.1 s. |
+| Landscape on the back | The back is taller than one screen, so the landscape sits at the bottom of the page instead of the screen. |
 
 ## License and attribution
 
