@@ -6722,9 +6722,8 @@ html.kd-design-minimal .primitive-group {
 
 html.kd-design-minimal .primitive-box {
     padding: 4px 12px;
-    /* --prim-* only exist in the neutral palette; with Japan-Theme colours derive them from the theme */
-    background: var(--prim-bg, color-mix(in srgb, var(--text-main) 8%, var(--surface)));
-    color: var(--prim-text, var(--text-muted));
+    background: var(--prim-bg);
+    color: var(--prim-text);
     border: none;
     border-radius: var(--border-rad-sm);
     box-shadow: none;
@@ -6732,9 +6731,22 @@ html.kd-design-minimal .primitive-box {
 }
 
 html.kd-design-minimal .primitive-label {
-    background: var(--prim-bg, color-mix(in srgb, var(--text-main) 8%, var(--surface)));
+    background: var(--prim-bg);
     color: var(--text-muted);
     box-shadow: 0 0 0 2px var(--bg-main);
+}
+
+/* Coloured accents keep the tinted Japan-Theme page, where grey boxes look muddy: white (surface) pills
+   with a thin theme border, like the canvas and the section cards. Schlicht keeps the classic grey boxes. */
+html.kd-design-minimal:not(.kd-accent-plain) .primitive-box {
+    background: var(--surface);
+    color: var(--text-main);
+    box-shadow: 0 0 0 1px var(--border-color);
+}
+
+html.kd-design-minimal:not(.kd-accent-plain) .primitive-label {
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--border-color);
 }
 
 /* --- Drawing area and buttons --- */
