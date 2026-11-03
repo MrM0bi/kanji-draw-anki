@@ -1,0 +1,171 @@
+// fork: inline info sections on the back (replaces upstream's info modal, docs/fork/v3-migration.md D3).
+// KD_SECTIONS is the single source for order, titles, icons and the default collapsed state; the markup
+// in the back templates only holds the section bodies. Each section remembers its state in kdSec_<key>
+// ('1' = collapsed). Lazy sections (Strichfolge, Schreibfehler) initialise on first open.
+(function () {
+    var host = document.getElementById('kd-info-inline');
+    if (!host || host._kdReady) return;
+    host._kdReady = true;
+
+    var ICON = {
+        elemente: '<circle cx="12" cy="5" r="3" class="fi-gold"></circle><circle cx="5.5" cy="18" r="3" class="fi-cream"></circle>' +
+            '<circle cx="18.5" cy="18" r="3" class="fi-teal"></circle><path d="M12 8v3.5M12 11.5H5.5V15M12 11.5h6.5V15"></path>',
+        strichfolge: '<circle cx="12" cy="12" r="9.5" class="fi-cream"></circle><polygon points="9.8,7.4 17.4,12 9.8,16.6" class="fi-coral"></polygon>',
+        eselsbruecken: '<path d="M15.1 14.5c.2-.9.6-1.7 1.4-2.5A4.6 4.6 0 0 0 18 8.2a6 6 0 0 0-12 0c0 1 .2 2.2 1.5 3.8.7.8 1.2 1.6 1.4 2.5z" class="fi-gold"></path>' +
+            '<rect x="8.8" y="14.5" width="6.4" height="5.5" rx="1.6" class="fi-cream"></rect><line x1="9" y1="17.2" x2="15" y2="17.2"></line>',
+        notiz: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" class="fi-cream"></path><path d="M14 2v6h6" class="fi-gold"></path>' +
+            '<line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
+        schreibfehler: '<circle cx="12" cy="12" r="9.5" class="fi-cream"></circle><circle cx="12" cy="12" r="5.6" class="fi-coral"></circle><circle cx="12" cy="12" r="2.2" class="fi-gold"></circle>',
+        wortbeispiele: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" class="fi-teal"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" class="fi-cream"></path>',
+        lesungen: '<path d="M10.5 4C6.4 4 3 6.7 3 10c0 1.8 1 3.4 2.5 4.5L4.5 17l3.2-1.4c.9.3 1.8.4 2.8.4 4.1 0 7.5-2.7 7.5-6S14.6 4 10.5 4z" class="fi-gold"></path>' +
+            '<path d="M16 11.5c-2.8 0-5 2-5 4.4s2.2 4.4 5 4.4c.6 0 1.2-.1 1.8-.3l2.2 1-0.6-2c1-0.8 1.6-1.9 1.6-3.1 0-2.4-2.2-4.4-5-4.4z" class="fi-cream"></path>',
+        links: '<circle cx="12" cy="12" r="10" class="fi-teal"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="fi-mint"></path>' +
+            '<line x1="2" y1="12" x2="22" y2="12"></line>'
+    };
+
+    var KD_SECTIONS = [
+        { key: 'elemente', title: 'Elemente' },
+        { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
+        { key: 'eselsbruecken', title: 'Eselsbrücken' },
+        { key: 'notiz', title: 'Notiz' },
+        { key: 'schreibfehler', title: 'Schreibfehler', collapsed: true, onOpen: openPitfalls },
+        { key: 'wortbeispiele', title: 'Wortbeispiele' },
+        { key: 'lesungen', title: 'Lesungen' },
+        { key: 'links', title: 'Externe Links' }
+    ];
+    window._kdSections = KD_SECTIONS;
+
+    var get = function (k, d) { try { return typeof safeGetItem === 'function' ? safeGetItem(k, d) : d; } catch (e) { return d; } };
+    var set = function (k, v) { try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
+    var buzz = function () { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); };
+    var isOpen = function (sec) { return sec && !sec.classList.contains('collapsed') && sec.style.display !== 'none'; };
+
+    // --- Lazy content ---
+    var orderTimer = null;
+    function openOrder(sec) {
+        if (!window._kanjiOrder) return;
+        window._kanjiOrder.open();
+        clearTimeout(orderTimer);
+        // upstream's open() only autoplays inside its modal page, so start playback here
+        orderTimer = setTimeout(function () {
+            var o = window._kanjiOrder;
+            if (o && isOpen(sec) && !o.st.playing && o.st.idx === 0) o.action('toggle');
+        }, 260);
+    }
+    function closeOrder() {
+        clearTimeout(orderTimer);
+        if (window._kanjiOrder) window._kanjiOrder.close();
+    }
+    function openPitfalls(sec) {
+        if (sec._kdPitDone || !window._kanjiRenderPitfalls) return;
+        var raw = document.getElementById('kd-raw-pitfalls-data');
+        var list = document.getElementById('pitfalls-list-target');
+        if (!raw || !list) return;
+        sec._kdPitDone = true;
+        var txt = raw.innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ').trim();
+        if (!txt) return;
+        try {
+            window._kanjiRenderPitfalls(txt, list, document.getElementById('pitfalls-preview-pad'),
+                document.getElementById('pitfalls-filter-bar'), null, null);
+        } catch (e) { }
+    }
+
+    // --- Empty content: drop groups/sections that would only show a header ---
+    var hide = function (key) { var s = host.querySelector('.kd-section[data-sec="' + key + '"]'); if (s) s.remove(); };
+    host.querySelectorAll('.kd-story-group').forEach(function (g) {
+        if (!g.querySelector('.story-box, .visuell-hinweis, .info-text-story')) g.remove();
+    });
+    var esel = host.querySelector('.kd-section[data-sec="eselsbruecken"]');
+    if (esel && !esel.querySelector('.story-box, .visuell-hinweis, .info-text-story')) hide('eselsbruecken');
+    var note = host.querySelector('.kd-note-box');
+    if (note && !note.textContent.replace(/ /g, ' ').trim() && !note.querySelector('img, video, audio, svg')) hide('notiz');
+    if (!host.querySelector('.readings-container--backside .reading-row')) hide('lesungen');
+    if (!document.querySelector('#svg-bg path')) hide('strichfolge');
+
+    // --- Primitives ("[name]" in Kanji): no font samples; no tree if Radikale only names the primitive itself ---
+    var rootEl = host.querySelector('.tree-root-kanji');
+    if (rootEl && /^\s*\[/.test(rootEl.textContent)) {
+        var box = rootEl.closest('.custom-tree-box');
+        if (box) box.classList.add('is-primitive');
+        var fe = host.querySelector('.kanji-font-examples');
+        if (fe) fe.classList.add('is-primitive');
+        var rawTree = document.getElementById('raw-tree-data');
+        var t = rawTree ? rawTree.textContent.replace(/<[^>]*>/g, '').trim() : '';
+        var depth = 0, top = 1;
+        for (var i = 0; i < t.length; i++) {
+            var ch = t[i];
+            if (ch === '[' || ch === '{') depth++;
+            else if (ch === ']' || ch === '}') depth--;
+            else if (ch === ',' && depth === 0) top++;
+        }
+        if (top <= 1 && t.indexOf('{') === -1) hide('elemente');
+    }
+
+    // --- Headers, order and collapse state ---
+    var CHEVRON = '<svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>';
+    var initialOpen = [];
+    KD_SECTIONS.forEach(function (cfg) {
+        var sec = host.querySelector('.kd-section[data-sec="' + cfg.key + '"]');
+        if (!sec) return;
+        host.appendChild(sec);
+        var body = sec.querySelector('.kd-section-body');
+        var header = document.createElement('div');
+        header.className = 'kd-section-header tappable';
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        header.innerHTML = '<svg class="kd-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            (ICON[cfg.key] || '') + '<' + '/svg><span class="kd-section-title"><' + '/span>' + CHEVRON;
+        header.querySelector('.kd-section-title').textContent = cfg.title;
+        sec.insertBefore(header, body);
+
+        var collapsed = get('kdSec_' + cfg.key, cfg.collapsed ? '1' : '0') === '1';
+        if (collapsed) sec.classList.add('collapsed');
+        header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        if (!collapsed && cfg.onOpen) initialOpen.push([cfg, sec]);
+
+        // after a height transition settle into a clean steady state (no half-set inline cap)
+        body.addEventListener('transitionend', function (e) {
+            if (e.target !== body || e.propertyName !== 'max-height') return;
+            body.style.maxHeight = sec.classList.contains('collapsed') ? '' : 'none';
+        });
+        var toggle = function (e) {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            buzz();
+            var willCollapse = !sec.classList.contains('collapsed');
+            if (willCollapse) {
+                body.style.maxHeight = body.scrollHeight + 'px';
+                void body.offsetHeight;
+                sec.classList.add('collapsed');
+                body.style.maxHeight = '0px';
+                if (cfg.onClose) cfg.onClose(sec);
+            } else {
+                sec.classList.remove('collapsed');
+                if (cfg.onOpen) cfg.onOpen(sec);
+                body.style.transition = 'none';
+                body.style.maxHeight = 'none';
+                var h = body.scrollHeight;
+                body.style.maxHeight = '0px';
+                void body.offsetHeight;
+                body.style.transition = '';
+                void body.offsetHeight;
+                body.style.maxHeight = h + 'px';
+                if (cfg.key === 'elemente' && window._kanjiRefreshTreeViewport) window._kanjiRefreshTreeViewport();
+            }
+            header.setAttribute('aria-expanded', willCollapse ? 'false' : 'true');
+            set('kdSec_' + cfg.key, willCollapse ? '1' : '0');
+            if (typeof _kdSnd === 'function') _kdSnd('fx', 'tick');
+        };
+        header.addEventListener('click', toggle);
+        header.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') toggle(e);
+        });
+    });
+    // Sections that start open run their init once the rest of the back script (player, pitfalls) exists.
+    // A timeout alone is not enough: the parser may run it between script elements, before that code.
+    var tries = 0;
+    var runInitial = function () {
+        if (!(window._kanjiOrder && window._kanjiRenderPitfalls) && tries++ < 40) { setTimeout(runInitial, 25); return; }
+        initialOpen.forEach(function (p) { if (isOpen(p[1])) p[0].onOpen(p[1]); });
+    };
+    if (initialOpen.length) setTimeout(runInitial, 0);
+})();

@@ -828,7 +828,8 @@ window._kanjiRenderPrimitiveTree = function (rawData, target) {
     let maxTapMove = 0, doubleTapToggled = false, startModalScroll = 0;
     let lastMoveY = 0, lastMoveT = 0, scrollVelY = 0, treeScrollRaf = null;
     let pinchDist0 = 0, pinchZoom0 = 1, pinchSvgX = root.x, pinchSvgY = root.y;
-    const treeModalEl = container ? container.closest('.info-modal') : document.querySelector('.info-modal');
+    // fork: inline on the back (no modal) a vertical drag over the tree scrolls the page instead
+    const treeModalEl = container ? (container.closest('.info-modal') || (container.closest('.kd-info-inline') && document.scrollingElement)) : document.querySelector('.info-modal');
     const stopTreeScrollMomentum = () => {
         if (treeScrollRaf) { cancelAnimationFrame(treeScrollRaf); treeScrollRaf = null; }
     };

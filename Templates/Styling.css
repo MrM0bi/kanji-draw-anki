@@ -2040,7 +2040,7 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     order: -1;
     padding: 1px 7px;
     border-radius: 999px;
-    background: var(--title-border);
+    background: color-mix(in srgb, var(--title-text) 78%, transparent);
     color: var(--title-bg);
     font-size: 9px;
     font-weight: 800;
@@ -5246,6 +5246,319 @@ ruby rt {
     font-weight: 700;
     opacity: 0.9;
 }
+
+/* ==========================================================================
+   fork: inline info sections on the back (replace upstream's info modal)
+   Markup: .kd-info-inline > .kd-section[data-sec] > .kd-section-header + .kd-section-body
+   (headers are built by src/back/kd-fork-sections.js). Plan: docs/fork/v3-migration.md D3.
+   ========================================================================== */
+.kd-info-inline {
+    width: var(--dynamic-size);
+    margin: 24px auto 0 auto;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    /* opacity only: a transform here would trap the fixed-position tree fullscreen */
+    animation: kdInlineIn 0.18s ease-out both;
+}
+
+@keyframes kdInlineIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+html.is-ankiweb .kd-info-inline {
+    margin-top: 10px;
+}
+
+.kd-info-inline .kd-info-tags {
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.kd-section {
+    background: var(--surface);
+    border: 2px solid var(--border-color);
+    border-bottom-width: 3.5px;
+    border-radius: var(--border-rad-main);
+    box-shadow: var(--filter-soft);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.kd-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease;
+}
+
+.kd-section-header:active {
+    background: var(--bg-main);
+}
+
+@media (hover: hover) {
+    .kd-section-header:hover {
+        background: var(--bg-main);
+    }
+}
+
+.kd-section-header:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+/* Icon badge: same pastel look as upstream's .info-section-title icons */
+.kd-section-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #2b180e;
+    stroke: #2b180e;
+    background: #dcd3b2;
+    padding: 5px;
+    border-radius: 9px;
+    box-sizing: content-box;
+}
+
+.nightMode .kd-section-icon,
+.night_mode .kd-section-icon {
+    background: #cfc49e;
+    color: #26150c;
+    stroke: #26150c;
+}
+
+.kd-section-title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.kd-section-chevron {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transform: rotate(90deg);
+    transition: transform 0.25s ease;
+}
+
+.kd-section.collapsed .kd-section-chevron {
+    transform: rotate(0deg);
+}
+
+/* max-height is driven inline by JS for a content-sized ease; the collapsed steady state is owned
+   by the .collapsed rule (padding zeroed too, border-box can't shrink below its own padding). */
+.kd-section-body {
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 2px 14px 16px 14px;
+    transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1), padding 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kd-section.collapsed .kd-section-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.kd-section-body > :first-child { margin-top: 0; }
+.kd-section-body > :last-child { margin-bottom: 0; }
+
+.kd-section-body .tree-container {
+    margin: 0;
+}
+
+.kd-section-body .word-example-list,
+.kd-section-body .readings-container--backside,
+.kd-section-body .info-text-story,
+.kd-section-body .link-grid {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* room for the hover-raised top border of the first word item */
+.kd-section-body .word-example-list {
+    padding-top: 2px;
+}
+
+/* Strichfolge: progress line above the stage */
+.kd-order-head {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.kd-section-body .order-controls {
+    margin-top: 12px;
+}
+
+/* Tree fullscreen inline: no modal to grow, so the tree covers the viewport */
+.kd-info-inline .tree-container.tree-graph-mode.tree-fullscreen {
+    position: fixed !important;
+    inset: 16px 12px !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: 1000 !important;
+    /* the huge spread dims the page behind, like upstream's overlay backdrop */
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45), 0 22px 48px rgba(0, 0, 0, 0.34) !important;
+}
+
+.is-ankimobile .kd-info-inline .tree-container.tree-graph-mode.tree-fullscreen {
+    top: max(env(safe-area-inset-top, 16px), 20px) !important;
+    bottom: max(env(safe-area-inset-bottom, 16px), 74px) !important;
+}
+
+html:has(.kd-info-inline .tree-fullscreen) {
+    overflow: hidden !important;
+}
+
+/* Story boxes in "Eselsbrücken": accent stripe, bold title row, italic text */
+.story-box {
+    background: var(--bg-main);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--border-rad-sm);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+.story-box:last-child {
+    margin-bottom: 0;
+}
+
+.story-box-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.story-box-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--text-main);
+}
+
+.story-box-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    font-style: italic;
+    color: var(--text-main);
+}
+
+/* Groups (KanjiDraw, Heisig) under a small muted label; the Heisig boxes get a muted stripe.
+   The stripe is mixed in the rule (not in :root) because the accent vars are set inline by JS. */
+.kd-story-group {
+    margin-top: 14px;
+}
+
+.kd-story-group:first-child {
+    margin-top: 0;
+}
+
+.kd-story-group-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 6px 2px;
+}
+
+.kd-story-group-ref .story-box {
+    border-left-color: color-mix(in srgb, var(--accent) 60%, var(--border-color));
+}
+
+.kd-story-group-kd .info-text-story {
+    margin-bottom: 0;
+}
+
+/* "Notiz": story-box shape, muted stripe, upright text, no title row */
+.kd-note-box {
+    background: var(--bg-main);
+    border-left: 3px solid var(--text-muted);
+    border-radius: var(--border-rad-sm);
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.kd-note-box > :first-child { margin-top: 0; }
+.kd-note-box > :last-child { margin-bottom: 0; }
+
+/* Nanori is secondary to ON/KUN: outlined, muted pill */
+.kd-nanori-label {
+    background-color: transparent;
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+/* Handschriftbeispiele: the kanji in three more fonts above the tree, when the setting is on
+   (.is-visible added by JS). Font files live in the collection media (leading underscore = kept). */
+@font-face {
+    font-family: kanji_font2;
+    src: url("_kanji_font2_kai08.otf");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: kanji_font3;
+    src: url("_kanji_font3_ArmedBanana.ttf");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: kanji_font4;
+    src: url("_kanji_font4_KouzanGyousho.otf");
+    font-display: swap;
+}
+
+.kanji-font-examples {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 12px;
+}
+
+.kanji-font-examples.is-visible {
+    display: flex;
+}
+
+.kanji-font-examples.is-primitive {
+    display: none;
+}
+
+.kanji-font-example {
+    color: var(--text-main);
+    font-size: 46px;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.kanji-font-example.font-2 { font-family: kanji_font2; }
+.kanji-font-example.font-3 { font-family: kanji_font3; }
+.kanji-font-example.font-4 { font-family: kanji_font4; }
 
 /* --------------------------------------------------------------------------
    Custom Overlay Scrollbars (zero layout gutter, blends seamlessly into modal)

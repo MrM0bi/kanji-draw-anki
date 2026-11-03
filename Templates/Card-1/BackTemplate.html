@@ -139,149 +139,205 @@
 
 {{FrontSide}}
 
-<div class="back-actions">
-    <button class="info-btn" onclick="openInfoModal(event)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" class="fi-cream"></path>
-            <path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" class="fi-gold"></path>
-        </svg>
-        Info & Merkhilfe
-    </button>
-</div>
+<!-- fork: inline info sections on the back instead of upstream's info modal (docs/fork/v3-migration.md D3).
+     Section order, titles, icons and default state come from KD_SECTIONS in src/back/kd-fork-sections.js;
+     this markup only holds the bodies. Keep this block identical in Card-1 and Card-2. -->
+<div class="kd-info-inline tappable" id="kd-info-inline">
 
-<div class="info-overlay tappable" id="info-overlay" onclick="closeInfoModal(event)">
-    <div class="info-modal tappable" onclick="event.stopPropagation()">
+    <div class="info-tags kd-info-tags">
+        {{#JLPT-Level}}
+        <span class="info-tag">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 10l10-5 10 5-10 5z" class="fi-cream" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" class="fi-gold" />
+                <path d="M22 10v6" />
+            </svg>
+            {{JLPT-Level}}
+        </span>
+        {{/JLPT-Level}}
+        {{#Häufigkeit}}
+        <span class="info-tag tag-frequency">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="13" width="4" height="7" rx="1" class="fi-cream" />
+                <rect x="10" y="5" width="4" height="15" rx="1" class="fi-gold" />
+                <rect x="16" y="9" width="4" height="11" rx="1" class="fi-teal" />
+            </svg>
+            {{Häufigkeit}}
+        </span>
+        {{/Häufigkeit}}
+        {{#Kanjinummer-BuchDE-Edition-4}}
+        <span class="info-tag tag-id" title="Nummer im Buch (4. Auflage)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z" class="fi-cream" />
+                <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" class="fi-gold" />
+            </svg>
+            Nr. {{Kanjinummer-BuchDE-Edition-4}}
+        </span>
+        {{/Kanjinummer-BuchDE-Edition-4}}
+    </div>
 
-        <div class="settings-page active" id="info-page-main">
-            <div class="info-modal-header">
-                <span class="info-modal-titles">
-                    <span class="info-modal-title">Übersicht</span>
-                    {{#Kanjinummer-BuchDE-Edition-4}}<span class="info-modal-number">Nr. {{Kanjinummer-BuchDE-Edition-4}}</span>{{/Kanjinummer-BuchDE-Edition-4}}
-                </span>
-                <span class="info-modal-meaning">{{Bedeutung-DE}}</span>
-            </div>
-
-            <div class="info-tags">
-                {{#JLPT-Level}}
-                <span class="info-tag">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 10l10-5 10 5-10 5z" class="fi-cream" />
-                        <path d="M6 12v5c3 3 9 3 12 0v-5" class="fi-gold" />
-                        <path d="M22 10v6" />
-                    </svg>
-                    {{JLPT-Level}}
-                </span>
-                {{/JLPT-Level}}
-                {{#Häufigkeit}}
-                <span class="info-tag tag-frequency">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="13" width="4" height="7" rx="1" class="fi-cream" />
-                        <rect x="10" y="5" width="4" height="15" rx="1" class="fi-gold" />
-                        <rect x="16" y="9" width="4" height="11" rx="1" class="fi-teal" />
-                    </svg>
-                    {{Häufigkeit}}
-                </span>
-                {{/Häufigkeit}}
-            </div>
-
-            {{#Radikale}}
+    {{#Radikale}}
+    <section class="kd-section" data-sec="elemente">
+        <div class="kd-section-body">
             <script id="raw-tree-data" type="text/plain">{{Radikale}}</script>
+            <!-- Handschriftbeispiele: the kanji in three more fonts (setting opt-handwriting, fonts in collection media) -->
+            <div class="kanji-font-examples">
+                <div class="kanji-font-example font-2" title="Kai">{{Kanji}}</div>
+                <div class="kanji-font-example font-3" title="Handschrift">{{Kanji}}</div>
+                <div class="kanji-font-example font-4" title="Gyōsho">{{Kanji}}</div>
+            </div>
             <div class="tree-container custom-tree-box">
                 <div class="tree-root-kanji">{{Kanji}}</div>
                 <div class="tree-children" id="tree-render-target"></div>
             </div>
-            {{/Radikale}}
+        </div>
+    </section>
+    {{/Radikale}}
 
-            {{#Stolperfallen}}
-            <script id="raw-pitfalls-data" type="text/plain">{{Stolperfallen}}</script>
-            {{/Stolperfallen}}
-            <div class="info-tools-grid">
-                <div role="button" tabindex="0" class="info-tool-btn tappable"
-                    onclick="navigateInfoToOrder(this, event)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+    <section class="kd-section" data-sec="strichfolge">
+        <div class="kd-section-body">
+            <div class="kd-order-head"><span class="info-modal-meaning" id="order-progress"></span></div>
+            <div class="order-stage"><svg id="order-svg" viewBox="0 0 109 109" aria-hidden="true"></svg></div>
+            <div class="order-controls">
+                <button class="order-ctrl tappable" onclick="strokeOrderAction('prev', event)" title="Strich zurück"
+                    aria-label="Strich zurück">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9.5" class="fi-cream"></circle>
-                        <polygon points="9.8,7.4 17.4,12 9.8,16.6" class="fi-coral"></polygon>
+                        <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
-                    <span>Strichfolge</span>
-                </div>
-                {{#Stolperfallen}}
-                <div role="button" tabindex="0" class="info-tool-btn tappable"
-                    onclick="navigateInfoToPitfalls(this, event)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+                </button>
+                <button class="order-ctrl order-ctrl-main tappable" id="order-toggle"
+                    onclick="strokeOrderAction('toggle', event)" title="Abspielen / Pause"
+                    aria-label="Abspielen / Pause"></button>
+                <button class="order-ctrl tappable" onclick="strokeOrderAction('next', event)" title="Nächster Strich"
+                    aria-label="Nächster Strich">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9.5" class="fi-cream" />
-                        <circle cx="12" cy="12" r="5.6" class="fi-coral" />
-                        <circle cx="12" cy="12" r="2.2" class="fi-gold" />
+                        <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                    <span>Schreibfehler</span>
+                </button>
+                <button class="order-ctrl tappable" id="order-speed" onclick="strokeOrderAction('speed', event)"
+                    title="Geschwindigkeit" aria-label="Geschwindigkeit">1×</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="kd-section" data-sec="eselsbruecken">
+        <div class="kd-section-body">
+            {{#Merksatz-Custom}}
+            <div class="story-box">
+                <div class="story-box-title">
+                    <svg class="story-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    Eigener Merksatz
                 </div>
-                {{/Stolperfallen}}
+                <p class="story-box-text">{{Merksatz-Custom}}</p>
             </div>
-
-            {{#Merksatz-KI}}
-            <div class="info-section-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M15.1 14.5c.2-.9.6-1.7 1.4-2.5A4.6 4.6 0 0 0 18 8.2a6 6 0 0 0-12 0c0 1 .2 2.2 1.5 3.8.7.8 1.2 1.6 1.4 2.5z"
-                        class="fi-gold" />
-                    <rect x="8.8" y="14.5" width="6.4" height="5.5" rx="1.6" class="fi-cream" />
-                    <line x1="9" y1="17.2" x2="15" y2="17.2" />
-                </svg>
-                Eselsbrücke
+            {{/Merksatz-Custom}}
+            {{#Merksatz-DE}}
+            <div class="story-box">
+                <div class="story-box-title">
+                    <svg class="story-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Merksatz
+                </div>
+                <p class="story-box-text">{{Merksatz-DE}}</p>
             </div>
-            {{/Merksatz-KI}}
-
-            {{#Merkhilfe}}
-            <div class="visuell-hinweis">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" class="fi-cream" />
-                    <circle cx="12" cy="12" r="3.4" class="fi-teal" />
-                    <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
-                </svg>
-                <span class="visuell-hinweis-text">{{Merkhilfe}}</span>
+            {{/Merksatz-DE}}
+            <!-- KanjiDraw group: v3's hint (Merkhilfe) above its mnemonic (field Merksatz-KI), colour-coded -->
+            <div class="kd-story-group kd-story-group-kd">
+                <div class="kd-story-group-label">KanjiDraw</div>
+                {{#Merkhilfe}}
+                <div class="visuell-hinweis">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" class="fi-cream" />
+                        <circle cx="12" cy="12" r="3.4" class="fi-teal" />
+                        <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                    </svg>
+                    <span class="visuell-hinweis-text">{{Merkhilfe}}</span>
+                </div>
+                {{/Merkhilfe}}
+                {{#Merksatz-KI}}
+                <p class="info-text-story">{{Merksatz-KI}}</p>
+                {{/Merksatz-KI}}
             </div>
-            {{/Merkhilfe}}
-
-            {{#Merksatz-KI}}
-            <p class="info-text-story">{{Merksatz-KI}}</p>
-            {{/Merksatz-KI}}
-
-            {{#Wortbeispiel}}
-            <div class="info-section-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" class="fi-teal"></path>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" class="fi-cream"></path>
-                </svg>
-                Wortbeispiele
+            <!-- Heisig group: the book's descriptions, set apart from the Merksätze -->
+            <div class="kd-story-group kd-story-group-ref">
+                <div class="kd-story-group-label">Heisig</div>
+                {{#BuchBeschreibung}}
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <svg class="story-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Kanji Beschreibung
+                    </div>
+                    <p class="story-box-text">{{BuchBeschreibung}}</p>
+                </div>
+                {{/BuchBeschreibung}}
+                {{#BuchPrimitivBeschreibung}}
+                <div class="story-box">
+                    <div class="story-box-title">
+                        <svg class="story-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Primitiv Beschreibung
+                    </div>
+                    <p class="story-box-text">{{BuchPrimitivBeschreibung}}</p>
+                </div>
+                {{/BuchPrimitivBeschreibung}}
             </div>
+        </div>
+    </section>
+
+    {{#Notiz}}
+    <section class="kd-section" data-sec="notiz">
+        <div class="kd-section-body">
+            <div class="kd-note-box">{{Notiz}}</div>
+        </div>
+    </section>
+    {{/Notiz}}
+
+    {{#Stolperfallen}}
+    <section class="kd-section" data-sec="schreibfehler">
+        <div class="kd-section-body">
+            <!-- not "raw-pitfalls-data": upstream's eager IIFE must skip it; KD_SECTIONS renders it on first open -->
+            <script id="kd-raw-pitfalls-data" type="text/plain">{{Stolperfallen}}</script>
+            <div class="pitfalls-stage">
+                <div class="pitfalls-preview-pad" id="pitfalls-preview-pad"></div>
+                <div class="pitfalls-filter-bar" id="pitfalls-filter-bar"></div>
+            </div>
+            <div class="pitfalls-list" id="pitfalls-list-target"></div>
+        </div>
+    </section>
+    {{/Stolperfallen}}
+
+    {{#Wortbeispiel}}
+    <section class="kd-section" data-sec="wortbeispiele">
+        <div class="kd-section-body">
             <div class="hint-word-box">
                 <div id="raw-hint-words" style="display:none;">{{furigana:Wortbeispiel}}</div>
                 <div id="formatted-hint-words" class="word-example-list"></div>
             </div>
-            {{/Wortbeispiel}}
+        </div>
+    </section>
+    {{/Wortbeispiel}}
 
-            <div class="info-section-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M10.5 4C6.4 4 3 6.7 3 10c0 1.8 1 3.4 2.5 4.5L4.5 17l3.2-1.4c.9.3 1.8.4 2.8.4 4.1 0 7.5-2.7 7.5-6S14.6 4 10.5 4z"
-                        class="fi-gold"></path>
-                    <path
-                        d="M16 11.5c-2.8 0-5 2-5 4.4s2.2 4.4 5 4.4c.6 0 1.2-.1 1.8-.3l2.2 1-0.6-2c1-0.8 1.6-1.9 1.6-3.1 0-2.4-2.2-4.4-5-4.4z"
-                        class="fi-cream"></path>
-                    <circle cx="8.2" cy="9.8" r="0.9" fill="currentColor" stroke="none"></circle>
-                    <circle cx="12.2" cy="9.8" r="0.9" fill="currentColor" stroke="none"></circle>
-                    <circle cx="14.5" cy="15.8" r="0.8" fill="currentColor" stroke="none"></circle>
-                    <circle cx="17.5" cy="15.8" r="0.8" fill="currentColor" stroke="none"></circle>
-                </svg>
-                Lesungen
-            </div>
+    <section class="kd-section" data-sec="lesungen">
+        <div class="kd-section-body">
             <div class="readings-container readings-container--backside">
                 {{#Onyomi}}
                 <div class="reading-row">
@@ -293,18 +349,17 @@
                     <span class="reading-label kunyomi-label">KUN</span><span class="reading-value">{{Kunyomi}}</span>
                 </div>
                 {{/Kunyomi}}
+                {{#Nanori}}
+                <div class="reading-row">
+                    <span class="reading-label kd-nanori-label">NANORI</span><span class="reading-value">{{Nanori}}</span>
+                </div>
+                {{/Nanori}}
             </div>
+        </div>
+    </section>
 
-            <div class="info-section-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" class="fi-teal" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                        class="fi-mint" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                </svg>
-                Externe Links
-            </div>
+    <section class="kd-section" data-sec="links">
+        <div class="kd-section-body">
             <div class="link-grid" data-kanji="{{Kanji}}">
                 <a class="link-btn tappable" href="https://jisho.org/search/{{Kanji}}%20%23kanji" target="_blank"
                     rel="noopener">
@@ -341,74 +396,184 @@
                     </svg>
                 </a>
             </div>
-
-            <div role="button" tabindex="0" class="close-settings tappable" onclick="closeInfoModal(event)">Schließen
-            </div>
         </div>
-
-        <div class="settings-page" id="info-page-order">
-            <div class="subpage-header">
-                <button class="back-btn tappable" onclick="navigateInfoBack(event)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M15 18l-6-6 6-6"></path>
-                    </svg>
-                </button>
-                <h3>Strichfolge</h3>
-                <span class="info-modal-meaning" id="order-progress"></span>
-            </div>
-            <div class="order-stage"><svg id="order-svg" viewBox="0 0 109 109" aria-hidden="true"></svg></div>
-            <div class="order-controls">
-                <button class="order-ctrl tappable" onclick="strokeOrderAction('prev', event)" title="Strich zurück"
-                    aria-label="Strich zurück">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <button class="order-ctrl order-ctrl-main tappable" id="order-toggle"
-                    onclick="strokeOrderAction('toggle', event)" title="Abspielen / Pause"
-                    aria-label="Abspielen / Pause"></button>
-                <button class="order-ctrl tappable" onclick="strokeOrderAction('next', event)" title="Nächster Strich"
-                    aria-label="Nächster Strich">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-                <button class="order-ctrl tappable" id="order-speed" onclick="strokeOrderAction('speed', event)"
-                    title="Geschwindigkeit" aria-label="Geschwindigkeit">1×</button>
-            </div>
-            <div role="button" tabindex="0" class="close-settings tappable" onclick="navigateInfoBack(event)">Zurück zur
-                Übersicht</div>
-        </div>
-
-        {{#Stolperfallen}}
-        <div class="settings-page" id="info-page-pitfalls">
-            <div class="subpage-header">
-                <button class="back-btn tappable" onclick="navigateInfoBack(event)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M15 18l-6-6 6-6"></path>
-                    </svg>
-                </button>
-                <h3>Häufige Schreibfehler</h3>
-                <span class="info-modal-meaning">{{Kanji}}</span>
-            </div>
-
-            <div class="pitfalls-stage">
-                <div class="pitfalls-preview-pad" id="pitfalls-preview-pad"></div>
-                <div class="pitfalls-filter-bar" id="pitfalls-filter-bar"></div>
-            </div>
-
-            <div class="pitfalls-list" id="pitfalls-list-target"></div>
-
-            <div role="button" tabindex="0" class="close-settings tappable" onclick="navigateInfoBack(event)">Zurück zur
-                Übersicht</div>
-        </div>
-        {{/Stolperfallen}}
-    </div>
+    </section>
 </div>
+<script>
+    // [KD-SRC back/kd-fork-sections.js]
+    // fork: inline info sections on the back (replaces upstream's info modal, docs/fork/v3-migration.md D3).
+    // KD_SECTIONS is the single source for order, titles, icons and the default collapsed state; the markup
+    // in the back templates only holds the section bodies. Each section remembers its state in kdSec_<key>
+    // ('1' = collapsed). Lazy sections (Strichfolge, Schreibfehler) initialise on first open.
+    (function () {
+        var host = document.getElementById('kd-info-inline');
+        if (!host || host._kdReady) return;
+        host._kdReady = true;
+
+        var ICON = {
+            elemente: '<circle cx="12" cy="5" r="3" class="fi-gold"></circle><circle cx="5.5" cy="18" r="3" class="fi-cream"></circle>' +
+                '<circle cx="18.5" cy="18" r="3" class="fi-teal"></circle><path d="M12 8v3.5M12 11.5H5.5V15M12 11.5h6.5V15"></path>',
+            strichfolge: '<circle cx="12" cy="12" r="9.5" class="fi-cream"></circle><polygon points="9.8,7.4 17.4,12 9.8,16.6" class="fi-coral"></polygon>',
+            eselsbruecken: '<path d="M15.1 14.5c.2-.9.6-1.7 1.4-2.5A4.6 4.6 0 0 0 18 8.2a6 6 0 0 0-12 0c0 1 .2 2.2 1.5 3.8.7.8 1.2 1.6 1.4 2.5z" class="fi-gold"></path>' +
+                '<rect x="8.8" y="14.5" width="6.4" height="5.5" rx="1.6" class="fi-cream"></rect><line x1="9" y1="17.2" x2="15" y2="17.2"></line>',
+            notiz: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" class="fi-cream"></path><path d="M14 2v6h6" class="fi-gold"></path>' +
+                '<line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
+            schreibfehler: '<circle cx="12" cy="12" r="9.5" class="fi-cream"></circle><circle cx="12" cy="12" r="5.6" class="fi-coral"></circle><circle cx="12" cy="12" r="2.2" class="fi-gold"></circle>',
+            wortbeispiele: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" class="fi-teal"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" class="fi-cream"></path>',
+            lesungen: '<path d="M10.5 4C6.4 4 3 6.7 3 10c0 1.8 1 3.4 2.5 4.5L4.5 17l3.2-1.4c.9.3 1.8.4 2.8.4 4.1 0 7.5-2.7 7.5-6S14.6 4 10.5 4z" class="fi-gold"></path>' +
+                '<path d="M16 11.5c-2.8 0-5 2-5 4.4s2.2 4.4 5 4.4c.6 0 1.2-.1 1.8-.3l2.2 1-0.6-2c1-0.8 1.6-1.9 1.6-3.1 0-2.4-2.2-4.4-5-4.4z" class="fi-cream"></path>',
+            links: '<circle cx="12" cy="12" r="10" class="fi-teal"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="fi-mint"></path>' +
+                '<line x1="2" y1="12" x2="22" y2="12"></line>'
+        };
+
+        var KD_SECTIONS = [
+            { key: 'elemente', title: 'Elemente' },
+            { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
+            { key: 'eselsbruecken', title: 'Eselsbrücken' },
+            { key: 'notiz', title: 'Notiz' },
+            { key: 'schreibfehler', title: 'Schreibfehler', collapsed: true, onOpen: openPitfalls },
+            { key: 'wortbeispiele', title: 'Wortbeispiele' },
+            { key: 'lesungen', title: 'Lesungen' },
+            { key: 'links', title: 'Externe Links' }
+        ];
+        window._kdSections = KD_SECTIONS;
+
+        var get = function (k, d) { try { return typeof safeGetItem === 'function' ? safeGetItem(k, d) : d; } catch (e) { return d; } };
+        var set = function (k, v) { try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
+        var buzz = function () { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); };
+        var isOpen = function (sec) { return sec && !sec.classList.contains('collapsed') && sec.style.display !== 'none'; };
+
+        // --- Lazy content ---
+        var orderTimer = null;
+        function openOrder(sec) {
+            if (!window._kanjiOrder) return;
+            window._kanjiOrder.open();
+            clearTimeout(orderTimer);
+            // upstream's open() only autoplays inside its modal page, so start playback here
+            orderTimer = setTimeout(function () {
+                var o = window._kanjiOrder;
+                if (o && isOpen(sec) && !o.st.playing && o.st.idx === 0) o.action('toggle');
+            }, 260);
+        }
+        function closeOrder() {
+            clearTimeout(orderTimer);
+            if (window._kanjiOrder) window._kanjiOrder.close();
+        }
+        function openPitfalls(sec) {
+            if (sec._kdPitDone || !window._kanjiRenderPitfalls) return;
+            var raw = document.getElementById('kd-raw-pitfalls-data');
+            var list = document.getElementById('pitfalls-list-target');
+            if (!raw || !list) return;
+            sec._kdPitDone = true;
+            var txt = raw.innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ').trim();
+            if (!txt) return;
+            try {
+                window._kanjiRenderPitfalls(txt, list, document.getElementById('pitfalls-preview-pad'),
+                    document.getElementById('pitfalls-filter-bar'), null, null);
+            } catch (e) { }
+        }
+
+        // --- Empty content: drop groups/sections that would only show a header ---
+        var hide = function (key) { var s = host.querySelector('.kd-section[data-sec="' + key + '"]'); if (s) s.remove(); };
+        host.querySelectorAll('.kd-story-group').forEach(function (g) {
+            if (!g.querySelector('.story-box, .visuell-hinweis, .info-text-story')) g.remove();
+        });
+        var esel = host.querySelector('.kd-section[data-sec="eselsbruecken"]');
+        if (esel && !esel.querySelector('.story-box, .visuell-hinweis, .info-text-story')) hide('eselsbruecken');
+        var note = host.querySelector('.kd-note-box');
+        if (note && !note.textContent.replace(/ /g, ' ').trim() && !note.querySelector('img, video, audio, svg')) hide('notiz');
+        if (!host.querySelector('.readings-container--backside .reading-row')) hide('lesungen');
+        if (!document.querySelector('#svg-bg path')) hide('strichfolge');
+
+        // --- Primitives ("[name]" in Kanji): no font samples; no tree if Radikale only names the primitive itself ---
+        var rootEl = host.querySelector('.tree-root-kanji');
+        if (rootEl && /^\s*\[/.test(rootEl.textContent)) {
+            var box = rootEl.closest('.custom-tree-box');
+            if (box) box.classList.add('is-primitive');
+            var fe = host.querySelector('.kanji-font-examples');
+            if (fe) fe.classList.add('is-primitive');
+            var rawTree = document.getElementById('raw-tree-data');
+            var t = rawTree ? rawTree.textContent.replace(/<[^>]*>/g, '').trim() : '';
+            var depth = 0, top = 1;
+            for (var i = 0; i < t.length; i++) {
+                var ch = t[i];
+                if (ch === '[' || ch === '{') depth++;
+                else if (ch === ']' || ch === '}') depth--;
+                else if (ch === ',' && depth === 0) top++;
+            }
+            if (top <= 1 && t.indexOf('{') === -1) hide('elemente');
+        }
+
+        // --- Headers, order and collapse state ---
+        var CHEVRON = '<svg class="kd-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>';
+        var initialOpen = [];
+        KD_SECTIONS.forEach(function (cfg) {
+            var sec = host.querySelector('.kd-section[data-sec="' + cfg.key + '"]');
+            if (!sec) return;
+            host.appendChild(sec);
+            var body = sec.querySelector('.kd-section-body');
+            var header = document.createElement('div');
+            header.className = 'kd-section-header tappable';
+            header.setAttribute('role', 'button');
+            header.setAttribute('tabindex', '0');
+            header.innerHTML = '<svg class="kd-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                (ICON[cfg.key] || '') + '<' + '/svg><span class="kd-section-title"><' + '/span>' + CHEVRON;
+            header.querySelector('.kd-section-title').textContent = cfg.title;
+            sec.insertBefore(header, body);
+
+            var collapsed = get('kdSec_' + cfg.key, cfg.collapsed ? '1' : '0') === '1';
+            if (collapsed) sec.classList.add('collapsed');
+            header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            if (!collapsed && cfg.onOpen) initialOpen.push([cfg, sec]);
+
+            // after a height transition settle into a clean steady state (no half-set inline cap)
+            body.addEventListener('transitionend', function (e) {
+                if (e.target !== body || e.propertyName !== 'max-height') return;
+                body.style.maxHeight = sec.classList.contains('collapsed') ? '' : 'none';
+            });
+            var toggle = function (e) {
+                if (e) { e.stopPropagation(); e.preventDefault(); }
+                buzz();
+                var willCollapse = !sec.classList.contains('collapsed');
+                if (willCollapse) {
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    void body.offsetHeight;
+                    sec.classList.add('collapsed');
+                    body.style.maxHeight = '0px';
+                    if (cfg.onClose) cfg.onClose(sec);
+                } else {
+                    sec.classList.remove('collapsed');
+                    if (cfg.onOpen) cfg.onOpen(sec);
+                    body.style.transition = 'none';
+                    body.style.maxHeight = 'none';
+                    var h = body.scrollHeight;
+                    body.style.maxHeight = '0px';
+                    void body.offsetHeight;
+                    body.style.transition = '';
+                    void body.offsetHeight;
+                    body.style.maxHeight = h + 'px';
+                    if (cfg.key === 'elemente' && window._kanjiRefreshTreeViewport) window._kanjiRefreshTreeViewport();
+                }
+                header.setAttribute('aria-expanded', willCollapse ? 'false' : 'true');
+                set('kdSec_' + cfg.key, willCollapse ? '1' : '0');
+                if (typeof _kdSnd === 'function') _kdSnd('fx', 'tick');
+            };
+            header.addEventListener('click', toggle);
+            header.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') toggle(e);
+            });
+        });
+        // Sections that start open run their init once the rest of the back script (player, pitfalls) exists.
+        // A timeout alone is not enough: the parser may run it between script elements, before that code.
+        var tries = 0;
+        var runInitial = function () {
+            if (!(window._kanjiOrder && window._kanjiRenderPitfalls) && tries++ < 40) { setTimeout(runInitial, 25); return; }
+            initialOpen.forEach(function (p) { if (isOpen(p[1])) p[0].onOpen(p[1]); });
+        };
+        if (initialOpen.length) setTimeout(runInitial, 0);
+    })();
+    // [/KD-SRC back/kd-fork-sections.js]
+</script>
 
 <script>
     // =======================================================================
@@ -1497,7 +1662,8 @@
         let maxTapMove = 0, doubleTapToggled = false, startModalScroll = 0;
         let lastMoveY = 0, lastMoveT = 0, scrollVelY = 0, treeScrollRaf = null;
         let pinchDist0 = 0, pinchZoom0 = 1, pinchSvgX = root.x, pinchSvgY = root.y;
-        const treeModalEl = container ? container.closest('.info-modal') : document.querySelector('.info-modal');
+        // fork: inline on the back (no modal) a vertical drag over the tree scrolls the page instead
+        const treeModalEl = container ? (container.closest('.info-modal') || (container.closest('.kd-info-inline') && document.scrollingElement)) : document.querySelector('.info-modal');
         const stopTreeScrollMomentum = () => {
             if (treeScrollRaf) { cancelAnimationFrame(treeScrollRaf); treeScrollRaf = null; }
         };
