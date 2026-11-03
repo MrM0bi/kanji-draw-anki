@@ -302,6 +302,10 @@ and who decided (user / agent).
 - **D27 (user, 2026-11-03) Design switch scope:** the whole design switches (settings, buttons, front, back);
   one global setting; colours: show variants. Also (user): the Primitive tag must never cover or touch other
   elements (keyword pill, other pills, gear) — checked with a bounding-box test at 320–1280 px.
+- **D29 (user, 2026-11-03) Colours and tag:** new accent colour "Plain" (UI label "Schlicht", key `plain`,
+  black/white). Minimal + Schlicht uses the neutral palette (variant A); minimal + any other accent keeps the
+  Japan-Theme colours (variant B). The Primitive tag overlaps the corner of the pill it marks (as before v3), just
+  nothing else (keyword pill, other pills, gear).
 - **D28 (agent) Long keywords:** v3's title pill grows past its width limit for long one-word keywords (93 in the
   deck with 13+ letters). Title gets `lang=de` + `hyphens:auto`; without a dictionary the font steps down to fit
   (min 15 px). Generic, could go upstream.
@@ -363,9 +367,8 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
       content); **one global setting**; colours: explore and show the options (v3 themes vs. the old palette).
 - [~] 2b.2 Implement (both cards), render-check both designs × light/dark × kanji/primitive. **Prototype done**
       (`2e105c5`): setting, early class, icon swap (`src/front/kd-fork-design*.js`, `KD_SECTIONS` `ICON_MIN`), CSS
-      skin (fork block at the end of `Styling.css`). Waiting for the user: colour variant A (classic palette,
-      default) vs. B (`html.kd-minimal-theme`, v3 Japan-Theme colours); if B or both, expose it as an option. With A
-      the Japan-Theme only changes the sound scene in minimal mode: hide that group there, or keep it?
+      skin (fork block at the end of `Styling.css`). Colours decided (D29): new accent "Schlicht"; minimal +
+      Schlicht = neutral palette, minimal + other accents = Japan-Theme colours (`4941859`).
       Not yet restyled in minimal: Strichfolge controls, Schreibfehler page, sound and "Danke" pages, the tree
       toolbar (they keep v3 shapes, outline icons).
 - [ ] 2b.3 Tests, `build.py --check`, `FORK.md`
@@ -453,3 +456,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Claude (server) · 3.3 first timing run, inconclusive because the server was under load (numbers in §7).
 - 2026-11-03 · Claude (server) · User feedback: primitive pills separated from the title pill, landscape at the page bottom on the back (`27927b4`). Planned the minimal-design option (D25, Phase 2b).
 - 2026-11-03 · Claude (server) · Primitive tag clearance + long keywords (`ff8e9da`). Minimal-design prototype (`2e105c5`), colour variants A/B rendered for the user.
+- 2026-11-03 · Claude (server) · Accent "Schlicht" + palette rule (D29), tag back on its pill's corner, minimal fixes.
