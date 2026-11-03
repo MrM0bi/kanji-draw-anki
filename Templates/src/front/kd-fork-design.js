@@ -37,6 +37,23 @@
         if (window._kdSectionIcons) window._kdSectionIcons();
     };
 
+    // Keep html.kd-accent-plain in sync when the accent changes (wraps upstream's updateThemeSetting, which
+    // every accent radio calls; re-wrapped on each render because the front script redefines it)
+    var syncAccent = function () {
+        var a = 'green';
+        try { a = safeGetItem('kanjiThemeAccent', getGlobalConfig().themeAccent || 'green'); } catch (e) { }
+        document.documentElement.classList.toggle('kd-accent-plain', a === 'plain');
+    };
+    if (typeof updateThemeSetting === 'function' && !updateThemeSetting._kdWrapped) {
+        var orig = updateThemeSetting;
+        window.updateThemeSetting = function (category) {
+            if (category === 'accent') try { safeSetItem('kanjiThemeAccent', arguments[1]); syncAccent(); } catch (e) { }
+            return orig.apply(this, arguments);
+        };
+        window.updateThemeSetting._kdWrapped = true;
+    }
+    syncAccent();
+
     window.kdSetDesign = function (val) {
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
         try { safeSetItem('kanjiThemeDesign', val); } catch (e) { }

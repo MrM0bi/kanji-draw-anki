@@ -8,11 +8,11 @@
     // growing the pill into the gear button. Only on the title, so CJK glyph selection elsewhere is unaffected.
     document.querySelectorAll('.card-title').forEach(function (t) {
         if (!t.lang) t.lang = 'de';
-        // Without a hyphenation dictionary a long word still widens the pill past its max-width (display:table):
-        // step the font down until it fits (min 15px). Inline !important beats the font-size map's !important.
+        // Without a hyphenation dictionary a long word still widens the pill past its max-width (display:table),
+        // or overflows the plain title of the minimal design: step the font down until it fits (min 15px). Inline !important beats the font-size map's !important.
         var limit = (window.innerWidth || document.documentElement.clientWidth) - 140;
         var fs = parseFloat(getComputedStyle(t).fontSize) || 24;
-        for (var i = 0; i < 12 && fs > 15 && t.getBoundingClientRect().width > limit + 1; i++) {
+        for (var i = 0; i < 12 && fs > 15 && (t.getBoundingClientRect().width > limit + 1 || t.scrollWidth > t.clientWidth + 1); i++) {
             fs -= 1;
             t.style.setProperty('font-size', fs + 'px', 'important');
         }

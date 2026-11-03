@@ -41,19 +41,27 @@
     // fork: design switch (docs/fork/v3-migration.md D25). Sets html.kd-design-minimal before the first paint.
     // Global setting kanjiThemeDesign ('kd' | 'minimal'), CSS default --default-theme-design. Same storage
     // chain as safeGetItem (add-on _ks, cookie _k, single cookie, localStorage), which isn't defined yet here.
+    // Also sets html.kd-accent-plain for the "Schlicht" accent (kanjiThemeAccent = 'plain'): minimal + Schlicht uses
+    // the neutral black/white palette, minimal + any other accent keeps the Japan-Theme colours (D29).
     (function () {
         try {
-            var R = document.documentElement, k = 'kanjiThemeDesign', v = null;
-            if (window._ks && window._ks[k] !== undefined) v = window._ks[k];
-            if (v == null) try {
-                var cs = document.cookie.split('; '), i;
-                if (location.protocol !== 'file:') for (i = 0; i < cs.length; i++) if (cs[i].indexOf('_k=') === 0) { var o = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (o[k] !== undefined) v = o[k]; break; }
-                if (v == null) for (i = cs.length - 1; i >= 0; i--) if (cs[i].indexOf(k + '=') === 0) { v = decodeURIComponent(cs[i].substring(k.length + 1)); break; }
-            } catch (e) { }
-            if (v == null) try { v = localStorage.getItem(k); } catch (e) { }
-            if (v == null) v = (getComputedStyle(R).getPropertyValue('--default-theme-design') || '').replace(/['"\s]/g, '');
-            R.classList.toggle('kd-design-minimal', v === 'minimal');
-            window._kdDesign = v === 'minimal' ? 'minimal' : 'kd';
+            var R = document.documentElement;
+            var read = function (k, cssVar) {
+                var v = null;
+                if (window._ks && window._ks[k] !== undefined) v = window._ks[k];
+                if (v == null) try {
+                    var cs = document.cookie.split('; '), i;
+                    if (location.protocol !== 'file:') for (i = 0; i < cs.length; i++) if (cs[i].indexOf('_k=') === 0) { var o = JSON.parse(decodeURIComponent(cs[i].substring(3))); if (o[k] !== undefined) v = o[k]; break; }
+                    if (v == null) for (i = cs.length - 1; i >= 0; i--) if (cs[i].indexOf(k + '=') === 0) { v = decodeURIComponent(cs[i].substring(k.length + 1)); break; }
+                } catch (e) { }
+                if (v == null) try { v = localStorage.getItem(k); } catch (e) { }
+                if (v == null) v = (getComputedStyle(R).getPropertyValue(cssVar) || '').replace(/['"\s]/g, '');
+                return v;
+            };
+            var design = read('kanjiThemeDesign', '--default-theme-design');
+            R.classList.toggle('kd-design-minimal', design === 'minimal');
+            R.classList.toggle('kd-accent-plain', read('kanjiThemeAccent', '--default-theme-accent') === 'plain');
+            window._kdDesign = design === 'minimal' ? 'minimal' : 'kd';
         } catch (e) { }
     })();
     // [/KD-SRC front/kd-fork-design-early.js]
@@ -1002,6 +1010,14 @@
                     <div class="accent-option">
                         <div class="accent-swatch" style="background:#2aabb8;"></div>
                         <span>Türkis</span>
+                    </div>
+                </label>
+                <!-- fork: "Schlicht" black/white accent -->
+                <label><input type="radio" name="theme-accent" value="plain"
+                        onchange="updateThemeSetting('accent', this.value)">
+                    <div class="accent-option">
+                        <div class="accent-swatch" style="background:linear-gradient(135deg, #1a1a1a 50%, #ffffff 50%);"></div>
+                        <span>Schlicht</span>
                     </div>
                 </label>
             </div>
@@ -4468,11 +4484,11 @@
         // growing the pill into the gear button. Only on the title, so CJK glyph selection elsewhere is unaffected.
         document.querySelectorAll('.card-title').forEach(function (t) {
             if (!t.lang) t.lang = 'de';
-            // Without a hyphenation dictionary a long word still widens the pill past its max-width (display:table):
-            // step the font down until it fits (min 15px). Inline !important beats the font-size map's !important.
+            // Without a hyphenation dictionary a long word still widens the pill past its max-width (display:table),
+            // or overflows the plain title of the minimal design: step the font down until it fits (min 15px). Inline !important beats the font-size map's !important.
             var limit = (window.innerWidth || document.documentElement.clientWidth) - 140;
             var fs = parseFloat(getComputedStyle(t).fontSize) || 24;
-            for (var i = 0; i < 12 && fs > 15 && t.getBoundingClientRect().width > limit + 1; i++) {
+            for (var i = 0; i < 12 && fs > 15 && (t.getBoundingClientRect().width > limit + 1 || t.scrollWidth > t.clientWidth + 1); i++) {
                 fs -= 1;
                 t.style.setProperty('font-size', fs + 'px', 'important');
             }
@@ -7261,6 +7277,11 @@
 
     // --- Theme: Accent color definitions (Forest botanical & jewel tones) ---
     var _accentColors = {
+        // fork: "Schlicht" – black / white accent (D29); with the minimal design it also selects the neutral palette
+        plain: {
+            accent: '#1a1a1a', hover: '#000000', bg: '#ececea', c1: '#1a1a1a', c2: '#5c5c5a',
+            dark: { accent: '#f0f0ec', hover: '#ffffff', bg: '#333330', c1: '#f0f0ec', c2: '#b4b4b0' }
+        },
         green: {
             accent: '#56a83a', hover: '#4a9432', bg: '#e3f4dc', c1: '#56a83a', c2: '#2d9588',
             dark: { accent: '#7cd43b', hover: '#6bc22c', bg: '#1e3d28', c1: '#7cd43b', c2: '#4ec4b8' }
@@ -8339,6 +8360,23 @@
             });
             if (window._kdSectionIcons) window._kdSectionIcons();
         };
+
+        // Keep html.kd-accent-plain in sync when the accent changes (wraps upstream's updateThemeSetting, which
+        // every accent radio calls; re-wrapped on each render because the front script redefines it)
+        var syncAccent = function () {
+            var a = 'green';
+            try { a = safeGetItem('kanjiThemeAccent', getGlobalConfig().themeAccent || 'green'); } catch (e) { }
+            document.documentElement.classList.toggle('kd-accent-plain', a === 'plain');
+        };
+        if (typeof updateThemeSetting === 'function' && !updateThemeSetting._kdWrapped) {
+            var orig = updateThemeSetting;
+            window.updateThemeSetting = function (category) {
+                if (category === 'accent') try { safeSetItem('kanjiThemeAccent', arguments[1]); syncAccent(); } catch (e) { }
+                return orig.apply(this, arguments);
+            };
+            window.updateThemeSetting._kdWrapped = true;
+        }
+        syncAccent();
 
         window.kdSetDesign = function (val) {
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);

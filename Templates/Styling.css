@@ -2042,16 +2042,18 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     margin: 0;
 }
 
-/* The group reserves room for its tag (padding top/right), so the tag never covers a pill, the keyword
-   pill or the gear button; translateY re-centres the pills on the keyword without changing the layout box. */
+/* The tag sits on the top-right corner of the pill it marks (the corner pill) and overlaps only that pill:
+   the group reserves a little room above/right of it (so the tag stays clear of the keyword pill and the
+   gear button) and every pill is wider than the tag (so it never reaches the neighbouring pill).
+   translateY re-centres the pills on the keyword without changing the layout box. */
 .primitive-group {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
-    padding: 16px 10px 0 0;
-    transform: translateY(-8px);
+    padding: 8px 9px 0 0;
+    transform: translateY(-4px);
 }
 
 .primitive-box {
@@ -2065,6 +2067,9 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     font-size: 16px;
     line-height: 1.3;
     white-space: nowrap;
+    min-width: 76px;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 .nightMode .primitive-box,
@@ -2074,7 +2079,7 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     box-shadow: 0 3px 0 var(--title-lip);
 }
 
-/* One small tag on the group, top right, above the pills (in the group's own padding) */
+/* One small tag on the group's top-right corner, overlapping the corner pill */
 .primitive-label {
     position: absolute;
     top: 0;
@@ -3591,6 +3596,12 @@ html.is-ankidesktop .info-overlay {
 .nightMode .accent-swatch,
 .night_mode .accent-swatch {
     border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* fork: 7 accent colours ("Schlicht" added) */
+.accent-options-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
 }
 
 .accent-option span {
@@ -6613,11 +6624,11 @@ body.reduce-motion *::after {
    Active when html.kd-design-minimal is set (setting "Design" on "Erscheinungsbild", key kanjiThemeDesign).
    Values come from the fork's Styling.css before v3. Only overrides; upstream rules stay untouched.
    Colours: the classic neutral palette below wins over the v3 Japan-Theme colours, which JS writes
-   inline on <html> and <body> (hence !important on the variables). html.kd-minimal-theme keeps the
-   Japan-Theme colours instead (colour variant under evaluation, D25).
+   inline on <html> and <body> (hence !important on the variables). It applies with the "Schlicht"
+   accent (html.kd-accent-plain); with any other accent the Japan-Theme colours stay (D29).
    ========================================================================== */
-html.kd-design-minimal:not(.kd-minimal-theme),
-html.kd-design-minimal:not(.kd-minimal-theme) body {
+html.kd-design-minimal.kd-accent-plain,
+html.kd-design-minimal.kd-accent-plain body {
     --bg-main: #f7f7f5 !important;
     --surface: #ffffff !important;
     --border-color: #e2e2df !important;
@@ -6639,10 +6650,10 @@ html.kd-design-minimal:not(.kd-minimal-theme) body {
     --border-rad-sm: 7px;
 }
 
-html.kd-design-minimal:not(.kd-minimal-theme).nightMode,
-html.kd-design-minimal:not(.kd-minimal-theme).night_mode,
-html.kd-design-minimal:not(.kd-minimal-theme) body.nightMode,
-html.kd-design-minimal:not(.kd-minimal-theme) body.night_mode {
+html.kd-design-minimal.kd-accent-plain.nightMode,
+html.kd-design-minimal.kd-accent-plain.night_mode,
+html.kd-design-minimal.kd-accent-plain body.nightMode,
+html.kd-design-minimal.kd-accent-plain body.night_mode {
     --bg-main: #1a1a1a !important;
     --surface: #252525 !important;
     --border-color: #363636 !important;
@@ -6665,8 +6676,8 @@ html.kd-design-minimal:not(.kd-minimal-theme) body.night_mode {
 /* --- Page: no landscape, plain background, system font --- */
 /* v3 also writes the theme colour inline as background-color on <html>/<body> (not on Anki Desktop,
    which keeps its own --canvas there and paints the backdrop with .card::before) */
-html.kd-design-minimal:not(.kd-minimal-theme):not(.is-ankidesktop),
-html.kd-design-minimal:not(.kd-minimal-theme):not(.is-ankidesktop) body {
+html.kd-design-minimal.kd-accent-plain:not(.is-ankidesktop),
+html.kd-design-minimal.kd-accent-plain:not(.is-ankidesktop) body {
     background-color: var(--bg-main) !important;
 }
 
@@ -6704,15 +6715,16 @@ html.kd-design-minimal .kd-title-row {
 }
 
 html.kd-design-minimal .primitive-group {
-    padding: 14px 8px 0 0;
-    transform: translateY(-7px);
+    padding: 8px 8px 0 0;
+    transform: translateY(-4px);
     gap: 8px;
 }
 
 html.kd-design-minimal .primitive-box {
     padding: 4px 12px;
-    background: var(--prim-bg);
-    color: var(--prim-text);
+    /* --prim-* only exist in the neutral palette; with Japan-Theme colours derive them from the theme */
+    background: var(--prim-bg, color-mix(in srgb, var(--text-main) 8%, var(--surface)));
+    color: var(--prim-text, var(--text-muted));
     border: none;
     border-radius: var(--border-rad-sm);
     box-shadow: none;
@@ -6720,7 +6732,7 @@ html.kd-design-minimal .primitive-box {
 }
 
 html.kd-design-minimal .primitive-label {
-    background: var(--prim-bg);
+    background: var(--prim-bg, color-mix(in srgb, var(--text-main) 8%, var(--surface)));
     color: var(--text-muted);
     box-shadow: 0 0 0 2px var(--bg-main);
 }
