@@ -296,6 +296,20 @@ and who decided (user / agent).
 - **D23 (agent) Primitive chips on v3's title pill:** colours derive from `--title-*`, the group wraps under the
   keyword on narrow screens, and the "Primitive" label sits inline before the chips (an overhanging label collided
   with the keyword when wrapping).
+- **D30 (agent, 2026-11-04) Radikale merge rules:** top-level names from the note itself; nested names from the
+  component's own note when its top level lists the same glyphs, else learnt from aligned (glyph, v3 keyword)
+  pairs, else the deck's dominant name (>= 80 %), else a review decision (only 廾, 尢, 叕). Result: 2214 notes
+  (2105 kanji + 109 single-component primitives, `@1-n`) migrate without a decision; 95 kanji go to review
+  (76 other decomposition, 1 other order, 17 other strokes = the Issue-1 book fixes, 籠/篭). The 54 multi-part
+  primitives keep their entry without ranges (tree without colouring). Every generated tree passes a range
+  check (inside 1..n, children inside parents, top level covers all strokes). Where the user's strokes differ
+  from v3, each user stroke joins the components of the geometrically nearest v3 stroke.
+- **D31 (agent, 2026-11-04) Not reviewed:** 誓/斬 numbers: Issue 6 checked them against the German book (斬 1214,
+  誓 1215); v3 follows the English edition, so the user's values stay. 籠 gets no v3 text import by default (v3's
+  Stolperfallen stroke references are for 篭); its Radikale is a review case.
+- **D32 (agent, 2026-11-04) Review page as a private artifact:** decisions are saved per click to the page's db
+  (collection `decisions`) and read back with ArtifactData, so no JSON round trip is needed (a copyable JSON
+  fallback exists). Deck content stays out of the public repo; generator in `fix-kanji-deck/tools/v3/`.
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -385,11 +399,12 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 3.4 Fix what's found. Add a short how-to for the harness to this file.
 
 ### Phase 4 – Data migration (scripts in `fix-kanji-deck`, dry run / `--apply` / `--undo`, value check, backup)
-- [ ] 4.1 Field-add script (`Stolperfallen` after `Radikale`, `Merkhilfe` after `Merksatz-KI`) via AnkiConnect
+- [x] 4.1 Field-add script (`Stolperfallen` after `Radikale`, `Merkhilfe` after `Merksatz-KI`) via AnkiConnect
       (`modelFieldAdd`/`modelFieldReposition`)
-- [ ] 4.2 Import `Stolperfallen`, `Merkhilfe`; overwrite `Merksatz-KI` for kanji (D5)
-- [ ] 4.3 Radikale merge: glyph → name table, auto group, review group, primitives `@1-n`
-- [ ] 4.4 Review page: Radikale + Bedeutung + SVG + 篭/籠 + 誓/斬 (D7) → **user review**
+- [x] 4.2 Import `Stolperfallen`, `Merkhilfe`; overwrite `Merksatz-KI` for kanji (D5)
+- [x] 4.3 Radikale merge: glyph → name table, auto group, review group, primitives `@1-n`
+- [~] 4.4 Review page: Radikale + Bedeutung + SVG + 篭/籠 + 誓/斬 (D7) → **user review** (page published
+      2026-11-04, waiting for the user's decisions; 誓/斬 needs none, see D31)
 - [ ] 4.5 Apply the review decisions in the test collection. Verify the tree and stroke colouring render.
 
 ### Phase 5 – Colour-coding (D8)
@@ -420,12 +435,20 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-03, server):** Phases 0–3 headless work complete (timing limitations below). All fork features F1–F12 are rebuilt on v3 (`b40e1f8`..`c68666c` after
-  merge `edf1045`, see §8). Rendered with real notes (kanji, primitive, both cards, light/dark,
-  phone/desktop width): no console errors.
-- **Next:** Phase 4 data migration tooling in `fix-kanji-deck` (field schema/import/radical-name mapping,
-  then review pages for user decisions). The real collection is still on pre-v3 templates/data. Phase 6 must
-  verify actual Windows/Android latency, flicker, font/media loading and the cold-load cost below.
+- **State (2026-11-04, server):** Phases 0–3 done; Phase 4 tooling done and tested; waiting for the user's
+  review decisions (4.4). The real collection is untouched (still pre-v3 templates/data).
+- **Next:** read the decisions from the review page (https://claude.ai/artifact/X9QbAPjNLb2DJprAfyK8mL, private,
+  ArtifactData `list` of collection `decisions`), turn them into a decisions JSON, run
+  `migrate.py changes`, then 4.5: apply 01→02→03 on a fresh test profile, render-check, undo, snapshot compare.
+  Then Phase 5 (colour-coding). Steps and formats: `fix-kanji-deck/tools/v3/README.md` "Phase 4".
+- **Phase 4 test run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p4` from the 2026-11-03 export,
+  test decisions = all recommendations. Dry run → apply (2 fields, 6597 imports, 2309 Radikale; 0 failed) →
+  branch templates installed in the test copy, Anki-rendered 語 学 派 六 掛 [spazierstock] both cards: tree +
+  stroke colouring, no JS errors → undo of all three → cards, revlog (13154), flags (17) and all 2363 notes'
+  fields identical to the baseline. (The review-case ranges were remapped differently in that run; the
+  mechanical 2214 are unaffected. 4.5 repeats the run with the real decisions.)
+- **Field order after 4.1:** `Merkhilfe` after `Merksatz-KI` (position 9), `Stolperfallen` after `Radikale`
+  (position 25). Adding fields forces a one-way full sync (upload from the desktop), see D11.
 - **Cold-load timing (2026-11-03):** Chrome 136, 412 px, 16 alternating rounds (first discarded), fresh
   contexts, upstream `b853acf` vs. fork `c468b4c`. Median paired first-frame differences (fork minus upstream):
   学 C1 **+61.6 ms**, 学 C2 **+176.8 ms**, 語 C1 **+97.3 ms**, 語 C2 **+106.4 ms**. All exceed +50 ms;
@@ -499,3 +522,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Codex (server) · Finished the Minimal skin for v3 tools and settings (2b.2/2b.3, `c468b4c`); isolated latest-export Anki collection imported (2363 notes, 4726 cards), rendered 40 sample sides through Anki backend, card/revlog hashes unchanged.
 
 - 2026-11-03 · Codex (server) · Phase 3: 240 card variants passed; component spotlight/zoom and Anki backend output checked. Paired cold loads exceeded +50 ms; reused-view flip medians stayed within it (details §7). Native device/cold-load validation remains Phase 6. Repeatable helpers committed to private tooling (`b0faf5a`, `75199ba`). Next: Phase 4.
+- 2026-11-04 · Claude (server) · Phase 4.1–4.3 tooling (`fix-kanji-deck` `eaf7beb`, `65ed7ed`), tested apply/undo on a fresh test profile; review page published (4.4), waiting for the user.
