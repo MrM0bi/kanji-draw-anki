@@ -326,6 +326,11 @@ and who decided (user / agent).
   1-4 + Truthahn 5-11; Tröte's Klang and Engel's 高 split by hand (a stroke short of the full glyph). v3's split
   of 金 is wrong everywhere: König 3-5+8, Tropfen 6, 7 (34 notes). Check page:
   https://claude.ai/artifact/JUAr4zUsoH7zPPzK1LLLjW (collections `checks`, `checks2`).
+- **D35 (agent, 2026-11-04) Phase 5 recovery:** preserve completed proposals and checkpoint new batches.
+  Rendering must reject any validation error or missing batch. Component branches beyond six cycle the same
+  palette as the tree. The current Codex provider cannot access Claude artifact publishing/DB, so the colour
+  review also saves locally and exports fingerprinted JSON; the user can return it for review decisions.
+  This changes how decisions are returned, not the requirement to review before applying anything.
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -424,7 +429,7 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 4.5 Apply the review decisions in the test collection. Verify the tree and stroke colouring render.
 
 ### Phase 5 – Colour-coding (D8)
-- [ ] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
+- [~] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
       JSON out), plus name alignment inside the Merksatz-KI spans
 - [ ] 5.2 Review page → **user review**. Radikale issues found → back to 4.4.
 - [ ] 5.3 Apply in the test collection, render-check
@@ -458,8 +463,10 @@ _Update this section before you stop._
   0 failed; branch templates installed in the copy; Anki-rendered trees of the 7 hand-made cases, 昔 浅 稽 璽
   and 4 primitives, no JS errors; undo of all three → cards, revlog, flags and notes identical to the baseline.
   Repeated after D34 on `work/anki-p46`: same result (鏡 観 金 [marsch] [spiegel] [tröte] rendered).
-- **Next:** Phase 5 (colour-coding proposals, D8). Steps and formats for Phase 4:
-  `fix-kanji-deck/tools/v3/README.md` "Phase 4".
+- **Next:** finish Phase 5 colour-coding proposals (D8), validate all 40 batches, then build the complete user
+  review page. The usage-limit recovery found 19 saved proposals (all now pass structural checks), 21 missing.
+  Details and replacement task ids: private `work/v3/p5/recovery_manifest.json`. Steps/formats are documented
+  in `fix-kanji-deck/tools/v3/README.md` (Phase 4 / Phase 5). No Phase 5 changes are approved or applied.
 - **Phase 4 test run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p4` from the 2026-11-03 export,
   test decisions = all recommendations. Dry run → apply (2 fields, 6597 imports, 2309 Radikale; 0 failed) →
   branch templates installed in the test copy, Anki-rendered 語 学 派 六 掛 [spazierstock] both cards: tree +
@@ -480,7 +487,8 @@ _Update this section before you stop._
   first-frame differences: 学 C1 **−18.5 ms**, 学 C2 **+15.4 ms**, 語 C1 **−19.2 ms**, 語 C2 **+12.6 ms**.
   These headless **median** differences are within +50 ms. They do not prove a worst-case bound or native
   Qt/AnkiDroid performance. Keep the cold-load result as a Phase 6 risk; don't dismiss it as noise.
-- **Blocked / waiting for user:** no input needed for Phase 4 tooling. Actual device testing waits until Phase 6.
+- **Blocked / waiting for user:** no input needed to finish the Phase 5 proposals; user review follows. Actual
+  device testing waits until Phase 6.
 - **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
   `/tmp/kd-apkg/mine_samples.json` (user notes via read-only AnkiConnect `notesInfo`), `/tmp/kd-apkg/v3.json`
   (v3 `.apkg` notes via sqlite), the three handwriting fonts copied next to the output pages (`retrieveMediaFile`).
@@ -544,3 +552,5 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-04 · Claude (server) · Phase 4.1–4.3 tooling (`fix-kanji-deck` `eaf7beb`, `65ed7ed`), tested apply/undo on a fresh test profile; review page published (4.4), waiting for the user.
 - 2026-11-04 · Claude (server) · User review applied (D33): custom trees, v3 corrections, 36 primitive decompositions (`fix-kanji-deck` `278113f`); 4.5 test apply/render/undo clean. Next: Phase 5.
 - 2026-11-04 · Claude (server) · Second check (D34): deep primitive trees, user fixes, 金 split corrected (`fix-kanji-deck` `a36e21a`, latest); final test apply/render/undo clean on `anki-p46`. Next: Phase 5.
+
+- 2026-11-04 · Codex (server) · Resumed interrupted Phase 5: preserved 19 proposal files, repaired validation/typos, added fail-closed rendering, palette cycling and portable decision export. Seven checker regressions and mobile light/dark save/export/reload/search/correction checks pass. Twenty-one batches still need completion; recovery manifest tracks them.
