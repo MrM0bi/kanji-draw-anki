@@ -429,9 +429,9 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 - [x] 4.5 Apply the review decisions in the test collection. Verify the tree and stroke colouring render.
 
 ### Phase 5 – Colour-coding (D8)
-- [~] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
+- [x] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
       JSON out), plus name alignment inside the Merksatz-KI spans
-- [ ] 5.2 Review page → **user review**. Radikale issues found → back to 4.4.
+- [~] 5.2 Review page → **user review** (complete page built, waiting for decisions). Radikale issues found → back to 4.4.
 - [ ] 5.3 Apply in the test collection, render-check
 
 ### Phase 6 – Test switch-over (user)
@@ -463,10 +463,19 @@ _Update this section before you stop._
   0 failed; branch templates installed in the copy; Anki-rendered trees of the 7 hand-made cases, 昔 浅 稽 璽
   and 4 primitives, no JS errors; undo of all three → cards, revlog, flags and notes identical to the baseline.
   Repeated after D34 on `work/anki-p46`: same result (鏡 観 金 [marsch] [spiegel] [tröte] rendered).
-- **Next:** finish Phase 5 colour-coding proposals (D8), validate all 40 batches, then build the complete user
-  review page. The usage-limit recovery found 19 saved proposals (all now pass structural checks), 21 missing.
-  Details and replacement task ids: private `work/v3/p5/recovery_manifest.json`. Steps/formats are documented
-  in `fix-kanji-deck/tools/v3/README.md` (Phase 4 / Phase 5). No Phase 5 changes are approved or applied.
+- **Next:** user reviews the Phase 5 proposals and returns fingerprinted decision JSON. Full private page:
+  `fix-kanji-deck/work/v3/p5/review.html` (inline version retains all data, with smaller initial pages).
+  All 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields. The review displays 2360 notes with
+  proposals or warnings; three unchanged notes are omitted. The priority filter contains 943 notes, including
+  495 with explicit uncertainty flags. Structural checks do not establish semantic correctness; user review is
+  still required, especially for story/tree mismatches and surreal name substitutions. No Phase 5 proposals
+  have been applied. Use the returned corrections to revisit Phase 4 trees where necessary before applying.
+- **Phase 5 artifacts/checks:** task ids and input/proposal hashes in private `work/v3/p5/recovery_manifest.json`
+  and `validation_report.json`; counts/review fingerprint in `review_summary.json`. Complete-page Chromium
+  checks passed at 390/1100 px, light/dark: search, unchanged-context warnings, decision save/reload and actual
+  JSON download. Packed-page decompression, complete dataset id, search, decisions/reload also passed.
+  T3 screenshot preview is blocked by host AppArmor; no host configuration was changed. The standalone HTML
+  remains available if the inline viewer is unavailable. Full instructions: private `tools/v3/README.md`.
 - **Phase 4 test run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p4` from the 2026-11-03 export,
   test decisions = all recommendations. Dry run → apply (2 fields, 6597 imports, 2309 Radikale; 0 failed) →
   branch templates installed in the test copy, Anki-rendered 語 学 派 六 掛 [spazierstock] both cards: tree +
@@ -487,8 +496,8 @@ _Update this section before you stop._
   first-frame differences: 学 C1 **−18.5 ms**, 学 C2 **+15.4 ms**, 語 C1 **−19.2 ms**, 語 C2 **+12.6 ms**.
   These headless **median** differences are within +50 ms. They do not prove a worst-case bound or native
   Qt/AnkiDroid performance. Keep the cold-load result as a Phase 6 risk; don't dismiss it as noise.
-- **Blocked / waiting for user:** no input needed to finish the Phase 5 proposals; user review follows. Actual
-  device testing waits until Phase 6.
+- **Blocked / waiting for user:** Phase 5 review decisions (JSON export). Phase 5.3 applies only after those
+  decisions, in an isolated collection. Actual device testing waits until Phase 6.
 - **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
   `/tmp/kd-apkg/mine_samples.json` (user notes via read-only AnkiConnect `notesInfo`), `/tmp/kd-apkg/v3.json`
   (v3 `.apkg` notes via sqlite), the three handwriting fonts copied next to the output pages (`retrieveMediaFile`).
@@ -556,3 +565,5 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-04 · Codex (server) · Resumed interrupted Phase 5: preserved 19 proposal files, repaired validation/typos, added fail-closed rendering, palette cycling and portable decision export. Seven checker regressions and mobile light/dark save/export/reload/search/correction checks pass. Twenty-one batches still need completion; recovery manifest tracks them.
 
 - 2026-11-04 · Codex (server) · First replacement batch `b40` validated (23 notes, 65 spans). Fixed review generation so an uncertainty without proposed marks remains visible with unchanged context; 8 checker/generator regressions pass. Other replacement workers continue; task ids remain in the private recovery manifest.
+
+- 2026-11-04 · Codex (server) · All 40 colour batches validate (2363 notes, 12363 spans, 1400 aligned fields). Complete review and packed inline version built/tested; user review is next (5.2), before any test-collection apply (5.3). Full counts and caveats are in §7; live Anki remains untouched.
