@@ -310,6 +310,15 @@ and who decided (user / agent).
 - **D32 (agent, 2026-11-04) Review page as a private artifact:** decisions are saved per click to the page's db
   (collection `decisions`) and read back with ArtifactData, so no JSON round trip is needed (a copyable JSON
   fallback exists). Deck content stays out of the public repo; generator in `fix-kanji-deck/tools/v3/`.
+- **D33 (user + agent, 2026-11-04) Review outcome:** 84 cases v3, 4 own decomposition with v3 ranges, 7
+  hand-made from the user's notes (失 one drop only; 賭 with Person's parts; 暇 own order, coloured; 喪 十 + two
+  mouths + Haarspange; 僅 with Kohl's parts; 籠 strokes 7/16 belong to the dragon; 箋 Bambus + Festwagen).
+  Meanings: v3 for 修 and 貧, own for 昭 川 吐. v3 component corrections: 廾 is the book's Blume (→ 艹[Blume*]);
+  尤 stays whole ("Chihuahua mit einem Menschenbein", no 尢 + 丶 split); 爾 in 璽 is not split (drops 叕).
+  The user asked for primitive decompositions too: 36 multi-part primitive notes get stroke ranges (agent-made
+  from numbered stroke sheets); the other 18 list related forms rather than parts and keep their entry. A kanji
+  component that is one of those primitives takes the primitive's own decomposition (e.g. 㦮 Festwagen =
+  zwei + Straßenfest in 浅 桟 残 銭 践).
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -403,9 +412,9 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
       (`modelFieldAdd`/`modelFieldReposition`)
 - [x] 4.2 Import `Stolperfallen`, `Merkhilfe`; overwrite `Merksatz-KI` for kanji (D5)
 - [x] 4.3 Radikale merge: glyph → name table, auto group, review group, primitives `@1-n`
-- [~] 4.4 Review page: Radikale + Bedeutung + SVG + 篭/籠 + 誓/斬 (D7) → **user review** (page published
-      2026-11-04, waiting for the user's decisions; 誓/斬 needs none, see D31)
-- [ ] 4.5 Apply the review decisions in the test collection. Verify the tree and stroke colouring render.
+- [x] 4.4 Review page: Radikale + Bedeutung + SVG + 篭/籠 + 誓/斬 (D7) → **user review** (done 2026-11-04,
+      see D33; 誓/斬 needs none, see D31)
+- [x] 4.5 Apply the review decisions in the test collection. Verify the tree and stroke colouring render.
 
 ### Phase 5 – Colour-coding (D8)
 - [ ] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
@@ -435,12 +444,14 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-04, server):** Phases 0–3 done; Phase 4 tooling done and tested; waiting for the user's
-  review decisions (4.4). The real collection is untouched (still pre-v3 templates/data).
-- **Next:** read the decisions from the review page (https://claude.ai/artifact/X9QbAPjNLb2DJprAfyK8mL, private,
-  ArtifactData `list` of collection `decisions`), turn them into a decisions JSON, run
-  `migrate.py changes`, then 4.5: apply 01→02→03 on a fresh test profile, render-check, undo, snapshot compare.
-  Then Phase 5 (colour-coding). Steps and formats: `fix-kanji-deck/tools/v3/README.md` "Phase 4".
+- **State (2026-11-04, server):** Phases 0–4 done. The real collection is untouched (still pre-v3
+  templates/data). Final change files: `fix-kanji-deck/work/v3/out/changes_0{1,2,3}_*.json` from
+  `work/v3/p4/decisions_user.json` (2 fields, 6599 imports, 2345 Radikale).
+- **4.5 run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p45` (2026-11-03 export): apply 01→02→03,
+  0 failed; branch templates installed in the copy; Anki-rendered trees of the 7 hand-made cases, 昔 浅 稽 璽
+  and 4 primitives, no JS errors; undo of all three → cards, revlog, flags and notes identical to the baseline.
+- **Next:** Phase 5 (colour-coding proposals, D8). Steps and formats for Phase 4:
+  `fix-kanji-deck/tools/v3/README.md` "Phase 4".
 - **Phase 4 test run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p4` from the 2026-11-03 export,
   test decisions = all recommendations. Dry run → apply (2 fields, 6597 imports, 2309 Radikale; 0 failed) →
   branch templates installed in the test copy, Anki-rendered 語 学 派 六 掛 [spazierstock] both cards: tree +
@@ -523,3 +534,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 
 - 2026-11-03 · Codex (server) · Phase 3: 240 card variants passed; component spotlight/zoom and Anki backend output checked. Paired cold loads exceeded +50 ms; reused-view flip medians stayed within it (details §7). Native device/cold-load validation remains Phase 6. Repeatable helpers committed to private tooling (`b0faf5a`, `75199ba`). Next: Phase 4.
 - 2026-11-04 · Claude (server) · Phase 4.1–4.3 tooling (`fix-kanji-deck` `eaf7beb`, `65ed7ed`), tested apply/undo on a fresh test profile; review page published (4.4), waiting for the user.
+- 2026-11-04 · Claude (server) · User review applied (D33): custom trees, v3 corrections, 36 primitive decompositions (`fix-kanji-deck` `278113f`); 4.5 test apply/render/undo clean. Next: Phase 5.
