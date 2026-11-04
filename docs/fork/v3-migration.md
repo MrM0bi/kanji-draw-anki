@@ -554,3 +554,5 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-04 · Claude (server) · Second check (D34): deep primitive trees, user fixes, 金 split corrected (`fix-kanji-deck` `a36e21a`, latest); final test apply/render/undo clean on `anki-p46`. Next: Phase 5.
 
 - 2026-11-04 · Codex (server) · Resumed interrupted Phase 5: preserved 19 proposal files, repaired validation/typos, added fail-closed rendering, palette cycling and portable decision export. Seven checker regressions and mobile light/dark save/export/reload/search/correction checks pass. Twenty-one batches still need completion; recovery manifest tracks them.
+
+- 2026-11-04 · Codex (server) · First replacement batch `b40` validated (23 notes, 65 spans). Fixed review generation so an uncertainty without proposed marks remains visible with unchanged context; 8 checker/generator regressions pass. Other replacement workers continue; task ids remain in the private recovery manifest.
