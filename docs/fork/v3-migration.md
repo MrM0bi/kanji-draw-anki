@@ -319,6 +319,13 @@ and who decided (user / agent).
   from numbered stroke sheets); the other 18 list related forms rather than parts and keep their entry. A kanji
   component that is one of those primitives takes the primitive's own decomposition (e.g. 㦮 Festwagen =
   zwei + Straßenfest in 浅 桟 残 銭 践).
+- **D34 (user + agent, 2026-11-04) Second check:** primitive parts are split down to their own parts as far as
+  the deck allows (part tree from its own note, or from how the kanji trees split that glyph, when the stroke
+  counts match; e.g. Marsch → Parade → Straßenfest → Pfeil + Tropfen). User fixes: Erntedankfest/Tröte stroke
+  3/5 → Straßenfest, Bergziege 3 → Hörner, Spiegel = stehen + plappernde Zunge + Menschenbeine, Pegasus = Pferd
+  1-4 + Truthahn 5-11; Tröte's Klang and Engel's 高 split by hand (a stroke short of the full glyph). v3's split
+  of 金 is wrong everywhere: König 3-5+8, Tropfen 6, 7 (34 notes). Check page:
+  https://claude.ai/artifact/JUAr4zUsoH7zPPzK1LLLjW (collections `checks`, `checks2`).
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -446,10 +453,11 @@ _Update this section before you stop._
 
 - **State (2026-11-04, server):** Phases 0–4 done. The real collection is untouched (still pre-v3
   templates/data). Final change files: `fix-kanji-deck/work/v3/out/changes_0{1,2,3}_*.json` from
-  `work/v3/p4/decisions_user.json` (2 fields, 6599 imports, 2345 Radikale).
+  `work/v3/p4/decisions_user.json` (2 fields, 6599 imports, 2346 Radikale, after D34).
 - **4.5 run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p45` (2026-11-03 export): apply 01→02→03,
   0 failed; branch templates installed in the copy; Anki-rendered trees of the 7 hand-made cases, 昔 浅 稽 璽
   and 4 primitives, no JS errors; undo of all three → cards, revlog, flags and notes identical to the baseline.
+  Repeated after D34 on `work/anki-p46`: same result (鏡 観 金 [marsch] [spiegel] [tröte] rendered).
 - **Next:** Phase 5 (colour-coding proposals, D8). Steps and formats for Phase 4:
   `fix-kanji-deck/tools/v3/README.md` "Phase 4".
 - **Phase 4 test run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p4` from the 2026-11-03 export,
@@ -535,3 +543,4 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-03 · Codex (server) · Phase 3: 240 card variants passed; component spotlight/zoom and Anki backend output checked. Paired cold loads exceeded +50 ms; reused-view flip medians stayed within it (details §7). Native device/cold-load validation remains Phase 6. Repeatable helpers committed to private tooling (`b0faf5a`, `75199ba`). Next: Phase 4.
 - 2026-11-04 · Claude (server) · Phase 4.1–4.3 tooling (`fix-kanji-deck` `eaf7beb`, `65ed7ed`), tested apply/undo on a fresh test profile; review page published (4.4), waiting for the user.
 - 2026-11-04 · Claude (server) · User review applied (D33): custom trees, v3 corrections, 36 primitive decompositions (`fix-kanji-deck` `278113f`); 4.5 test apply/render/undo clean. Next: Phase 5.
+- 2026-11-04 · Claude (server) · Second check (D34): deep primitive trees, user fixes, 金 split corrected (`fix-kanji-deck` `a36e21a`, latest); final test apply/render/undo clean on `anki-p46`. Next: Phase 5.
