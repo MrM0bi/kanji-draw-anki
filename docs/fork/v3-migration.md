@@ -344,6 +344,12 @@ and who decided (user / agent).
   grouped/sorted by outcome, bulk approval for resolved groups and manual review only for edge cases.
   Check native Claude artifact availability; do not silently substitute a public site or another model.
   This supersedes sending the old 943-priority-note page straight to the user. Nothing is applied without approval.
+- **D37 (agent, 2026-11-05) Comparable repeat reviews:** first-round differences include harmless
+  span-length choices. From round two, use whole inflected words and meaningful compound image units;
+  preserve concrete component identities and first clear mentions. Confidence below 9 needs a specific
+  competing interpretation or missing evidence, not merely a changed mark or documented alternative name.
+  Thresholds remain unchanged; agreement alone is not evidence. Freeze each round's instructions with
+  its input hash and reject changed protocols. Preserve the original first-round instructions/votes.
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -484,17 +490,19 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Checkpoint 2026-11-05 18:46 CET: 76/80 first-round votes validate (Claude all 40;
-  GPT b01–b36). The user reports using a reset token and authorises immediate continuation. The old
-  23:05 one-shot schedule is disabled and the GPT dispatch hold removed (override history preserved).
-  Retry b37 from its complete 60-note/240-field draft for remaining checks, and b38 from scratch (no
-  checkpoint); use fresh request IDs with the exact same model/effort and unchanged inputs. b39/b40
-  remain queued. After all 80 votes validate, continue comparison and repeat rounds (D36).
+  Checkpoint 2026-11-05 19:03 CET: all 80 first-round votes validate, covering 2363 notes /
+  9411 fields per judge. Exact issue-free agreement at >=9 from both judges: 7628 fields; 1783 fields on
+  1118 notes remain for further judging (intermediate work, not a manual-review assignment).
+  Round two is prepared: 1883 fields / 1190 notes per judge, including 100 audit fields from 100 distinct
+  consensus notes; 40 batch votes. Anonymous prior objections are included only where needed. D37
+  clarifies spans/confidence reasons; frozen protocol hashes prevent instructions changing mid-round.
+  The user-used reset token lifted the old hold and the old timer is disabled. Continue exact-model
+  dispatch and repeat review; final grouped approval artifact waits for convergence, up to ten rounds.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
   unavailable endpoint. Candidates are contextual evidence, not unconditional equivalences.
-  Twelve panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
+  Thirteen panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
   silently become consensus. Final delivery requires a private Claude artifact and <=149 manual notes,
   subject to the honest ten-round failsafe. Real Anki remains untouched.
 - **Preserved Phase 5 baseline:** all 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields.
@@ -636,3 +644,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 
 - 2026-11-05 · Codex (server) · User used a reset token and requested immediate continuation. Disabled
   the old timed resume and lifted the hold; renewed retry IDs for b37/b38 with preserved history/drafts.
+
+- 2026-11-05 19:03 CET · Codex (server) · All 80 first-round votes validated and compared; round two prepared
+  with unresolved fields plus a 100-note agreement audit. Froze round instructions and clarified harmless
+  span conventions (D37); 13 panel and 8 checker tests pass. No manual review or collection apply yet.
