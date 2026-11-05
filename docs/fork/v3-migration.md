@@ -480,7 +480,10 @@ _Update this section before you stop._
   Repeated after D34 on `work/anki-p46`: same result (鏡 観 金 [marsch] [spiegel] [tröte] rendered).
 - **Next:** run the independent alias-aware panel (D36) from private `tools/v3/panel/COORDINATOR.md`.
   Exact task metadata, source hashes, votes and convergence history stay in `work/v3/panel/run/`.
-  Both stated reset times have passed. Release b01 pilots first, then at most two active batches per judge.
+  Both stated reset times have passed. Both b01 pilots passed and the pilot gate is released.
+  Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
+  review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
+  active batches per judge.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
@@ -594,3 +597,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
   (D36). Frozen 2363-note/9411-field inputs; nine panel and eight existing checker tests pass. Both requested
   reset times passed. Next: b01 pilots with exact requested models/settings, followed by repeated batched
   review and a private Claude approval artifact. No collection writes.
+
+- 2026-11-05 · Codex (server) · Both b01 pilots validate (60 notes / 252 fields each); 223 identical outputs,
+  199 high-confidence issue-free agreements. Pilot gate released for the remaining first-round batches.
+  Claude reports native Artifact publishing available; owner-only publication remains to verify at delivery.
