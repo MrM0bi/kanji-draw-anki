@@ -488,7 +488,8 @@ _Update this section before you stop._
   GPT b01–b27). Older interrupted GPT batches recovered fully. GPT b28's reported 18:04 reset has
   passed; resume its 50-note/197-field checkpoint. Claude b34/b35 hit an API rate limit with no reset
   time: b34 saved 54 notes/214 fields; b35 has no checkpoint. Preserve failures/snapshots and use new
-  retry IDs with unchanged inputs. Retry one Claude batch first; restore two slots after b34 validates.
+  retry IDs with unchanged inputs. Claude b34 subsequently recovered and validated (61/80 votes);
+  its successful probe restores two Claude slots.
   GPT keeps two slots. No model/provider substitutions. Exact task/probe state stays private.
   Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
   count exists yet, and this checkpoint is not a user-review assignment.
