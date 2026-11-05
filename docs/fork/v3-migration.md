@@ -502,7 +502,7 @@ _Update this section before you stop._
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
   unavailable endpoint. Candidates are contextual evidence, not unconditional equivalences.
-  Thirteen panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
+  Fourteen panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
   silently become consensus. Final delivery requires a private Claude artifact and <=149 manual notes,
   subject to the honest ten-round failsafe. Real Anki remains untouched.
 - **Preserved Phase 5 baseline:** all 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields.
@@ -648,3 +648,8 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 19:03 CET · Codex (server) · All 80 first-round votes validated and compared; round two prepared
   with unresolved fields plus a 100-note agreement audit. Froze round instructions and clarified harmless
   span conventions (D37); 13 panel and 8 checker tests pass. No manual review or collection apply yet.
+
+- 2026-11-05 19:15 CET · Codex (server) · Four round-two votes validate. Preserved eight concrete protocol
+  objections for a future formal round where literal-first rationales skipped earlier clear meanings.
+  Original votes and active frozen inputs remain untouched; objections are questions, not votes.
+  Fourteen panel and eight checker tests pass. No collection writes or manual review requested.
