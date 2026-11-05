@@ -331,6 +331,19 @@ and who decided (user / agent).
   palette as the tree. The current Codex provider cannot access Claude artifact publishing/DB, so the colour
   review also saves locally and exports fingerprinted JSON; the user can return it for review decisions.
   This changes how decisions are returned, not the requirement to review before applying anything.
+- **D36 (user, 2026-11-04; prepared 2026-11-05) Alias-aware second pass:** recognise alternative primitive
+  names and contextual images, explicitly Mund for 囗/eingepfercht. Compile a source-linked candidate
+  registry from available decks, books and dictionaries first. Preserve the existing 40-batch proposals as
+  the starting point. After BOTH usage resets (Claude Nov 4 ~22:21; Codex Nov 5 ~01:32, Europe/Rome), use
+  independent batched Claude Opus 5.5 **medium** and GPT-6.1-sol **high** judges. Each field gets a 1–10
+  current-quality rating, a 1–10 proposed-annotation confidence and exact comparable component spans.
+  Repeat reviews for at least two rounds, up to TEN; target fewer than 150 distinct notes requiring manual
+  attention. Only identical annotations at >=9 confidence from both judges without unresolved issues enter
+  consensus. Audit 100 consensus notes in round two; changed audits reopen affected component families.
+  Preserve disagreements honestly if the limit is not reached. Final user review: PRIVATE Claude artifact,
+  grouped/sorted by outcome, bulk approval for resolved groups and manual review only for edge cases.
+  Check native Claude artifact availability; do not silently substitute a public site or another model.
+  This supersedes sending the old 943-priority-note page straight to the user. Nothing is applied without approval.
 - **D24 (agent) Correction:** v3 has no left-hand mode (the analysis listed one by mistake).
 - **D25 (user, 2026-11-03) Design switch:** the new v3 design is the default. Plan an option to switch to the old
   minimal design and icons (the fork's look before v3). Scope and open questions: checklist Phase 2b.
@@ -431,7 +444,9 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 ### Phase 5 – Colour-coding (D8)
 - [x] 5.1 Agents propose `kd-kw` spans for Merksatz-DE, BuchBeschreibung, BuchPrimitivBeschreibung (batched,
       JSON out), plus name alignment inside the Merksatz-KI spans
-- [~] 5.2 Review page → **user review** (complete page built, waiting for decisions). Radikale issues found → back to 4.4.
+- [~] 5.2 Alias-aware two-judge panel (D36), then grouped private Claude artifact → **user review**.
+      Prior 40-batch proposals are the starting point; user is not asked to review the old 943-case queue.
+      Radikale issues found → back to 4.4.
 - [ ] 5.3 Apply in the test collection, render-check
 
 ### Phase 6 – Test switch-over (user)
@@ -456,20 +471,26 @@ Legend: `[ ]` open, `[x]` done, `[~]` in progress, `[!]` blocked (reason in §7)
 
 _Update this section before you stop._
 
-- **State (2026-11-04, server):** Phases 0–4 done. The real collection is untouched (still pre-v3
+- **State (2026-11-05, server):** Phases 0–4 done. The real collection is untouched (still pre-v3
   templates/data). Final change files: `fix-kanji-deck/work/v3/out/changes_0{1,2,3}_*.json` from
   `work/v3/p4/decisions_user.json` (2 fields, 6599 imports, 2346 Radikale, after D34).
 - **4.5 run (2026-11-04):** fresh profile `fix-kanji-deck/work/anki-p45` (2026-11-03 export): apply 01→02→03,
   0 failed; branch templates installed in the copy; Anki-rendered trees of the 7 hand-made cases, 昔 浅 稽 璽
   and 4 primitives, no JS errors; undo of all three → cards, revlog, flags and notes identical to the baseline.
   Repeated after D34 on `work/anki-p46`: same result (鏡 観 金 [marsch] [spiegel] [tröte] rendered).
-- **Next:** user reviews the Phase 5 proposals and returns fingerprinted decision JSON. Full private page:
-  `fix-kanji-deck/work/v3/p5/review.html` (inline version retains all data, with smaller initial pages).
-  All 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields. The review displays 2360 notes with
-  proposals or warnings; three unchanged notes are omitted. The priority filter contains 943 notes, including
-  495 with explicit uncertainty flags. Structural checks do not establish semantic correctness; user review is
-  still required, especially for story/tree mismatches and surreal name substitutions. No Phase 5 proposals
-  have been applied. Use the returned corrections to revisit Phase 4 trees where necessary before applying.
+- **Next:** run the independent alias-aware panel (D36) from private `tools/v3/panel/COORDINATOR.md`.
+  Exact task metadata, source hashes, votes and convergence history stay in `work/v3/panel/run/`.
+  Both stated reset times have passed. Release b01 pilots first, then at most two active batches per judge.
+  Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
+  `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
+  It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
+  unavailable endpoint. Candidates are contextual evidence, not unconditional equivalences.
+  Nine panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
+  silently become consensus. Final delivery requires a private Claude artifact and <=149 manual notes,
+  subject to the honest ten-round failsafe. Real Anki remains untouched.
+- **Preserved Phase 5 baseline:** all 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields.
+  `work/v3/p5/review.html` displays 2360 notes; three unchanged omitted. Its 943 priority notes / 495 explicit
+  warnings are input to the new panel, not a manual-review assignment. No Phase 5 proposals have been applied.
 - **Phase 5 artifacts/checks:** task ids and input/proposal hashes in private `work/v3/p5/recovery_manifest.json`
   and `validation_report.json`; counts/review fingerprint in `review_summary.json`. Complete-page Chromium
   checks passed at 390/1100 px, light/dark: search, unchanged-context warnings, decision save/reload and actual
@@ -496,8 +517,9 @@ _Update this section before you stop._
   first-frame differences: 学 C1 **−18.5 ms**, 学 C2 **+15.4 ms**, 語 C1 **−19.2 ms**, 語 C2 **+12.6 ms**.
   These headless **median** differences are within +50 ms. They do not prove a worst-case bound or native
   Qt/AnkiDroid performance. Keep the cold-load result as a Phase 6 risk; don't dismiss it as noise.
-- **Blocked / waiting for user:** Phase 5 review decisions (JSON export). Phase 5.3 applies only after those
-  decisions, in an isolated collection. Actual device testing waits until Phase 6.
+- **Approval still required later:** after the panel, the user reviews the grouped private artifact. Phase 5.3
+  applies approved changes only in an isolated collection. Actual device testing waits until Phase 6.
+  The panel can proceed autonomously now; the old review page is superseded by D36.
 - **Render harness (private, uses deck content):** `fix-kanji-deck/tools/v3/render_cards.py`. Inputs:
   `/tmp/kd-apkg/mine_samples.json` (user notes via read-only AnkiConnect `notesInfo`), `/tmp/kd-apkg/v3.json`
   (v3 `.apkg` notes via sqlite), the three handwriting fonts copied next to the output pages (`retrieveMediaFile`).
@@ -567,3 +589,8 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-04 · Codex (server) · First replacement batch `b40` validated (23 notes, 65 spans). Fixed review generation so an uncertainty without proposed marks remains visible with unchanged context; 8 checker/generator regressions pass. Other replacement workers continue; task ids remain in the private recovery manifest.
 
 - 2026-11-04 · Codex (server) · All 40 colour batches validate (2363 notes, 12363 spans, 1400 aligned fields). Complete review and packed inline version built/tested; user review is next (5.2), before any test-collection apply (5.3). Full counts and caveats are in §7; live Anki remains untouched.
+
+- 2026-11-05 · Codex (server) · Prepared source-linked alternative names and the persistent two-judge panel
+  (D36). Frozen 2363-note/9411-field inputs; nine panel and eight existing checker tests pass. Both requested
+  reset times passed. Next: b01 pilots with exact requested models/settings, followed by repeated batched
+  review and a private Claude approval artifact. No collection writes.
