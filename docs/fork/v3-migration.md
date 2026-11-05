@@ -484,19 +484,19 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Resume checkpoint 2026-11-05 13:04 CET: 42/80 first-round votes validate (Claude b01–b24,
-  GPT b01–b18). GPT b19/b20 hit a usage limit reporting 13:03; the user asked to continue after that
-  reset, now passed. Both complete drafts (240/236 fields) pass structural validation; preserve snapshots
-  and let the resumed same-model judges finish their remaining checks before counting those votes.
-  GPT b10/b11 previously recovered fully. Retry uses new request IDs and unchanged input hashes.
-  Per-judge reset holds prevent premature future dispatch. Task/attempt details remain private.
+  Recovery checkpoint 2026-11-05 18:04 CET: 60/80 first-round votes validate (Claude b01–b33,
+  GPT b01–b27). Older interrupted GPT batches recovered fully. GPT b28's reported 18:04 reset has
+  passed; resume its 50-note/197-field checkpoint. Claude b34/b35 hit an API rate limit with no reset
+  time: b34 saved 54 notes/214 fields; b35 has no checkpoint. Preserve failures/snapshots and use new
+  retry IDs with unchanged inputs. Retry one Claude batch first; restore two slots after b34 validates.
+  GPT keeps two slots. No model/provider substitutions. Exact task/probe state stays private.
   Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
   count exists yet, and this checkpoint is not a user-review assignment.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
   unavailable endpoint. Candidates are contextual evidence, not unconditional equivalences.
-  Eleven panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
+  Twelve panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
   silently become consensus. Final delivery requires a private Claude artifact and <=149 manual notes,
   subject to the honest ten-round failsafe. Real Anki remains untouched.
 - **Preserved Phase 5 baseline:** all 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields.
@@ -621,3 +621,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · Recorded Claude b23/b24 (233/237 fields), bringing validated votes to 42/80.
   After the user-requested wait until the reported 13:03 Codex reset, resume GPT b19/b20 from complete
   validated drafts for their remaining checks. Failure histories and snapshots preserved; no collection writes.
+
+- 2026-11-05 · Codex (server) · Recorded GPT b27, bringing validated first-round votes to 60/80. After the
+  reported 18:04 Codex reset, resume saved GPT/Claude checkpoints. Claude's unspecified API rate limit is
+  handled with one retry first; the other judge keeps its slots. Twelve panel and eight checker tests pass.
