@@ -484,14 +484,12 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Checkpoint 2026-11-05 18:39 CET: 76/80 first-round votes validate (Claude all 40;
-  GPT b01–b36). GPT b37 hit its usage limit reporting 23:04 CET. Its full 60-note/240-field checkpoint
-  passes structural validation; preserve it for the resumed judge's remaining checks. GPT b38 subsequently
-  failed at the same limit without a checkpoint. No delegate remains active; GPT b39/b40 remain queued.
-  GPT dispatch is held until 23:05 CET. A real one-shot schedule, bound to the current thread, is enabled
-  for 2026-11-05 23:05 CET (22:05 UTC); its metadata is private in the saved coordinator state. Continue
-  automatically then, with exact models/settings, fresh retry IDs and preserved snapshots. Do not advance
-  before all 80 votes validate. Repeated reviews and the final manual-case count remain pending.
+  Checkpoint 2026-11-05 18:46 CET: 76/80 first-round votes validate (Claude all 40;
+  GPT b01–b36). The user reports using a reset token and authorises immediate continuation. The old
+  23:05 one-shot schedule is disabled and the GPT dispatch hold removed (override history preserved).
+  Retry b37 from its complete 60-note/240-field draft for remaining checks, and b38 from scratch (no
+  checkpoint); use fresh request IDs with the exact same model/effort and unchanged inputs. b39/b40
+  remain queued. After all 80 votes validate, continue comparison and repeat rounds (D36).
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
@@ -635,3 +633,6 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 
 - 2026-11-05 · Codex (server) · Recorded the subsequent GPT b38 quota failure (no checkpoint). The same
   enabled 23:05 CET continuation covers both failed jobs; no duplicate schedule or early dispatch.
+
+- 2026-11-05 · Codex (server) · User used a reset token and requested immediate continuation. Disabled
+  the old timed resume and lifted the hold; renewed retry IDs for b37/b38 with preserved history/drafts.
