@@ -484,10 +484,12 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Recovery 2026-11-05 08:03 CET: 20/80 first-round votes validate. GPT b10/b11 hit a usage limit reporting
-  06:32; the reset has passed. Preserve their 38/50-note checkpoints and resume with new attempt request
-  ids, unchanged inputs and exact requested model/settings. Per-judge reset holds prevent further dispatch
-  before future resets; the other judge may continue. Task/attempt details remain private in saved state.
+  Halfway checkpoint 2026-11-05 08:38 CET: 40/80 first-round votes validate (Claude b01–b22,
+  GPT b01–b18), covering 9638 field votes. GPT b10/b11 recovered fully from saved checkpoints after the
+  reported 06:32 reset; no failed jobs remain. Same input hashes and exact requested models/settings.
+  Per-judge reset holds prevent dispatch before future resets. Task/attempt details stay in private state.
+  Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
+  count exists yet, and this checkpoint is not a user-review assignment.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
@@ -609,3 +611,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · Ingested Claude b10/b11 (240/239 fields). Recovered interrupted GPT b10/b11
   checkpoints after the reported 06:32 reset; added safe retry IDs, attempt history and per-judge reset holds.
   Eleven panel and eight checker tests pass. All work remains proposed; no collection writes.
+
+- 2026-11-05 · Codex (server) · Halfway through first-round judging: 40/80 batch votes validate, 9638 field
+  votes. Both interrupted GPT batches recovered fully; exact judges/settings unchanged. Continue from
+  private coordinator state. No collection writes or user approval requested at this interim stage.
