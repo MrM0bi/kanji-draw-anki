@@ -484,13 +484,14 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Checkpoint 2026-11-05 18:28 CET: 73/80 first-round votes validate. Claude has complete coverage:
-  40 batches / 2363 notes / 9411 nonempty fields. GPT b01–b33 validate; b34/b35 are active and b36–b40
-  queued. Latest interrupted checkpoints recovered; Claude's successful retry restored its two slots.
-  Keep the exact requested models/efforts and unchanged inputs. Preserve failures/snapshots and fresh
-  retry IDs; task details remain private. Do not advance until the remaining seven GPT votes validate.
-  Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
-  count exists yet, and this checkpoint is not a user-review assignment.
+  Checkpoint 2026-11-05 18:39 CET: 76/80 first-round votes validate (Claude all 40;
+  GPT b01–b36). GPT b37 hit its usage limit reporting 23:04 CET. Its full 60-note/240-field checkpoint
+  passes structural validation; preserve it for the resumed judge's remaining checks. GPT b38 is still
+  active until an actual completion event; never poll it. GPT b39/b40 remain queued.
+  GPT dispatch is held until 23:05 CET. A real one-shot schedule, bound to the current thread, is enabled
+  for 2026-11-05 23:05 CET (22:05 UTC); its metadata is private in the saved coordinator state. Continue
+  automatically then, with exact models/settings, fresh retry IDs and preserved snapshots. Do not advance
+  before all 80 votes validate. Repeated reviews and the final manual-case count remain pending.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
@@ -627,3 +628,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 
 - 2026-11-05 18:28 CET · Codex (server) · Claude first-round coverage complete: 40 batches / 9411 fields validated.
   Total 73/80 votes; seven GPT votes remain before comparison and repeat rounds. No collection writes.
+
+- 2026-11-05 · Codex (server) · 76/80 votes validate. Preserved the complete interrupted GPT b37 draft and
+  enabled a one-shot resume at 23:05 CET after the reported reset; gpt dispatch held until then. No active
+  task polling, model fallback or collection writes. GPT b38 can still deliver its completion independently.
