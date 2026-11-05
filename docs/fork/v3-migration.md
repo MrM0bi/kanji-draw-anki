@@ -484,10 +484,12 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Halfway checkpoint 2026-11-05 08:38 CET: 40/80 first-round votes validate (Claude b01–b22,
-  GPT b01–b18), covering 9638 field votes. GPT b10/b11 recovered fully from saved checkpoints after the
-  reported 06:32 reset; no failed jobs remain. Same input hashes and exact requested models/settings.
-  Per-judge reset holds prevent dispatch before future resets. Task/attempt details stay in private state.
+  Resume checkpoint 2026-11-05 13:04 CET: 42/80 first-round votes validate (Claude b01–b24,
+  GPT b01–b18). GPT b19/b20 hit a usage limit reporting 13:03; the user asked to continue after that
+  reset, now passed. Both complete drafts (240/236 fields) pass structural validation; preserve snapshots
+  and let the resumed same-model judges finish their remaining checks before counting those votes.
+  GPT b10/b11 previously recovered fully. Retry uses new request IDs and unchanged input hashes.
+  Per-judge reset holds prevent premature future dispatch. Task/attempt details remain private.
   Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
   count exists yet, and this checkpoint is not a user-review assignment.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
@@ -615,3 +617,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · Halfway through first-round judging: 40/80 batch votes validate, 9638 field
   votes. Both interrupted GPT batches recovered fully; exact judges/settings unchanged. Continue from
   private coordinator state. No collection writes or user approval requested at this interim stage.
+
+- 2026-11-05 · Codex (server) · Recorded Claude b23/b24 (233/237 fields), bringing validated votes to 42/80.
+  After the user-requested wait until the reported 13:03 Codex reset, resume GPT b19/b20 from complete
+  validated drafts for their remaining checks. Failure histories and snapshots preserved; no collection writes.
