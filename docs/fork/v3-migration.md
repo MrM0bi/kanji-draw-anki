@@ -486,8 +486,8 @@ _Update this section before you stop._
   active batches per judge.
   Checkpoint 2026-11-05 18:39 CET: 76/80 first-round votes validate (Claude all 40;
   GPT b01–b36). GPT b37 hit its usage limit reporting 23:04 CET. Its full 60-note/240-field checkpoint
-  passes structural validation; preserve it for the resumed judge's remaining checks. GPT b38 is still
-  active until an actual completion event; never poll it. GPT b39/b40 remain queued.
+  passes structural validation; preserve it for the resumed judge's remaining checks. GPT b38 subsequently
+  failed at the same limit without a checkpoint. No delegate remains active; GPT b39/b40 remain queued.
   GPT dispatch is held until 23:05 CET. A real one-shot schedule, bound to the current thread, is enabled
   for 2026-11-05 23:05 CET (22:05 UTC); its metadata is private in the saved coordinator state. Continue
   automatically then, with exact models/settings, fresh retry IDs and preserved snapshots. Do not advance
@@ -632,3 +632,6 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · 76/80 votes validate. Preserved the complete interrupted GPT b37 draft and
   enabled a one-shot resume at 23:05 CET after the reported reset; gpt dispatch held until then. No active
   task polling, model fallback or collection writes. GPT b38 can still deliver its completion independently.
+
+- 2026-11-05 · Codex (server) · Recorded the subsequent GPT b38 quota failure (no checkpoint). The same
+  enabled 23:05 CET continuation covers both failed jobs; no duplicate schedule or early dispatch.
