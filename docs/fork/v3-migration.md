@@ -484,11 +484,15 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
+  Recovery 2026-11-05 08:03 CET: 20/80 first-round votes validate. GPT b10/b11 hit a usage limit reporting
+  06:32; the reset has passed. Preserve their 38/50-note checkpoints and resume with new attempt request
+  ids, unchanged inputs and exact requested model/settings. Per-judge reset holds prevent further dispatch
+  before future resets; the other judge may continue. Task/attempt details remain private in saved state.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
   unavailable endpoint. Candidates are contextual evidence, not unconditional equivalences.
-  Nine panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
+  Eleven panel tests and eight existing checker regressions pass. A changed audit or uncertain verdict cannot
   silently become consensus. Final delivery requires a private Claude artifact and <=149 manual notes,
   subject to the honest ten-round failsafe. Real Anki remains untouched.
 - **Preserved Phase 5 baseline:** all 40 batches validate: 2363 notes, 12363 spans, 1400 aligned fields.
@@ -601,3 +605,7 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · Both b01 pilots validate (60 notes / 252 fields each); 223 identical outputs,
   199 high-confidence issue-free agreements. Pilot gate released for the remaining first-round batches.
   Claude reports native Artifact publishing available; owner-only publication remains to verify at delivery.
+
+- 2026-11-05 · Codex (server) · Ingested Claude b10/b11 (240/239 fields). Recovered interrupted GPT b10/b11
+  checkpoints after the reported 06:32 reset; added safe retry IDs, attempt history and per-judge reset holds.
+  Eleven panel and eight checker tests pass. All work remains proposed; no collection writes.
