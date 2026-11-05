@@ -484,13 +484,11 @@ _Update this section before you stop._
   Pilot: 223/252 identical annotations; 199 meet consensus criteria, 53 fields on 32 notes need later panel
   review. Both recognise Mund for 囗 and retain valid original alternatives. Continue with at most two
   active batches per judge.
-  Recovery checkpoint 2026-11-05 18:04 CET: 60/80 first-round votes validate (Claude b01–b33,
-  GPT b01–b27). Older interrupted GPT batches recovered fully. GPT b28's reported 18:04 reset has
-  passed; resume its 50-note/197-field checkpoint. Claude b34/b35 hit an API rate limit with no reset
-  time: b34 saved 54 notes/214 fields; b35 has no checkpoint. Preserve failures/snapshots and use new
-  retry IDs with unchanged inputs. Claude b34 subsequently recovered and validated (61/80 votes);
-  its successful probe restores two Claude slots.
-  GPT keeps two slots. No model/provider substitutions. Exact task/probe state stays private.
+  Checkpoint 2026-11-05 18:28 CET: 73/80 first-round votes validate. Claude has complete coverage:
+  40 batches / 2363 notes / 9411 nonempty fields. GPT b01–b33 validate; b34/b35 are active and b36–b40
+  queued. Latest interrupted checkpoints recovered; Claude's successful retry restored its two slots.
+  Keep the exact requested models/efforts and unchanged inputs. Preserve failures/snapshots and fresh
+  retry IDs; task details remain private. Do not advance until the remaining seven GPT votes validate.
   Continue first-round dispatch; do not advance before all 80 votes validate. No final consensus/manual
   count exists yet, and this checkpoint is not a user-review assignment.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
@@ -626,3 +624,6 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
 - 2026-11-05 · Codex (server) · Recorded GPT b27, bringing validated first-round votes to 60/80. After the
   reported 18:04 Codex reset, resume saved GPT/Claude checkpoints. Claude's unspecified API rate limit is
   handled with one retry first; the other judge keeps its slots. Twelve panel and eight checker tests pass.
+
+- 2026-11-05 18:28 CET · Codex (server) · Claude first-round coverage complete: 40 batches / 9411 fields validated.
+  Total 73/80 votes; seven GPT votes remain before comparison and repeat rounds. No collection writes.
