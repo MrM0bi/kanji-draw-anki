@@ -498,6 +498,9 @@ _Update this section before you stop._
   clarifies spans/confidence reasons; frozen protocol hashes prevent instructions changing mid-round.
   The user-used reset token lifted the old hold and the old timer is disabled. Continue exact-model
   dispatch and repeat review; final grouped approval artifact waits for convergence, up to ten rounds.
+  Recovery 2026-11-06 00:02 CET: 9/40 round-two votes validate (Claude b01–b05; GPT b01–b04).
+  Resume GPT b05/b06 ten-note checkpoints (20/18 fields) after the reported November 5 23:39 reset,
+  now passed. Preserve failure histories, frozen protocols and new retry request IDs.
   Frozen inputs cover 2363 notes / 9411 nonempty fields. Alternative-name catalogue:
   `work/v3/panel/aliases/alternatives.md` / `.csv`, full `registry.json`, provenance `sources.md`.
   It contains 3829 German candidates, 43414 multilingual names / 4324 forms; 31 source entries include one
@@ -653,3 +656,6 @@ Newest last. One entry per finished item or session: date, agent/machine, what, 
   objections for a future formal round where literal-first rationales skipped earlier clear meanings.
   Original votes and active frozen inputs remain untouched; objections are questions, not votes.
   Fourteen panel and eight checker tests pass. No collection writes or manual review requested.
+
+- 2026-11-06 00:02 CET · Codex (server) · Nine round-two votes validate. Resume two ten-note GPT checkpoints
+  after the reported 23:39 reset; preserve exact judges/settings and immutable active inputs.
