@@ -737,6 +737,20 @@
                     </label>
                 </div>
             </div>
+            <!-- [KD-SRC front/kd-fork-back-settings.html] -->
+            <!-- fork: scoped mnemonic sources and back options; shared by both card types -->
+            <div class="kd-back-option kd-comparison-option c1-only-setting">
+                <div class="setting-group-title">Vergleichsansicht (Frei)</div>
+                <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <label><input type="radio" name="opt-side-by-side" value="on" onchange="updateFeatureSetting('sideBySide', this.value)">
+                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3zM12 5v14" /></svg><span>Nebeneinander</span></div>
+                </label>
+                <label><input type="radio" name="opt-side-by-side" value="off" onchange="updateFeatureSetting('sideBySide', this.value)">
+                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5z" /></svg><span>Einzeln</span></div>
+                </label>
+                </div>
+            </div>
+            <!-- [/KD-SRC front/kd-fork-back-settings.html] -->
             <!-- fork: Handschriftbeispiele (the kanji in three more fonts above the Elemente tree) -->
             <div class="setting-group-title">Handschriftbeispiele</div>
             <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
@@ -7173,6 +7187,7 @@
             'opt-autodraw': scopedGet('kanjiOptAutodraw', globalConf.autodraw),
             'opt-numbers': scopedGet('kanjiOptNumbers', globalConf.numbers),
             'opt-handwriting': scopedGet('kanjiOptHandwriting', globalConf.handwriting), // fork
+            'opt-side-by-side': scopedGet('kanjiOptSideBySide', globalConf.sideBySide), // fork
             'opt-strictness': scopedGet('kanjiOptStrictness', globalConf.strictness),
             'opt-celebration': scopedGet('kanjiOptCelebration', globalConf.celebration),
             'opt-display-style': scopedGet('kanjiOptDisplayStyle', globalConf.displayStyle),
@@ -7237,8 +7252,12 @@
         // Free view (Strichansicht): disabled in guided mode
         var fvTitle = document.getElementById('free-view-title');
         var fvGrid = document.getElementById('free-view-grid');
-        if (fvTitle) fvTitle.classList.toggle('setting-disabled', !isFree);
-        if (fvGrid) fvGrid.classList.toggle('setting-disabled', !isFree);
+        // fork: comparison shows both forms; the single-form selector is only relevant without it.
+        var comparing = scopedGet('kanjiOptSideBySide', globalConf.sideBySide) === 'on';
+        if (fvTitle) fvTitle.classList.toggle('setting-disabled', !isFree || comparing);
+        if (fvGrid) fvGrid.classList.toggle('setting-disabled', !isFree || comparing);
+        var comparison = document.querySelector('.kd-comparison-option');
+        if (comparison) comparison.classList.toggle('setting-disabled', !isFree);
     }
 
     // Read CSS custom properties once and cache (avoids Anki timing/load-order issues)
@@ -7261,10 +7280,11 @@
             autodraw: getVar('--default-opt-autodraw', 'on'),
             numbers: getVar('--default-opt-numbers', 'on'),
             handwriting: getVar('--default-opt-handwriting', 'off'), // fork
+            sideBySide: getVar('--default-opt-side-by-side', 'on'), // fork
             strictness: getVar('--default-opt-strictness', 'normal'),
             celebration: getVar('--default-opt-celebration', 'on'),
             displayStyle: getVar('--default-opt-display-style', 'standard'),
-            drawMode: getVar('--default-opt-draw-mode', 'guided'),
+            drawMode: getVar('--default-opt-draw-mode', 'free'), // fork: default to Frei
             freeView: getVar('--default-opt-free-view', 'handwriting'),
             startHint: getVar('--default-opt-start-hint', 'off'),
             startHintDelay: getVar('--default-opt-start-hint-delay', 'instant'),
@@ -8295,7 +8315,7 @@
 
         // ···· Draw Mode Detection ····
 
-        const drawMode = hostGet('kanjiOptDrawMode', cachedGlobalConf.drawMode || 'guided');
+        const drawMode = hostGet('kanjiOptDrawMode', cachedGlobalConf.drawMode || 'free'); // fork
         let isFreeMode = drawMode === 'free';
 
         // Free canvas state

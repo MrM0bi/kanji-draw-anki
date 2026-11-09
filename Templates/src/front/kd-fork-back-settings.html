@@ -1,0 +1,12 @@
+<!-- fork: scoped mnemonic sources and back options; shared by both card types -->
+<div class="kd-back-option kd-comparison-option c1-only-setting">
+    <div class="setting-group-title">Vergleichsansicht (Frei)</div>
+    <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <label><input type="radio" name="opt-side-by-side" value="on" onchange="updateFeatureSetting('sideBySide', this.value)">
+        <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3zM12 5v14" /></svg><span>Nebeneinander</span></div>
+    </label>
+    <label><input type="radio" name="opt-side-by-side" value="off" onchange="updateFeatureSetting('sideBySide', this.value)">
+        <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5z" /></svg><span>Einzeln</span></div>
+    </label>
+    </div>
+</div>
