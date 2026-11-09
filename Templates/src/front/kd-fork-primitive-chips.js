@@ -4,19 +4,6 @@
 // title on its front (it is the answer) and reveals it on the back. Runs on the front and, via FrontSide,
 // again on the back (fresh elements each time).
 (function () {
-    // German keywords can be one long word: lang="de" lets the browser hyphenate them (CSS below) instead of
-    // growing the pill into the gear button. Only on the title, so CJK glyph selection elsewhere is unaffected.
-    document.querySelectorAll('.card-title').forEach(function (t) {
-        if (!t.lang) t.lang = 'de';
-        // Without a hyphenation dictionary a long word still widens the pill past its max-width (display:table),
-        // or overflows the plain title of the minimal design: step the font down until it fits (min 15px). Inline !important beats the font-size map's !important.
-        var limit = (window.innerWidth || document.documentElement.clientWidth) - 140;
-        var fs = parseFloat(getComputedStyle(t).fontSize) || 24;
-        for (var i = 0; i < 12 && fs > 15 && (t.getBoundingClientRect().width > limit + 1 || t.scrollWidth > t.clientWidth + 1); i++) {
-            fs -= 1;
-            t.style.setProperty('font-size', fs + 'px', 'important');
-        }
-    });
     document.querySelectorAll('.card-title > .primitive-group').forEach(function (g) {
         var title = g.parentNode;
         var raw = (g.textContent || '').trim();
@@ -31,6 +18,22 @@
         row.appendChild(title);
         row.appendChild(g);
         if (title.style.visibility) g.style.visibility = title.style.visibility;
+    });
+    // fork: fit only the keyword, after its primitive meanings have been moved out. Fitting the combined
+    // text shrank even "eins" to 17px on a 320px phone. Use the actual row width rather than desktop gutters.
+    document.querySelectorAll('.card-title').forEach(function (t) {
+        if (!t.lang) t.lang = 'de';
+        var row = t.parentNode, limit = (window.innerWidth || document.documentElement.clientWidth) - 140;
+        if (row.classList.contains('kd-title-row')) {
+            var style = getComputedStyle(row);
+            limit = row.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
+        }
+        var fs = parseFloat(getComputedStyle(t).fontSize) || 24;
+        // Keep the established long-word fallback for platforms without German hyphenation dictionaries.
+        for (var i = 0; i < 12 && fs > 15 && (t.getBoundingClientRect().width > limit + 1 || t.scrollWidth > t.clientWidth + 1); i++) {
+            fs -= 1;
+            t.style.setProperty('font-size', fs + 'px', 'important');
+        }
     });
     // The tag belongs on the top-right pill (last pill of the first row). Which pill that is depends on the
     // wrapping, so it is moved into that pill after layout and again when the window is resized.
@@ -48,4 +51,13 @@
     if (window._kdTagResize) window.removeEventListener('resize', window._kdTagResize);
     window._kdTagResize = placeTags;
     window.addEventListener('resize', placeTags);
+    // fork: fonts/design changes can rewrap pills without a viewport resize. The group has display:contents,
+    // so observe the actual row/pills; disconnect the previous card's observer when FrontSide runs again.
+    if (window._kdTagObserver) window._kdTagObserver.disconnect();
+    if (window.ResizeObserver) {
+        window._kdTagObserver = new ResizeObserver(placeTags);
+        document.querySelectorAll('.kd-title-row, .kd-title-row > .card-title, .primitive-box').forEach(function (el) {
+            window._kdTagObserver.observe(el);
+        });
+    }
 })();

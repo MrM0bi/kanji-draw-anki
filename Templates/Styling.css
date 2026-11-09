@@ -2040,7 +2040,10 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     justify-content: center;
     align-items: center;
     gap: 14px 12px;
-    max-width: calc(100vw - 140px);
+    width: 100%;
+    max-width: calc(100vw - 112px);
+    padding-right: 16px;
+    box-sizing: border-box;
     margin: 0 auto 18px auto;
 }
 
@@ -2048,19 +2051,36 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     margin: 0;
 }
 
-/* The tag sits on the top-right corner of the pill it marks (the top-right pill) and overlaps only that
-   pill's edge, not its text: the group reserves a little room above/right of it (so the tag stays clear of
-   the keyword pill and the gear button) and every pill is wider than the tag (so it never reaches the
-   neighbouring pill).
-   translateY re-centres the pills on the keyword without changing the layout box. */
+/* fork: phone headers reserve only the gear's side, not 112px of viewport width. Compact pill padding
+   keeps a short keyword beside a primitive at 320px without reducing either text size. */
+@media (max-width: 600px) {
+    .kd-title-row {
+        max-width: 100%;
+        padding-right: 32px;
+        column-gap: 8px;
+    }
+
+    .kd-title-row > .card-title {
+        min-width: 0;
+        max-width: 100%;
+        padding-inline: 18px;
+        overflow-wrap: anywhere;
+    }
+
+    .kd-title-row .primitive-box {
+        padding-inline: 12px;
+    }
+
+    .kd-title-row .primitive-box > .primitive-label {
+        right: 0; /* keep the tag inside its pill, clear of the phone's gear button */
+    }
+}
+
+/* fork: each primitive pill participates in the title's flex row, rather than wrapping the entire group
+   below the keyword. Keep the wrapper for Card 2's inherited answer visibility and tag placement.
+   The row reserves space for the gear and the tag's right overhang. */
 .primitive-group {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 14px 0 0;
-    transform: translateY(-6px);
+    display: contents;
 }
 
 .primitive-box {
@@ -2071,9 +2091,11 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     border-radius: 999px;
     box-shadow: 0 3px 0 var(--title-bg);
     font-weight: 800;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.3;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
     min-width: 76px;
     box-sizing: border-box;
     text-align: center;
@@ -2109,7 +2131,7 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
     white-space: nowrap;
 }
 
-html.kd-enter .kd-title-row .primitive-group {
+html.kd-enter .kd-title-row .primitive-box {
     animation: kdRiseIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s backwards;
 }
 
@@ -2119,11 +2141,11 @@ html.kd-enter .kd-title-row .primitive-group {
     visibility: visible !important;
 }
 
-body.card2 #is-back-side-marker ~ .kd-title-row .primitive-group {
+body.card2 #is-back-side-marker ~ .kd-title-row .primitive-box {
     animation: kdPillsIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
 }
 
-/* no "to" frame: it ends on the group's own transform (fadeAndSlideIn would reset it to 0) */
+/* fork: animate the individual pills, whose wrapper has no layout box. */
 @keyframes kdPillsIn {
     from {
         opacity: 0;
@@ -6724,13 +6746,7 @@ html.kd-design-minimal .card-title {
 }
 
 html.kd-design-minimal .kd-title-row {
-    gap: 6px 10px;
-}
-
-html.kd-design-minimal .primitive-group {
-    padding: 12px 14px 0 0;
-    transform: translateY(-6px);
-    gap: 8px;
+    gap: 14px 10px; /* fork: leave room for the Primitive tag when a pill wraps below the keyword */
 }
 
 html.kd-design-minimal .primitive-box {
@@ -6740,7 +6756,7 @@ html.kd-design-minimal .primitive-box {
     border: none;
     border-radius: var(--border-rad-sm);
     box-shadow: none;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 html.kd-design-minimal .primitive-label {
@@ -7284,3 +7300,7 @@ html.kd-design-minimal .sbs-kanji { border-width: 1px; box-shadow: var(--shadow-
 .kd-source-toggle[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--active-tab-color, var(--accent)); color: var(--text-main); }
 .kd-source-toggle:focus-visible { outline: 2px solid var(--active-tab-color, var(--accent)); outline-offset: 2px; }
 .kd-story-group[hidden] { display: none !important; }
+html.font-small .primitive-box { font-size: 16px; }
+html.font-large .primitive-box { font-size: 20px; }
+html.kd-design-minimal.font-small .primitive-box { font-size: 18px; }
+html.kd-design-minimal.font-large .primitive-box { font-size: 22px; }
