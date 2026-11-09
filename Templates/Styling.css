@@ -7199,6 +7199,7 @@ html.kd-design-minimal .pitfall-filter-btn:active {
 .kd-story-group-kd[hidden], .kd-nanori-row[hidden], .kd-section[hidden] { display: none !important; }
 .kd-tree-root-keyword { text-align: center; color: var(--text-main); font-size: 13px; font-weight: 700; margin: 4px 0 12px; }
 .tree-graph-mode .kd-tree-root-keyword, .is-primitive .kd-tree-root-keyword { display: none; }
+.word-jp ruby rt { position: relative; top: -0.18em; }
 /* Border-box prevents the white half from bleeding under the swatch's rounded border. */
 .accent-swatch.kd-swatch-plain { box-sizing: border-box; overflow: hidden; background: #fff; position: relative; }
 .kd-swatch-plain::before { content: ""; position: absolute; inset: -1px; background: #1a1a1a; clip-path: polygon(0 0, 100% 0, 0 100%); }
