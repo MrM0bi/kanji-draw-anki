@@ -4620,7 +4620,9 @@
 
 <div class="kanji-container">
     <svg id="grid-bg" viewBox="0 0 109 109"></svg>
-    <svg id="svg-bg" viewBox="0 0 109 109">{{SVGPfade}}</svg>
+    <!-- fork: inert path source tolerates HTML wrappers/line breaks from mobile field rendering. -->
+    <template id="kd-stroke-source">{{SVGPfade}}</template>
+    <svg id="svg-bg" viewBox="0 0 109 109"></svg>
     <div id="legacy-gesture-warning">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" aria-hidden="true">
@@ -6956,6 +6958,24 @@
         }, 300);
     };
     // [/KD-SRC front/shared-helpers.js]
+
+    // [KD-SRC front/kd-fork-svg-paths.js]
+    // fork: keep raw field markup inert and construct real SVG paths explicitly. HTML line breaks between
+    // paths otherwise end the browser's SVG parsing context, leaving only the first stroke inside #svg-bg.
+    (function () {
+        var source = document.getElementById('kd-stroke-source');
+        var svg = document.getElementById('svg-bg');
+        if (!source || !svg) return;
+        var fragment = document.createDocumentFragment();
+        source.content.querySelectorAll('path[d]').forEach(function (raw) {
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', raw.getAttribute('d'));
+            fragment.appendChild(path);
+        });
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        svg.appendChild(fragment);
+    })();
+    // [/KD-SRC front/kd-fork-svg-paths.js]
 
     document.querySelectorAll('#svg-bg path').forEach(path => {
         path.classList.add('svg-stroke');
