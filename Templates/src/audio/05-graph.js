@@ -3,7 +3,9 @@
 function ensureCtx() {
     if (ctx) return ctx;
     if (disposed || cfg.level === 'off') return null;
-    try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { try { ctx = new AC(); } catch (e2) { ctx = null; return null; } }
+    // fork: Qt/Windows benefits from a larger output buffer while the WebView paints a card.
+    const latencyHint = /Windows/i.test(navigator.userAgent || '') ? 'balanced' : 'interactive';
+    try { ctx = new AC({ latencyHint: latencyHint }); } catch (e) { try { ctx = new AC(); } catch (e2) { ctx = null; return null; } }
     // iOS 17+: mix with other audio and respect the silent switch
     try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) { }
     setup(ctx);

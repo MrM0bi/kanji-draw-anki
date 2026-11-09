@@ -53,9 +53,10 @@ function pump(horizon) {
     const tn = now();
     players.forEach(p => {
         // Missed bars (suspended tab, throttled timer): skip ahead in the song without playing them
-        if (!OFF && p.nextT < tn - 0.2) {
-            for (let k = 0; p.nextT < tn - 0.2 && k < 64; k++) { if (p.needSong) p.newSong(); p.step(); p.bar++; p.nextT += p.barDur; }
-            if (p.nextT < tn) p.nextT = tn + 0.05;
+        if (!OFF && p.nextT < tn + 0.05) {
+            // fork: even a short UI stall must not schedule the start of a bar in the past.
+            for (let k = 0; p.nextT < tn + 0.05 && k < 64; k++) { if (p.needSong) p.newSong(); p.step(); p.bar++; p.nextT += p.barDur; }
+            if (p.nextT < tn + 0.05) p.nextT = tn + 0.05;
         }
         if (!p.ending) p.applyWant(tn + 0.05);
         while (p.nextT < horizon && (p.endT === null || p.nextT < p.endT)) { p.scheduleBar(p.nextT); p.bar++; p.nextT += p.barDur; }
