@@ -50,7 +50,7 @@
     --default-opt-free-view: handwriting;
 
     /* fork: Handschriftbeispiele (Rückseite): 'on' (An), 'off' (Aus) – Kanji zusätzlich in anderen Schriftarten */
-    --default-opt-handwriting: off;
+    --default-opt-handwriting: on;
     /* fork: back content and free-drawing comparison */
     --default-opt-merksaetze: on;
     --default-opt-kanji-draw: off;
@@ -75,8 +75,8 @@
     /* Akzentfarbe: 'green' (Grün), 'blue' (Blau), 'purple' (Lila), 'orange' (Orange), 'red' (Rot), 'teal' (Türkis) */
     --default-theme-accent: green;
 
-    /* Primärfarbe: 'neutral' (Fuji), 'warm' (Kinkaku), 'cool' (Onsen), 'sepia' (Momiji), 'rose' (Sakura), 'sage' (Bambus), 'hokkaido' (Hokkaidō), 'tokyo' (Tokyo), 'okinawa' (Okinawa) */
-    --default-theme-primary: sage;
+    /* Primärfarbe: 'neutral' (Fuji), 'warm' (Kinkaku), 'cool' (Onsen), 'sepia' (Momiji), 'rose' (Sakura), 'sage' (Bambus), 'hokkaido' (Hokkaidō), 'tokyo' (Tokyo), 'okinawa' (Okinawa), 'random' (Zufall) */
+    --default-theme-primary: random;
 
     /* Schriftgröße: 'small' (Klein), 'normal' (Normal), 'large' (Groß) */
     --default-theme-font-size: normal;
@@ -89,6 +89,14 @@
 
     /* Strichstärke: 'thin' (Dünn), 'normal' (Normal), 'thick' (Dick) */
     --default-theme-stroke-width: normal;
+
+    /* fork: Klang & Musik (global, saved selections override these defaults) */
+    --default-sound-level: low;
+    --default-sound-music: lofi;
+    --default-sound-immersion: low;
+    --default-sound-music-level: low;
+    --default-sound-stroke: on;
+    --default-sound-fx: on;
 }
 
 /* ==========================================================================

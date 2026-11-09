@@ -7272,12 +7272,12 @@
             'theme-stroke-color': safeGetItem('kanjiThemeStrokeColor', globalConf.themeStrokeColor || 'black'),
             'theme-stroke-style': safeGetItem('kanjiThemeStrokeStyle', globalConf.themeStrokeStyle || 'standard'),
             'theme-stroke-width': safeGetItem('kanjiThemeStrokeWidth', globalConf.themeStrokeWidth || 'normal'),
-            'sound-level': safeGetItem('kanjiSoundLevel', 'off'),
-            'sound-music': safeGetItem('kanjiSoundMusic', 'off'),
-            'sound-music-level': safeGetItem('kanjiSoundMusicLevel', 'mid'),
-            'sound-stroke': safeGetItem('kanjiSoundStroke', 'on'),
-            'sound-fx': safeGetItem('kanjiSoundFx', 'on'),
-            'sound-immersion': safeGetItem('kanjiSoundImmersion', 'low')
+            'sound-level': safeGetItem('kanjiSoundLevel', globalConf.soundLevel),
+            'sound-music': safeGetItem('kanjiSoundMusic', globalConf.soundMusic),
+            'sound-music-level': safeGetItem('kanjiSoundMusicLevel', globalConf.soundMusicLevel),
+            'sound-stroke': safeGetItem('kanjiSoundStroke', globalConf.soundStroke),
+            'sound-fx': safeGetItem('kanjiSoundFx', globalConf.soundFx),
+            'sound-immersion': safeGetItem('kanjiSoundImmersion', globalConf.soundImmersion)
         };
         _settingsRadios.forEach(r => {
             if (radioValues[r.name] !== undefined) r.checked = (r.value === radioValues[r.name]);
@@ -7347,7 +7347,7 @@
             colorBack: getVar('--default-opt-color-back', 'on'),
             autodraw: getVar('--default-opt-autodraw', 'on'),
             numbers: getVar('--default-opt-numbers', 'on'),
-            handwriting: getVar('--default-opt-handwriting', 'off'), // fork
+            handwriting: getVar('--default-opt-handwriting', 'on'), // fork
             merksaetze: getVar('--default-opt-merksaetze', 'on'), // fork
             kanjiDraw: getVar('--default-opt-kanji-draw', 'off'), // fork
             heisig: getVar('--default-opt-heisig', 'on'), // fork
@@ -7364,7 +7364,14 @@
             themeDesign: getVar('--default-theme-design', 'kd'), // fork
             themeAccent: getVar('--default-theme-accent', 'green'),
             themeFontSize: getVar('--default-theme-font-size', 'normal'),
-            themePrimary: getVar('--default-theme-primary', 'neutral'),
+            themePrimary: getVar('--default-theme-primary', 'random'),
+            // fork: deck defaults for the global sound controls
+            soundLevel: getVar('--default-sound-level', 'low'),
+            soundMusic: getVar('--default-sound-music', 'lofi'),
+            soundMusicLevel: getVar('--default-sound-music-level', 'low'),
+            soundImmersion: getVar('--default-sound-immersion', 'low'),
+            soundStroke: getVar('--default-sound-stroke', 'on'),
+            soundFx: getVar('--default-sound-fx', 'on'),
             themeStrokeColor: getVar('--default-theme-stroke-color', 'black'),
             themeStrokeStyle: getVar('--default-theme-stroke-style', 'standard'),
             themeStrokeWidth: getVar('--default-theme-stroke-width', 'normal')
@@ -7756,7 +7763,7 @@
 
     // [KD-SRC front/sound-bridge.js]
     // --- Sound & music: bridge to the audio engine (window.__kdAudio) ---
-    // Settings are global (not c1_/c2_-scoped), like the theme keys. Default: off.
+    // Settings are global (not c1_/c2_-scoped), like the theme keys. Defaults come from Styling.css.
     function _kdSnd(method) {
         var a = window.__kdAudio;
         if (!a || typeof a[method] !== 'function') return;
@@ -7764,13 +7771,14 @@
     }
 
     function _kdSoundConf() {
+        var gc = getGlobalConfig();
         return {
-            level: safeGetItem('kanjiSoundLevel', 'off'),
-            music: safeGetItem('kanjiSoundMusic', 'off'),
-            musicLevel: safeGetItem('kanjiSoundMusicLevel', 'mid'),
-            stroke: safeGetItem('kanjiSoundStroke', 'on'),
-            fx: safeGetItem('kanjiSoundFx', 'on'),
-            immersion: safeGetItem('kanjiSoundImmersion', 'low')
+            level: safeGetItem('kanjiSoundLevel', gc.soundLevel),
+            music: safeGetItem('kanjiSoundMusic', gc.soundMusic),
+            musicLevel: safeGetItem('kanjiSoundMusicLevel', gc.soundMusicLevel),
+            stroke: safeGetItem('kanjiSoundStroke', gc.soundStroke),
+            fx: safeGetItem('kanjiSoundFx', gc.soundFx),
+            immersion: safeGetItem('kanjiSoundImmersion', gc.soundImmersion)
         };
     }
 

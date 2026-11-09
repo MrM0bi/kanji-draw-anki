@@ -1,5 +1,5 @@
 // --- Sound & music: bridge to the audio engine (window.__kdAudio) ---
-// Settings are global (not c1_/c2_-scoped), like the theme keys. Default: off.
+// Settings are global (not c1_/c2_-scoped), like the theme keys. Defaults come from Styling.css.
 function _kdSnd(method) {
     var a = window.__kdAudio;
     if (!a || typeof a[method] !== 'function') return;
@@ -7,13 +7,14 @@ function _kdSnd(method) {
 }
 
 function _kdSoundConf() {
+    var gc = getGlobalConfig();
     return {
-        level: safeGetItem('kanjiSoundLevel', 'off'),
-        music: safeGetItem('kanjiSoundMusic', 'off'),
-        musicLevel: safeGetItem('kanjiSoundMusicLevel', 'mid'),
-        stroke: safeGetItem('kanjiSoundStroke', 'on'),
-        fx: safeGetItem('kanjiSoundFx', 'on'),
-        immersion: safeGetItem('kanjiSoundImmersion', 'low')
+        level: safeGetItem('kanjiSoundLevel', gc.soundLevel),
+        music: safeGetItem('kanjiSoundMusic', gc.soundMusic),
+        musicLevel: safeGetItem('kanjiSoundMusicLevel', gc.soundMusicLevel),
+        stroke: safeGetItem('kanjiSoundStroke', gc.soundStroke),
+        fx: safeGetItem('kanjiSoundFx', gc.soundFx),
+        immersion: safeGetItem('kanjiSoundImmersion', gc.soundImmersion)
     };
 }
 
