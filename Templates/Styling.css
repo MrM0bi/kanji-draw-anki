@@ -3621,6 +3621,8 @@ html.is-ankidesktop .info-overlay {
 }
 
 .accent-swatch {
+    box-sizing: border-box;
+    flex-shrink: 0;
     width: clamp(26px, 5vmin, 30px);
     height: clamp(26px, 5vmin, 30px);
     border-radius: 50%;
@@ -6659,11 +6661,11 @@ body.reduce-motion *::after {
    Active when html.kd-design-minimal is set (setting "Design" on "Erscheinungsbild", key kanjiThemeDesign).
    Values come from the fork's Styling.css before v3. Only overrides; upstream rules stay untouched.
    Colours: the classic neutral palette below wins over the v3 Japan-Theme colours, which JS writes
-   inline on <html> and <body> (hence !important on the variables). It applies with the "Schlicht"
-   accent (html.kd-accent-plain); with any other accent the Japan-Theme colours stay (D29).
+   inline on <html> and <body> (hence !important on the variables). Surfaces stay neutral
+   with every accent; the selected accent still colours controls and highlights.
    ========================================================================== */
-html.kd-design-minimal.kd-accent-plain,
-html.kd-design-minimal.kd-accent-plain body {
+html.kd-design-minimal,
+html.kd-design-minimal body {
     --bg-main: #f7f7f5 !important;
     --surface: #ffffff !important;
     --border-color: #e2e2df !important;
@@ -6685,10 +6687,10 @@ html.kd-design-minimal.kd-accent-plain body {
     --border-rad-sm: 7px;
 }
 
-html.kd-design-minimal.kd-accent-plain.nightMode,
-html.kd-design-minimal.kd-accent-plain.night_mode,
-html.kd-design-minimal.kd-accent-plain body.nightMode,
-html.kd-design-minimal.kd-accent-plain body.night_mode {
+html.kd-design-minimal.nightMode,
+html.kd-design-minimal.night_mode,
+html.kd-design-minimal body.nightMode,
+html.kd-design-minimal body.night_mode {
     --bg-main: #1a1a1a !important;
     --surface: #252525 !important;
     --border-color: #363636 !important;
@@ -6711,8 +6713,8 @@ html.kd-design-minimal.kd-accent-plain body.night_mode {
 /* --- Page: no landscape, plain background, system font --- */
 /* v3 also writes the theme colour inline as background-color on <html>/<body> (not on Anki Desktop,
    which keeps its own --canvas there and paints the backdrop with .card::before) */
-html.kd-design-minimal.kd-accent-plain:not(.is-ankidesktop),
-html.kd-design-minimal.kd-accent-plain:not(.is-ankidesktop) body {
+html.kd-design-minimal:not(.is-ankidesktop),
+html.kd-design-minimal:not(.is-ankidesktop) body {
     background-color: var(--bg-main) !important;
 }
 
@@ -6765,19 +6767,6 @@ html.kd-design-minimal .primitive-label {
     background: var(--prim-bg);
     color: var(--text-muted);
     box-shadow: 0 0 0 2px var(--bg-main);
-}
-
-/* Coloured accents keep the tinted Japan-Theme page, where grey boxes look muddy: white (surface) pills
-   with a thin theme border, like the canvas and the section cards. Schlicht keeps the classic grey boxes. */
-html.kd-design-minimal:not(.kd-accent-plain) .primitive-box {
-    background: var(--surface);
-    color: var(--text-main);
-    box-shadow: 0 0 0 1px var(--border-color);
-}
-
-html.kd-design-minimal:not(.kd-accent-plain) .primitive-label {
-    background: var(--surface);
-    box-shadow: 0 0 0 1px var(--border-color);
 }
 
 /* --- Drawing area and buttons --- */
@@ -7208,6 +7197,12 @@ html.kd-design-minimal .pitfall-filter-btn:active {
 
 /* fork: back feedback — optional content, root meaning, readable furigana and appearance previews. */
 .kd-story-group-kd[hidden], .kd-nanori-row[hidden], .kd-section[hidden] { display: none !important; }
+/* Border-box prevents the white half from bleeding under the swatch's rounded border. */
+.accent-swatch.kd-swatch-plain { box-sizing: border-box; overflow: hidden; background: #fff; position: relative; }
+.kd-swatch-plain::before { content: ""; position: absolute; inset: -1px; background: #1a1a1a; clip-path: polygon(0 0, 100% 0, 0 100%); }
+input[name="theme-design"][value="minimal"] + .visual-option svg,
+.kd-back-option .visual-option svg { color: var(--text-main); stroke: currentColor; }
+
 /* fork: restored pre-v3 free-drawing comparison. */
 .sbs-badge-row {
     display: grid;
@@ -7295,6 +7290,22 @@ html.kd-design-minimal .sbs-kanji { border-width: 1px; box-shadow: var(--shadow-
     .side-by-side-wrapper, .side-by-side-wrapper.splitting { transition: none; transform: none; }
 }
 
+/* fork: feedback round 2 — global controls use the chosen accent, independent of the card tab. */
+html.kd-design-minimal .settings-modal,
+.settings-modal #page-theme,
+.settings-modal #page-sound { --active-tab-color: var(--accent); }
+/* fork: restore the pre-v3 frequency badge's accent-tinted surface as well as its text. */
+html.kd-design-minimal .tag-frequency {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    color: color-mix(in srgb, var(--accent) 65%, #000);
+}
+html.kd-design-minimal.nightMode .tag-frequency,
+html.kd-design-minimal.night_mode .tag-frequency {
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+.accent-options-grid > label { display: flex; min-width: 0; }
+.accent-option { width: 100%; height: 100%; box-sizing: border-box; }
 .kd-source-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .kd-source-toggle { display: block; width: 100%; min-width: 0; min-height: 44px; margin: 0; padding: 8px 5px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: var(--border-rad-sm); background: var(--bg-main); color: var(--text-muted); font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; text-align: center; cursor: pointer; }
 .kd-source-toggle[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--active-tab-color, var(--accent)); color: var(--text-main); }
@@ -7304,3 +7315,6 @@ html.font-small .primitive-box { font-size: 16px; }
 html.font-large .primitive-box { font-size: 20px; }
 html.kd-design-minimal.font-small .primitive-box { font-size: 18px; }
 html.kd-design-minimal.font-large .primitive-box { font-size: 22px; }
+@media (max-width: 480px) {
+    .accent-options-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

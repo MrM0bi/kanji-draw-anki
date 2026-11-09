@@ -1,8 +1,7 @@
 // fork: design switch (docs/fork/v3-migration.md D25). Sets html.kd-design-minimal before the first paint.
 // Global setting kanjiThemeDesign ('kd' | 'minimal'), CSS default --default-theme-design. Same storage
 // chain as safeGetItem (add-on _ks, cookie _k, single cookie, localStorage), which isn't defined yet here.
-// Also sets html.kd-accent-plain for the "Schlicht" accent (kanjiThemeAccent = 'plain'): minimal + Schlicht uses
-// the neutral black/white palette, minimal + any other accent keeps the Japan-Theme colours (D29).
+// Also tracks the monochrome "Schlicht" accent. Minimal uses neutral surfaces with every accent.
 (function () {
     try {
         var R = document.documentElement;
