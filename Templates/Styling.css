@@ -429,7 +429,8 @@ html.kd-enter .forest-scenery {
 }
 
 html.kd-enter .card-title {
-    animation: kdRiseIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.06s backwards;
+    /* fork: frequent keyword reveals should not wait for a staged entrance. */
+    animation: kdRiseIn 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
 
 html.kd-enter .kanji-container,
@@ -2140,7 +2141,7 @@ html[data-jp-theme="okinawa"] .night_mode .forest-scenery .fs-pebbles {
 }
 
 html.kd-enter .kd-title-row .primitive-box {
-    animation: kdRiseIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s backwards;
+    animation: kdRiseIn 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; /* fork: reveal with the keyword */
 }
 
 /* Card 2 hides the title on its front and reveals it on the back (anti-flicker style there); the
@@ -2150,7 +2151,18 @@ html.kd-enter .kd-title-row .primitive-box {
 }
 
 body.card2 #is-back-side-marker ~ .kd-title-row .primitive-box {
-    animation: kdPillsIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
+    animation: kdPillsIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) backwards; /* fork: no answer stagger */
+}
+
+/* fork: the pills are created after the upstream reduced-motion rule; cover both answer animations too. */
+@media (prefers-reduced-motion: reduce) {
+    html.kd-enter .kd-title-row .primitive-box,
+    body.card2 #is-back-side-marker ~ .kd-title-row .primitive-box,
+    body.card2 #is-back-side-marker ~ .kd-title-row .card-title,
+    body.card2 #is-back-side-marker ~ .card-title {
+        animation: none;
+        opacity: 1;
+    }
 }
 
 /* fork: animate the individual pills, whose wrapper has no layout box. */
