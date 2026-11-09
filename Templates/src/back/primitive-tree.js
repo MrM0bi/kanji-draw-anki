@@ -84,7 +84,10 @@ window._kanjiRenderPrimitiveTree = function (rawData, target) {
     const svgBg = document.getElementById('svg-bg');
     const ds = svgBg ? Array.prototype.filter.call(svgBg.children, p => p.tagName.toLowerCase() === 'path' && !p.classList.contains('gel-halo')).map(p => p.getAttribute('d')) : [];
     const rootChar = (target.closest('.tree-container') || document).querySelector('.tree-root-kanji');
-    const root = { value: rootChar ? rootChar.textContent.trim() : '', rawKeyword: '', keyword: '', strokes: ds.map((_, i) => i), children: splitTop(rawData).map(parseItem), isRoot: true };
+    // fork: use the same effective meaning as the front title, keeping the glyph separate.
+    const rootLabel = rootChar && rootChar.parentNode.querySelector('.kd-tree-root-keyword');
+    const rootMeaning = rootLabel ? rootLabel.textContent.trim() : '';
+    const root = { value: rootChar ? rootChar.textContent.trim() : '', rawKeyword: rootMeaning, keyword: rootMeaning, strokes: ds.map((_, i) => i), children: splitTop(rawData).map(parseItem), isRoot: true };
 
     // Measure stroke / markup / label bounding boxes in an off-screen SVG
     const scratch = document.createElementNS(NS, 'svg');
@@ -115,7 +118,7 @@ window._kanjiRenderPrimitiveTree = function (rawData, target) {
     const initNodes = (n, depth) => {
         n.depth = depth;
         maxDepth = Math.max(maxDepth, depth);
-        n.lines = (!n.isRoot && n.keyword) ? wrapLabel(n.rawKeyword || n.keyword) : [];
+        n.lines = n.keyword ? wrapLabel(n.rawKeyword || n.keyword) : []; // fork: root uses the same pill layout
         if (n.lines.length) {
             const maxChars = Math.max.apply(null, n.lines.map(l => l.length));
             let measuredW = maxChars * 6.8;
