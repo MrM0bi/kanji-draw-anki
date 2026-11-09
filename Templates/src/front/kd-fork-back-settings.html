@@ -1,4 +1,23 @@
 <!-- fork: scoped mnemonic sources and back options; shared by both card types -->
+<div class="kd-back-option">
+    <div class="setting-group-title" id="kd-source-title">Eselsbrücken – Quellen</div>
+    <div class="kd-source-options" role="group" aria-labelledby="kd-source-title">
+        <button type="button" class="kd-source-toggle" data-source="merksaetze" aria-pressed="true" onclick="kdSetSource(this)">Merksätze</button>
+        <button type="button" class="kd-source-toggle" data-source="kanjiDraw" aria-pressed="false" onclick="kdSetSource(this)">KanjiDraw</button>
+        <button type="button" class="kd-source-toggle" data-source="heisig" aria-pressed="true" onclick="kdSetSource(this)">Heisig</button>
+    </div>
+</div>
+<div class="kd-back-option">
+    <div class="setting-group-title">Nanori</div>
+    <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <label><input type="radio" name="opt-nanori" value="on" onchange="updateFeatureSetting('nanori', this.value)">
+        <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg><span>An</span></div>
+    </label>
+    <label><input type="radio" name="opt-nanori" value="off" onchange="updateFeatureSetting('nanori', this.value)">
+        <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19" /></svg><span>Aus</span></div>
+    </label>
+    </div>
+</div>
 <div class="kd-back-option kd-comparison-option c1-only-setting">
     <div class="setting-group-title">Vergleichsansicht (Frei)</div>
     <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">

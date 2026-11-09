@@ -740,6 +740,25 @@
             </div>
             <!-- [KD-SRC front/kd-fork-back-settings.html] -->
             <!-- fork: scoped mnemonic sources and back options; shared by both card types -->
+            <div class="kd-back-option">
+                <div class="setting-group-title" id="kd-source-title">Eselsbrücken – Quellen</div>
+                <div class="kd-source-options" role="group" aria-labelledby="kd-source-title">
+                    <button type="button" class="kd-source-toggle" data-source="merksaetze" aria-pressed="true" onclick="kdSetSource(this)">Merksätze</button>
+                    <button type="button" class="kd-source-toggle" data-source="kanjiDraw" aria-pressed="false" onclick="kdSetSource(this)">KanjiDraw</button>
+                    <button type="button" class="kd-source-toggle" data-source="heisig" aria-pressed="true" onclick="kdSetSource(this)">Heisig</button>
+                </div>
+            </div>
+            <div class="kd-back-option">
+                <div class="setting-group-title">Nanori</div>
+                <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <label><input type="radio" name="opt-nanori" value="on" onchange="updateFeatureSetting('nanori', this.value)">
+                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg><span>An</span></div>
+                </label>
+                <label><input type="radio" name="opt-nanori" value="off" onchange="updateFeatureSetting('nanori', this.value)">
+                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19" /></svg><span>Aus</span></div>
+                </label>
+                </div>
+            </div>
             <div class="kd-back-option kd-comparison-option c1-only-setting">
                 <div class="setting-group-title">Vergleichsansicht (Frei)</div>
                 <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
@@ -7186,6 +7205,22 @@
         if (window._initModalScrollbars) window._initModalScrollbars();
     }
 
+    // [KD-SRC front/kd-fork-source-settings.js]
+    // fork: source chips share the existing per-card persistence; native buttons support keyboard toggling.
+    function kdRefreshSourceSettings() {
+        var gc = getGlobalConfig();
+        document.querySelectorAll('button[data-source]').forEach(function (control) {
+            var category = control.getAttribute('data-source');
+            var key = 'kanjiOpt' + category.charAt(0).toUpperCase() + category.slice(1);
+            control.setAttribute('aria-pressed', scopedGet(key, gc[category]) === 'on' ? 'true' : 'false');
+        });
+    }
+    function kdSetSource(control) {
+        updateFeatureSetting(control.getAttribute('data-source'), control.getAttribute('aria-pressed') === 'true' ? 'off' : 'on');
+        kdRefreshSourceSettings();
+    }
+    // [/KD-SRC front/kd-fork-source-settings.js]
+
     function refreshSettingsRadios() {
         const globalConf = getGlobalConfig();
         const radioValues = {
@@ -7198,6 +7233,7 @@
             'opt-autodraw': scopedGet('kanjiOptAutodraw', globalConf.autodraw),
             'opt-numbers': scopedGet('kanjiOptNumbers', globalConf.numbers),
             'opt-handwriting': scopedGet('kanjiOptHandwriting', globalConf.handwriting), // fork
+            'opt-nanori': scopedGet('kanjiOptNanori', globalConf.nanori), // fork
             'opt-side-by-side': scopedGet('kanjiOptSideBySide', globalConf.sideBySide), // fork
             'opt-strictness': scopedGet('kanjiOptStrictness', globalConf.strictness),
             'opt-celebration': scopedGet('kanjiOptCelebration', globalConf.celebration),
@@ -7226,6 +7262,7 @@
         _settingsRadios.forEach(r => {
             if (radioValues[r.name] !== undefined) r.checked = (r.value === radioValues[r.name]);
         });
+        kdRefreshSourceSettings(); // fork: source chips follow the active card tab too
         updateModeDisabledSettings();
         _updateGridSubOptionsState(radioValues['grid-type'] || 'cross');
     }
@@ -7291,6 +7328,10 @@
             autodraw: getVar('--default-opt-autodraw', 'on'),
             numbers: getVar('--default-opt-numbers', 'on'),
             handwriting: getVar('--default-opt-handwriting', 'off'), // fork
+            merksaetze: getVar('--default-opt-merksaetze', 'on'), // fork
+            kanjiDraw: getVar('--default-opt-kanji-draw', 'off'), // fork
+            heisig: getVar('--default-opt-heisig', 'on'), // fork
+            nanori: getVar('--default-opt-nanori', 'off'), // fork
             sideBySide: getVar('--default-opt-side-by-side', 'on'), // fork
             strictness: getVar('--default-opt-strictness', 'normal'),
             celebration: getVar('--default-opt-celebration', 'on'),
@@ -7810,6 +7851,8 @@
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
         var _scope = scopeOverride || _activeTab;
         safeSetItem(_scope + '_kanjiOpt' + category.charAt(0).toUpperCase() + category.slice(1), val);
+        // fork: update visible back content without requiring a card flip.
+        if (window._kdApplyBackOptions) window._kdApplyBackOptions();
         if (_scope === 'c2f') {
             applyFrontFeaturesC2();
             refreshSettingsRadios();

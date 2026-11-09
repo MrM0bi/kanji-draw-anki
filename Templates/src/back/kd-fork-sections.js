@@ -201,4 +201,27 @@
         initialOpen.forEach(function (p) { if (isOpen(p[1])) p[0].onOpen(p[1]); });
     };
     if (initialOpen.length) setTimeout(runInitial, 0);
+    // fork: optional back content follows the host card, even when the other settings tab is open.
+    window._kdApplyBackOptions = function () {
+        if (!host.isConnected) return;
+        var card = typeof _hostCard === 'string' ? _hostCard : 'c1';
+        var gc = typeof getGlobalConfig === 'function' ? getGlobalConfig() : {};
+        var enabled = function (key, def) { return get(card + '_kanjiOpt' + key, get('kanjiOpt' + key, def || 'on')) === 'on'; };
+        [['merksaetze', 'Merksaetze', gc.merksaetze], ['kd', 'KanjiDraw', gc.kanjiDraw], ['ref', 'Heisig', gc.heisig]].forEach(function (source) {
+            var group = host.querySelector('.kd-story-group-' + source[0]);
+            if (group) group.hidden = !enabled(source[1], source[2]);
+        });
+        var stories = host.querySelector('[data-sec="eselsbruecken"]');
+        if (stories) stories.hidden = !stories.querySelector('.kd-story-group:not([hidden])');
+        var nanori = host.querySelector('.kd-nanori-row');
+        if (nanori) nanori.hidden = !enabled('Nanori', gc.nanori);
+        var readings = host.querySelector('[data-sec="lesungen"]');
+        if (readings) readings.hidden = !readings.querySelector('.reading-row:not([hidden])');
+        host.querySelectorAll('.kd-section:not(.collapsed) .kd-section-body').forEach(function (body) {
+            body.style.maxHeight = 'none'; // keep responsive wrapping and late font loads unclipped
+        });
+    };
+    window._kdApplyBackOptions();
+    // fork: back-only badges appear after FrontSide's initial design pass.
+    if (window._kdApplyDesign) window._kdApplyDesign();
 })();
