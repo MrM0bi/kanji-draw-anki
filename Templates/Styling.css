@@ -7346,3 +7346,24 @@ html.kd-design-minimal.font-large .primitive-box { font-size: 22px; }
 @media (max-width: 480px) {
     .accent-options-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* fork: larger component-tree tools in Verspielt (were 26px; Minimal already uses 40px). */
+html:not(.kd-design-minimal) .tree-toolbar { gap: 6px; }
+html:not(.kd-design-minimal) .tree-zoom-btn,
+html:not(.kd-design-minimal) .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+}
+html:not(.kd-design-minimal) .tree-zoom-btn svg,
+html:not(.kd-design-minimal) .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn svg {
+    width: 16px;
+    height: 16px;
+}
+@media (pointer: coarse) {
+    html:not(.kd-design-minimal) .tree-zoom-btn,
+    html:not(.kd-design-minimal) .tree-container.tree-graph-mode.tree-fullscreen .tree-zoom-btn {
+        width: 42px;
+        height: 42px;
+    }
+}
