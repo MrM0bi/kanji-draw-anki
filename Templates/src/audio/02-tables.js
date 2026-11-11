@@ -1,7 +1,10 @@
 // Configuration tables: levels, landscapes, nature, stroke voices, rooms, instruments
 
 const LEVEL = { off: 0, low: 0.4, mid: 0.7, high: 1 };
-const MLEVEL = { low: 0.45, mid: 0.7, high: 1 };
+// fork: music levels lowered (were 0.45 / 0.7 / 1; "Leise" was far too loud). MSEND_REF keeps the old dry/wet balance:
+// the music's reverb and echo sends are scaled by MLEVEL / MSEND_REF (they used to bypass the music level).
+const MLEVEL = { low: 0.16, mid: 0.32, high: 0.55 };
+const MSEND_REF = 0.7;
 // A landscape only colours the music: key, scale and tempo belong to the song
 const THEMES = {
     neutral: { bright: 1, sig: 'koto' }, warm: { bright: 0.95, sig: 'shamisen' }, cool: { bright: 0.9, sig: 'suikin' },

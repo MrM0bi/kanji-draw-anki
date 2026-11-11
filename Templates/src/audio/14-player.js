@@ -24,8 +24,8 @@ class Player {
         this.tone = filt('lowpass', this.toneF, 0.5); this.damp = filt('lowpass', sp.damp, 0.5);
         this.fd = gainN(0); this.fw = gainN(0); this.fe = gainN(0);
         this.dry.connect(this.tone); this.nat.connect(this.tone); this.tone.connect(this.fd); this.fd.connect(G.music);
-        this.mwet.connect(this.wet); this.nwet.connect(this.wet); this.wet.connect(this.damp); this.damp.connect(this.fw); this.fw.connect(G.verbIn);
-        this.echo.connect(this.fe); this.fe.connect(G.echoIn);
+        this.mwet.connect(this.wet); this.nwet.connect(this.wet); this.wet.connect(this.damp); this.damp.connect(this.fw); this.fw.connect(G.musicVerb || G.verbIn);
+        this.echo.connect(this.fe); this.fe.connect(G.musicEcho || G.echoIn);
         this.d = { dry: this.dry, wet: this.mwet, echo: this.echo };
     }
     // Fader value at time t (follows the equal-power curve of fade())

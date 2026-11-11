@@ -4692,7 +4692,7 @@
            graph → samples → instruments → harmony → flow → melody → percussion →
            genres → nature → player → control → fx → strokes → api */
 
-        const VERSION = '1.2.1';
+        const VERSION = '1.2.2';
         const W = window, D = document;
         const prior = W.__kdAudio;
         if (prior && prior.version === VERSION) return;
@@ -4714,7 +4714,10 @@
         // Configuration tables: levels, landscapes, nature, stroke voices, rooms, instruments
 
         const LEVEL = { off: 0, low: 0.4, mid: 0.7, high: 1 };
-        const MLEVEL = { low: 0.45, mid: 0.7, high: 1 };
+        // fork: music levels lowered (were 0.45 / 0.7 / 1; "Leise" was far too loud). MSEND_REF keeps the old dry/wet balance:
+        // the music's reverb and echo sends are scaled by MLEVEL / MSEND_REF (they used to bypass the music level).
+        const MLEVEL = { low: 0.16, mid: 0.32, high: 0.55 };
+        const MSEND_REF = 0.7;
         // A landscape only colours the music: key, scale and tempo belong to the song
         const THEMES = {
             neutral: { bright: 1, sig: 'koto' }, warm: { bright: 0.95, sig: 'shamisen' }, cool: { bright: 0.9, sig: 'suikin' },
@@ -4997,7 +5000,7 @@
             g.comp = c.createDynamicsCompressor();
             g.comp.threshold.value = -18; g.comp.knee.value = 12; g.comp.ratio.value = 4; g.comp.attack.value = 0.005; g.comp.release.value = 0.3;
             g.master.connect(g.comp); g.comp.connect(c.destination);
-            g.music = gn(MLEVEL[cfg.musicLevel] || 0.7); g.duck = gn(1);
+            g.music = gn(MLEVEL[cfg.musicLevel] || MLEVEL.mid); g.duck = gn(1);
             var ls = c.createBiquadFilter(), hs = c.createBiquadFilter();
             ls.type = 'lowshelf'; ls.frequency.value = 170; ls.gain.value = 1; hs.type = 'highshelf'; hs.frequency.value = 7000; hs.gain.value = -2.5;
             g.music.connect(ls); ls.connect(hs); hs.connect(g.duck); g.duck.connect(g.master);
@@ -5019,6 +5022,10 @@
             dl.connect(mg, 0, 0); dr.connect(mg, 0, 1);
             g.echoOut = gn(0.45); mg.connect(g.echoOut); g.echoOut.connect(g.master);
             var es = gn(0.3); g.echoOut.connect(es); es.connect(g.verbIn);
+            // fork: music reverb/echo sends follow the music level (see MSEND_REF)
+            var ms = (MLEVEL[cfg.musicLevel] || MLEVEL.mid) / MSEND_REF;
+            g.musicVerb = gn(ms); g.musicVerb.connect(g.verbIn);
+            g.musicEcho = gn(ms); g.musicEcho.connect(g.echoIn);
             return g;
         }
         function FXD() { return { dry: G.fx, wet: G.verbIn, echo: G.echoIn }; }
@@ -5521,7 +5528,7 @@
         }
         function riser(t, dur) {
             if (t < now()) { dur -= now() - t; t = now(); if (dur < 0.3) return; }
-            noiseHit({ dry: G.music, wet: G.verbIn, echo: null }, t, { kind: 'pink', type: 'bandpass', f: 350, f2: 3200, q: 1.1, dur: dur, att: dur * 0.92, vel: 0.02, wet: 0.5 });
+            noiseHit({ dry: G.music, wet: G.musicVerb || G.verbIn, echo: null }, t, { kind: 'pink', type: 'bandpass', f: 350, f2: 3200, q: 1.1, dur: dur, att: dur * 0.92, vel: 0.02, wet: 0.5 });
         }
 
         // ── 10-melody.js ────────────────────────────────────────────────
@@ -6125,8 +6132,8 @@
                 this.tone = filt('lowpass', this.toneF, 0.5); this.damp = filt('lowpass', sp.damp, 0.5);
                 this.fd = gainN(0); this.fw = gainN(0); this.fe = gainN(0);
                 this.dry.connect(this.tone); this.nat.connect(this.tone); this.tone.connect(this.fd); this.fd.connect(G.music);
-                this.mwet.connect(this.wet); this.nwet.connect(this.wet); this.wet.connect(this.damp); this.damp.connect(this.fw); this.fw.connect(G.verbIn);
-                this.echo.connect(this.fe); this.fe.connect(G.echoIn);
+                this.mwet.connect(this.wet); this.nwet.connect(this.wet); this.wet.connect(this.damp); this.damp.connect(this.fw); this.fw.connect(G.musicVerb || G.verbIn);
+                this.echo.connect(this.fe); this.fe.connect(G.musicEcho || G.echoIn);
                 this.d = { dry: this.dry, wet: this.mwet, echo: this.echo };
             }
             // Fader value at time t (follows the equal-power curve of fade())
@@ -6529,7 +6536,7 @@
                 fx: (o.fx === 'on' || o.fx === 'off') ? o.fx : cfg.fx,
                 immersion: IMM.hasOwnProperty(o.immersion) ? o.immersion : cfg.immersion
             };
-            if (ctx && G) { const t = now(); setParam(G.master.gain, LEVEL[cfg.level], t, 0.08); setParam(G.music.gain, MLEVEL[cfg.musicLevel], t, 0.25); }
+            if (ctx && G) { const t = now(); setParam(G.master.gain, LEVEL[cfg.level], t, 0.08); setParam(G.music.gain, MLEVEL[cfg.musicLevel], t, 0.25); if (G.musicVerb) { setParam(G.musicVerb.gain, MLEVEL[cfg.musicLevel] / MSEND_REF, t, 0.25); setParam(G.musicEcho.gain, MLEVEL[cfg.musicLevel] / MSEND_REF, t, 0.25); } }
             if (cfg.stroke === 'off' || cfg.level === 'off') strokeEnd();
             if (cfg.level === 'off') { fadeOutAll(0.4); return; }
             syncMusic();
@@ -6701,6 +6708,7 @@
                 cur = { theme: o.theme || 'neutral', dark: !!o.dark };
                 setup(off);
                 if (o.muteMusic) G.music.gain.value = 0;
+                if (o.muteMusicSends) { G.musicVerb.gain.value = 0; G.musicEcho.gain.value = 0; }
                 TO = 0; syncMusic();
                 (o.events || []).slice().sort((a, b) => a.at - b.at).forEach(ev => {
                     TO = ev.at; pump(ev.at + 1.4);

@@ -72,7 +72,7 @@ function buildGraph(c) {
     g.comp = c.createDynamicsCompressor();
     g.comp.threshold.value = -18; g.comp.knee.value = 12; g.comp.ratio.value = 4; g.comp.attack.value = 0.005; g.comp.release.value = 0.3;
     g.master.connect(g.comp); g.comp.connect(c.destination);
-    g.music = gn(MLEVEL[cfg.musicLevel] || 0.7); g.duck = gn(1);
+    g.music = gn(MLEVEL[cfg.musicLevel] || MLEVEL.mid); g.duck = gn(1);
     var ls = c.createBiquadFilter(), hs = c.createBiquadFilter();
     ls.type = 'lowshelf'; ls.frequency.value = 170; ls.gain.value = 1; hs.type = 'highshelf'; hs.frequency.value = 7000; hs.gain.value = -2.5;
     g.music.connect(ls); ls.connect(hs); hs.connect(g.duck); g.duck.connect(g.master);
@@ -94,6 +94,10 @@ function buildGraph(c) {
     dl.connect(mg, 0, 0); dr.connect(mg, 0, 1);
     g.echoOut = gn(0.45); mg.connect(g.echoOut); g.echoOut.connect(g.master);
     var es = gn(0.3); g.echoOut.connect(es); es.connect(g.verbIn);
+    // fork: music reverb/echo sends follow the music level (see MSEND_REF)
+    var ms = (MLEVEL[cfg.musicLevel] || MLEVEL.mid) / MSEND_REF;
+    g.musicVerb = gn(ms); g.musicVerb.connect(g.verbIn);
+    g.musicEcho = gn(ms); g.musicEcho.connect(g.echoIn);
     return g;
 }
 function FXD() { return { dry: G.fx, wet: G.verbIn, echo: G.echoIn }; }

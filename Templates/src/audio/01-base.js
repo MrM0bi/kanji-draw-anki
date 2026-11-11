@@ -15,7 +15,7 @@
    graph → samples → instruments → harmony → flow → melody → percussion →
    genres → nature → player → control → fx → strokes → api */
 
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 const W = window, D = document;
 const prior = W.__kdAudio;
 if (prior && prior.version === VERSION) return;

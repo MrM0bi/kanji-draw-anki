@@ -11,7 +11,7 @@ function configure(o) {
         fx: (o.fx === 'on' || o.fx === 'off') ? o.fx : cfg.fx,
         immersion: IMM.hasOwnProperty(o.immersion) ? o.immersion : cfg.immersion
     };
-    if (ctx && G) { const t = now(); setParam(G.master.gain, LEVEL[cfg.level], t, 0.08); setParam(G.music.gain, MLEVEL[cfg.musicLevel], t, 0.25); }
+    if (ctx && G) { const t = now(); setParam(G.master.gain, LEVEL[cfg.level], t, 0.08); setParam(G.music.gain, MLEVEL[cfg.musicLevel], t, 0.25); if (G.musicVerb) { setParam(G.musicVerb.gain, MLEVEL[cfg.musicLevel] / MSEND_REF, t, 0.25); setParam(G.musicEcho.gain, MLEVEL[cfg.musicLevel] / MSEND_REF, t, 0.25); } }
     if (cfg.stroke === 'off' || cfg.level === 'off') strokeEnd();
     if (cfg.level === 'off') { fadeOutAll(0.4); return; }
     syncMusic();
@@ -183,6 +183,7 @@ function offline(o) {
         cur = { theme: o.theme || 'neutral', dark: !!o.dark };
         setup(off);
         if (o.muteMusic) G.music.gain.value = 0;
+        if (o.muteMusicSends) { G.musicVerb.gain.value = 0; G.musicEcho.gain.value = 0; }
         TO = 0; syncMusic();
         (o.events || []).slice().sort((a, b) => a.at - b.at).forEach(ev => {
             TO = ev.at; pump(ev.at + 1.4);

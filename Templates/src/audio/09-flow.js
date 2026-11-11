@@ -107,5 +107,5 @@ function stageHit(p, t0, dir) {
 }
 function riser(t, dur) {
     if (t < now()) { dur -= now() - t; t = now(); if (dur < 0.3) return; }
-    noiseHit({ dry: G.music, wet: G.verbIn, echo: null }, t, { kind: 'pink', type: 'bandpass', f: 350, f2: 3200, q: 1.1, dur: dur, att: dur * 0.92, vel: 0.02, wet: 0.5 });
+    noiseHit({ dry: G.music, wet: G.musicVerb || G.verbIn, echo: null }, t, { kind: 'pink', type: 'bandpass', f: 350, f2: 3200, q: 1.1, dur: dur, att: dur * 0.92, vel: 0.02, wet: 0.5 });
 }
