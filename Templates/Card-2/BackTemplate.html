@@ -1306,6 +1306,19 @@
             requestAnimationFrame(() => applyViewBox());
         };
         window._kanjiSetTreeFullscreen = setFullscreen;
+        // fork: Esc leaves the fullscreen tree. One document listener for the whole session (Anki reuses the
+        // page between cards); it reads the current tree's state through window._kanjiTreeIsFullscreen.
+        window._kanjiTreeIsFullscreen = () => isFullscreen;
+        if (!window._kdTreeEscBound) {
+            window._kdTreeEscBound = true;
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' && e.key !== 'Esc') return;
+                if (!window._kanjiTreeIsFullscreen || !window._kanjiTreeIsFullscreen()) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (window._kanjiSetTreeFullscreen) window._kanjiSetTreeFullscreen(false);
+            }, true);
+        }
 
         const getBaseBox = () => {
             const cW = viewport.clientWidth || svg.clientWidth || 0;
