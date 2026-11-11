@@ -2,7 +2,8 @@
 
 This is a personal fork of [PawMethod/kanji-draw-anki](https://github.com/PawMethod/kanji-draw-anki). It adapts the
 KanjiDraw note type to a German Heisig deck (*„Die Kanji lernen und behalten“*, 4th ed.) with its own field set
-and some extra features. Everything else, including the [README](README.md), is upstream's work and documentation.
+and some extra features. Everything else is upstream's work and documentation; the [README](README.md) is upstream's
+text with only a fork note at the top.
 
 > **Status (2026-11-11).** Branch `t3/reconcile-v3-fork` is upstream **v3.0.0** (`b853acf`) plus the changes
 > below. These templates are installed in the study profile. `main` is still based on upstream before v3; merging

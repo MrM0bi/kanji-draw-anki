@@ -7,6 +7,9 @@ Interaktives Anki-Template zum Erlernen der japanischen Kanji-Schriftzeichen —
 ![Sprache](https://img.shields.io/badge/Sprache-Deutsch-yellow)
 ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-lightgrey)
 
+> [!NOTE]
+> **Dies ist ein Fork** von [PawMethod/kanji-draw-anki](https://github.com/PawMethod/kanji-draw-anki), angepasst an ein deutsches Heisig-Deck (*„Die Kanji lernen und behalten“*). Was der Fork ändert (Felder, Funktionen, Einstellungen, Deck-Daten), steht in [FORK.md](FORK.md). Diese README ist der Text von upstream.
+
 ---
 
 ## Vorschau
