@@ -7230,7 +7230,12 @@ input[name="theme-design"][value="minimal"] + .visual-option svg,
 .sbs-badge-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    width: 100%;
+    /* fork: same width and gap as .side-by-side-wrapper, so each badge stays under its drawing on wide screens */
+    column-gap: 12px;
+    width: var(--dynamic-size, 100%);
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
     padding: 6px 0 2px;
 }
 
