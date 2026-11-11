@@ -10,8 +10,8 @@ and some extra features. Everything else, including the [README](README.md), is 
 > [`docs/fork/v3-migration.md`](docs/fork/v3-migration.md).
 
 **Contents:** [How the fork is organised](#how-the-fork-is-organised) · [Fields](#fields) ·
-[Changes](#changes) · [Settings and defaults](#settings-and-defaults) · [Fork files](#fork-files) ·
-[Upstream candidates](#upstream-candidates) · [Merging upstream](#merging-upstream)
+[Deck data](#deck-data) · [Changes](#changes) · [Settings and defaults](#settings-and-defaults) ·
+[Fork files](#fork-files) · [Upstream candidates](#upstream-candidates)
 
 ## How the fork is organised
 
@@ -52,9 +52,65 @@ Fields only the fork uses:
 **Primitive notes:** the deck also has notes for primitives. Their `Kanji` field holds a bracketed name such as
 `[Spazierstock]` instead of a glyph. The templates detect them by the leading `[`.
 
-**Deck data is not in this repo.** The deck's `Radikale` uses upstream's v3 tree format
-(`吾[Ich]@8-14{五[fünf]@8-11, …}`), and its mnemonic fields carry upstream's colour spans
-(`<span class="kd-kw kd-c1">`). Both were migrated with separate private tooling.
+The deck's contents are not in this repo; [Deck data](#deck-data) describes how they differ from upstream's deck.
+
+## Deck data
+
+Upstream ships its own deck. This fork's deck is a separate one: the German Heisig deck
+`Kanji::🏮Benni's RTK Deutsch🏮` with the note type `Mobi's Die Kanji lernen & behalten 1`, 2363 notes
+(2200 kanji, 163 primitives) and 30 fields. Its data was changed with private scripts that go through AnkiConnect
+(dry run, apply, undo, each tested on a copy first). Scheduling, review history and flags were never touched. The
+data itself is not in this repo.
+
+### Fields taken from upstream's deck (v3)
+
+| Field | Change in this deck |
+|---|---|
+| `Stolperfallen` | New field, after `Radikale`. Imported unchanged for 2199 kanji. Not for 籠, because upstream has the variant 篭 and its stroke references would not match. |
+| `Merkhilfe` | New field, after `Merksatz-KI`. Imported for 2199 kanji. In 70 of them the component names were changed to this deck's names. |
+| `Merksatz-KI` | Holds upstream's `Eselsbrücke`, which replaced the previous texts for 2199 kanji; primitives keep theirs. In 391 texts the component names were changed to this deck's names (e.g. upstream's "Pfote" becomes "Finger"), with the grammar adjusted. |
+| `Radikale` | Converted to upstream's tree format with stroke ranges and nesting (`吾[Ich]@8-14{五[fünf]@8-11, …}`) for 2346 notes. The names stay this deck's (book) names. Details below. |
+| `Bedeutung-DE` | Upstream's wording for 2 kanji (a typo and a stray line break); this deck's wording kept for the other 3 differences. |
+
+Kept from this deck instead of upstream: the book numbers (German 4th edition; upstream follows the English
+edition, e.g. 斬 1214 / 誓 1215 are swapped there) and the stroke paths where the book's form differs from
+upstream's.
+
+### Component trees (`Radikale`)
+
+- **Names.** Top-level parts keep the note's own names. Nested parts take the name from that part's own note
+  (e.g. 吾 inside 語 uses the 吾 note), otherwise this deck's usual name for that glyph.
+- **Reviewed by hand.** 95 kanji where the decks disagreed: 84 use upstream's tree, 4 this deck's decomposition with
+  upstream's stroke ranges, and 7 trees were built by hand.
+- **Corrections to upstream's trees.** 廾 is the book's "Blume" (now 艹). 尤 stays whole ("Chihuahua mit einem
+  Menschenbein") instead of 尢 + 丶. 爾 in 璽 is not split further. 金 is split König 3–5+8, Tropfen 6 and 7
+  (upstream: König 3–6), in 金 and the 33 kanji containing it.
+- **Primitives.** The 109 single-part primitives cover all their strokes. 36 multi-part primitives got their parts with
+  stroke ranges, split down as far as the deck allows (e.g. Marsch → Parade → Straßenfest → Pfeil + Tropfen). 18 that
+  list related forms rather than parts keep their entry. Where a kanji contains one of these primitives, its tree
+  uses the primitive's parts.
+- **Missing parents.** An audit added three missing intermediate parts: 昆 in 混, 苗 in 猫, 刑 in 型.
+
+### Colour-coded mnemonics (this deck only)
+
+Component names and keywords in the book-based texts are marked with upstream's colour spans
+(`<span class="kd-kw kd-c1">`), coloured by the top-level part of the tree they belong to:
+`Merksatz-DE` (2341 notes), `BuchBeschreibung` (2331), `BuchPrimitivBeschreibung` (127). Indirect wording counts too,
+e.g. "Worte" for the part "sagen" (言). Two AI models proposed the spans independently, and every field was
+approved by hand. `Merksatz-Custom` is unchanged.
+
+### Earlier cleanup of this deck (before v3)
+
+- **Stroke paths (`SVGPfade`).** Broken paths replaced with KanjiVG. Where the book prints a different form,
+  KanjiVG's variant was used; a few were built by hand (e.g. 箋, 嗅).
+- **Stroke counts (`Strichanzahl`).** Equal to the number of strokes in the paths. Book misprints and book-specific
+  stroke splits are noted in `Notiz`.
+- **Primitives.** All 163 primitive notes completed (7 added): stroke paths, components, short Merksätze,
+  English names, `Wortbeispiel` (kanji that use the primitive) and `Häufigkeit` (how often it is used).
+- **Order.** `Kanjinummer-BuchDE-Edition-4_mitPrimitive` numbers all notes 1–2363 in book order, primitives
+  after their frame. New cards come in that order.
+- **Book numbers.** German 4th edition checked (all correct); the English 6th edition numbers (誓/斬) and 5 German
+  3rd edition numbers were corrected.
 
 ## Changes
 
@@ -223,17 +279,6 @@ Generic fixes that don't depend on this deck and could be offered upstream (no P
 - Esc to close the fullscreen tree; tree height by nesting depth
 - Faster answer reveal and reduced-motion handling of the title/pill animations
 - Comparison badges sized to the pads
-
-## Merging upstream
-
-1. `git fetch upstream && git merge upstream/main` on the work branch.
-2. Conflicts are mostly in the four generated templates: resolve the sources in `Templates/src/` first, then run
-   `python3 Tools/build.py` and `python3 Tools/build.py --check`.
-3. Find fork code with `git grep -n "fork:"` and the `kd-` prefixes; the files in [Fork files](#fork-files) are
-   fork-only.
-4. Run `python3 Tools/check_scripts.py` and the Node tests
-   (`cd Tests/js && node --test --test-concurrency=1 test_*.js`).
-5. Render real cards (a kanji and a primitive note, both card types, front and back) before installing.
 
 ## License and attribution
 
