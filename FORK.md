@@ -5,10 +5,8 @@ KanjiDraw note type to a German Heisig deck (*鈥濪ie Kanji lernen und behalten鈥
 and some extra features. Everything else is upstream's work and documentation; the [README](README.md) is upstream's
 text with only a fork note at the top.
 
-> **Status (2026-11-11).** Branch `t3/reconcile-v3-fork` is upstream **v3.0.0** (`b853acf`) plus the changes
-> below. These templates are installed in the study profile. `main` is still based on upstream before v3; merging
-> this branch into it hasn't happened yet. The upgrade history is in
-> [`docs/fork/v3-migration.md`](docs/fork/v3-migration.md).
+> **Status (2026-11-12).** Based on upstream **v3.0.0** (`b853acf`) plus the changes below. This version is
+> installed in the deck's study profile.
 
 **Contents:** [How the fork is organised](#how-the-fork-is-organised) 路 [Fields](#fields) 路
 [Deck data](#deck-data) 路 [Changes](#changes) 路 [Settings and defaults](#settings-and-defaults) 路
@@ -264,7 +262,6 @@ New files (everything else is a marked edit of an upstream file):
 | `src/front/kd-fork-pen-scroll.js` | Pen scrolling on Anki Desktop |
 | `Tests/js/test_fork_settings.js`, `test_audio_scheduling.js` | Node tests: settings/defaults resolution, audio scheduling |
 | `Tests/browser/check_fork_*.py` | Playwright checks against Anki-rendered cards (back options, mobile title, strokes, reveal timing); see [Tests/browser/README.md](Tests/browser/README.md) |
-| `docs/fork/v3-migration.md` | Plan, decisions and history of the v3 upgrade |
 | `FORK.md` | This file |
 
 Paths under `src/` are relative to `Templates/`. `.gitignore` additionally ignores the local agent instruction files
