@@ -5572,7 +5572,8 @@ html.is-ankimobile .card:has(#kd-info-inline) .forest-scenery {
     margin-bottom: clamp(90px, 18vw, 160px);
 }
 
-/* Story boxes in "Eselsbrücken": accent stripe, bold title row, italic text */
+/* Story boxes in "Eselsbrücken": accent stripe, bold title row; upright text like the KanjiDraw texts
+   (fork: was italic, which read as a different typeface next to Merksatz-KI) */
 .story-box {
     background: var(--bg-main);
     border-left: 3px solid var(--accent);
@@ -5606,7 +5607,6 @@ html.is-ankimobile .card:has(#kd-info-inline) .forest-scenery {
     margin: 0;
     font-size: 15px;
     line-height: 1.55;
-    font-style: italic;
     color: var(--text-main);
 }
 
