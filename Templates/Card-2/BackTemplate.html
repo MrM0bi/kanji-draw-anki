@@ -1001,7 +1001,10 @@
         placeSubtree(root);
 
         // Spread narrow trees horizontally and adapt vertical step so the tree fills the box cleanly without button overlap
-        const boxH = maxDepth >= 3 ? 320 : (maxDepth === 2 ? 280 : 225);
+        // fork: deeper trees get a taller box (+90px per level beyond three, up to 590px), so their nodes are not
+        // shrunk to fit the fixed 320px height.
+        const boxH = maxDepth > 3 ? Math.min(590, 320 + (maxDepth - 3) * 90)
+            : (maxDepth === 3 ? 320 : (maxDepth === 2 ? 280 : 225));
 
         let minEdge = Infinity, maxEdge = -Infinity, minCenter = Infinity, maxCenter = -Infinity;
         const scanX = (n) => {
