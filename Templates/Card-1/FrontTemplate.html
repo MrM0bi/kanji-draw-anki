@@ -868,16 +868,6 @@
                     <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="7" rx="1.2" class="fi-gold" /><path d="M3 3h4.5v18H3zM9.5 12h5v9h-5zM16.5 3H21v18h-4.5z" /></svg><span>Neben dem Kopf</span></div>
                 </label>
             </div>
-            <div class="setting-group-title">Scrollen</div>
-            <p class="kd-layout-note">Lange Spalten allein: Spalten, die ganz sichtbar sind, bleiben stehen; nur zu lange Spalten scrollen weiter.</p>
-            <div class="visual-options-grid" style="grid-template-columns: repeat(2, 1fr);">
-                <label><input type="radio" name="opt-kd-layout-scroll" value="page" onchange="kdLayoutSetOption(this)">
-                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5z" /><path d="M12 8v8M9.5 13.5L12 16l2.5-2.5" class="fi-gold" /></svg><span>Ganze Seite</span></div>
-                </label>
-                <label><input type="radio" name="opt-kd-layout-scroll" value="sticky" onchange="kdLayoutSetOption(this)">
-                    <div class="visual-option"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h5v8H3zM9.5 3h5v18h-5zM16 3h5v6h-5z" /><path d="M12 8v8M10 14l2 2 2-2" class="fi-gold" /></svg><span>Lange Spalten allein</span></div>
-                </label>
-            </div>
             <div role="button" tabindex="0" class="close-settings back-to-main" onclick="navigateBack(event)">Zurück zur
                 Übersicht</div>
         </div>
@@ -7347,7 +7337,7 @@
         if (btn) btn.disabled = !live;
         if (note) note.hidden = live;
         var gc = typeof getGlobalConfig === 'function' ? getGlobalConfig() : {};
-        [['cols', 'auto'], ['side', 'below'], ['scroll', 'page']].forEach(function (o) {
+        [['cols', 'auto'], ['side', 'below']].forEach(function (o) {
             var cap = o[0].charAt(0).toUpperCase() + o[0].slice(1);
             var val = safeGetItem('kdLayout' + cap, '') || gc['layout' + cap] || o[1];
             document.querySelectorAll('input[name="opt-kd-layout-' + o[0] + '"]').forEach(function (r) { r.checked = r.value === val; });
@@ -7382,7 +7372,7 @@
         kdSectionsPageSync();
         if (btn) btn.textContent = 'Zurückgesetzt';
     }
-    // Spalten / Seitenspalten / Scrollen radios (name opt-kd-layout-<cols|side|scroll>); redraws the visible back.
+    // Spalten / Seitenspalten radios (name opt-kd-layout-<cols|side>); redraws the visible back.
     function kdLayoutSetOption(input) {
         var name = input.name.replace('opt-kd-layout-', ''), key = 'kdLayout' + name.charAt(0).toUpperCase() + name.slice(1);
         var L = kdLayoutLive();
@@ -7504,7 +7494,6 @@
             sideBySide: getVar('--default-opt-side-by-side', 'on'), // fork
             layoutCols: getVar('--default-layout-cols', 'auto'), // fork: Abschnitte
             layoutSide: getVar('--default-layout-side', 'below'), // fork
-            layoutScroll: getVar('--default-layout-scroll', 'page'), // fork
             strictness: getVar('--default-opt-strictness', 'normal'),
             celebration: getVar('--default-opt-celebration', 'on'),
             displayStyle: getVar('--default-opt-display-style', 'standard'),

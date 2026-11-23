@@ -61,7 +61,6 @@
        Seitenspalten 'below' (unter dem Kopf) oder 'top' (neben dem Kopf); Scrollen 'page' oder 'sticky' */
     --default-layout-cols: auto;
     --default-layout-side: below;
-    --default-layout-scroll: page;
 
     /* Startpunkt-Hilfe (Nur Zeichnen-Karte, Geführt-Modus): 'on' (An), 'off' (Aus) */
     --default-opt-start-hint: off;
@@ -5770,6 +5769,45 @@ html:has(.kd-info-inline .tree-fullscreen) {
 .kd-edit-count {
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--accent);
+}
+
+.kd-edit-label {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.kd-edit-chips {
+    display: flex;
+    gap: 3px;
+}
+
+.kd-edit-chip {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    opacity: 0.55;
+}
+
+.kd-edit-chip.is-current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    opacity: 1;
+}
+
+@media (max-width: 480px) {
+    .kd-edit-label,
+    .kd-edit-count {
+        display: none;
+    }
 }
 
 .kd-edit-bar-btn {
@@ -5857,11 +5895,16 @@ html.kd-design-minimal .category-icon.cat-sections {
     position: sticky;
 }
 
+/* Edit mode: the columns of the arrangement being edited, tinted with the theme accent */
+.kd-editing .kd-col {
+    outline: 2px dashed color-mix(in srgb, var(--accent) 65%, transparent);
+    outline-offset: 3px;
+    border-radius: var(--border-rad-main);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
 .kd-wide.kd-editing .kd-col {
     min-height: 140px;
-    outline: 2px dashed var(--border-color);
-    outline-offset: 6px;
-    border-radius: var(--border-rad-main);
 }
 
 .kd-wide .kd-hidden-strip {

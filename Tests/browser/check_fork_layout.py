@@ -170,11 +170,13 @@ with sync_playwright() as pw:
     p.wait_for_timeout(500)
     assert p.evaluate(COLS)['L1'][0] == 'strichfolge', 'kdLayout3 kept, Notiz hidden everywhere'
     # side columns beside the drawings; sticky columns while the page scrolls
-    p.evaluate("_kdLayout.setOption('kdLayoutSide', 'top'); _kdLayout.setOption('kdLayoutScroll', 'sticky')")
+    p.evaluate("_kdLayout.setOption('kdLayoutSide', 'top'); window.scrollTo(0, 0)")
     p.wait_for_timeout(300)
     tops = p.evaluate("[...document.querySelectorAll('.kd-col')].map(c => [c.dataset.slot, Math.round(c.getBoundingClientRect().top)])")
     centre = dict(tops)['C']
     assert all(t < centre - 100 for s, t in tops if s != 'C'), tops
+    box = p.evaluate("Math.round(document.querySelector('.side-by-side-box').getBoundingClientRect().top)")
+    assert all(abs(t - box) <= 1 for s, t in tops if s != 'C'), ('side columns start level with the drawing box', box, tops)
     p.screenshot(path=str(OUT / 'wide-3-top.png'))
     p.evaluate("document.querySelector('[data-sec=eselsbruecken] .kd-section-body').style.minHeight = '1800px'")
     p.wait_for_timeout(300)

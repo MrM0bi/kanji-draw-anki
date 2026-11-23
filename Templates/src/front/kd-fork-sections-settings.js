@@ -9,7 +9,7 @@ function kdSectionsPageSync() {
     if (btn) btn.disabled = !live;
     if (note) note.hidden = live;
     var gc = typeof getGlobalConfig === 'function' ? getGlobalConfig() : {};
-    [['cols', 'auto'], ['side', 'below'], ['scroll', 'page']].forEach(function (o) {
+    [['cols', 'auto'], ['side', 'below']].forEach(function (o) {
         var cap = o[0].charAt(0).toUpperCase() + o[0].slice(1);
         var val = safeGetItem('kdLayout' + cap, '') || gc['layout' + cap] || o[1];
         document.querySelectorAll('input[name="opt-kd-layout-' + o[0] + '"]').forEach(function (r) { r.checked = r.value === val; });
@@ -44,7 +44,7 @@ function kdLayoutResetAll(e) {
     kdSectionsPageSync();
     if (btn) btn.textContent = 'Zurückgesetzt';
 }
-// Spalten / Seitenspalten / Scrollen radios (name opt-kd-layout-<cols|side|scroll>); redraws the visible back.
+// Spalten / Seitenspalten radios (name opt-kd-layout-<cols|side>); redraws the visible back.
 function kdLayoutSetOption(input) {
     var name = input.name.replace('opt-kd-layout-', ''), key = 'kdLayout' + name.charAt(0).toUpperCase() + name.slice(1);
     var L = kdLayoutLive();

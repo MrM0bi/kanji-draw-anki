@@ -135,8 +135,9 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   `src/front/kd-fork-source-settings.js`.
 - **Custom section order and hiding.** "Layout bearbeiten" on the new "Abschnitte" settings page switches the back
   into an edit mode. The card looks as usual, plus a grab handle, arrow buttons and an eye button on each section
-  header, a bar with "Bearbeite: 1 Spalte", "Zurücksetzen" and "Fertig", and an "Ausgeblendet" area below the
-  sections (on wide screens all columns show as dashed drop areas, and ←/→ move a section between columns).
+  header, a bar with "Zurücksetzen", "Fertig" and the column counts 1–9 with the one being edited highlighted in the
+  theme accent, and an "Ausgeblendet" area below the sections. The columns being edited show as accent-tinted dashed
+  drop areas; on wide screens ←/→ move a section between columns.
   Sections are dragged by the handle (mouse, touch or pen; the page scrolls near the screen edges) or moved
   with the arrows. Sections without content on the current card show as a bare header ("leer auf dieser Karte") so
   they can still be placed. Every change is saved at once; answering the card ends the edit mode. Hiding is global
@@ -150,11 +151,11 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   starts from the nearest larger arranged count, its outer columns added below the outermost remaining ones, or from
   the defaults (writing on the left, Elemente and Eselsbrücken in the middle, language on the right). Outer column
   pairs without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside the
-  drawings, under the keyword. "Scrollen": the whole page (default), or "Lange Spalten allein", where columns that
-  fit stay in view and longer ones scroll with the page until their end is visible. Open/closed states are kept
+  header, level with the top of the drawing box. Columns that fit the window stay in view while the page scrolls;
+  longer ones scroll with the page until their end is visible. Open/closed states are kept
   separately for one column and for several (Strichfolge starts open with columns).
   *Code:* `src/back/kd-fork-layout.js` (`core.count`, `core.arrangement`, `place()`), `.kd-wide`, `.kd-side-top`,
-  `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide / layoutScroll` in both fronts.
+  `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide` in both fronts.
 - **Notiz.** A free-form note section, hidden when the field is empty or holds only line breaks.
   *Code:* `.kd-note-box`, section key `notiz`.
 - **Nanori.** A third reading row with a muted outlined `NANORI` label. Can be switched on or off per card type;
@@ -266,7 +267,6 @@ always win over the CSS defaults; deck defaults are the `--default-*` variables 
 | Arrangement per column count (Abschnitte) | `kdLayout3` … `kdLayout9` | defaults in `kd-fork-layout.js` | `L1:a,b\|C:c\|R1:d` | global |
 | Spalten (Abschnitte) | `kdLayoutCols` | `--default-layout-cols` | `auto`; `1`, `3`, `5`, `7`, `9` | global |
 | Seitenspalten beginnen (Abschnitte) | `kdLayoutSide` | `--default-layout-side` | `below`; `top` | global |
-| Scrollen (Abschnitte) | `kdLayoutScroll` | `--default-layout-scroll` | `page`; `sticky` | global |
 | Section open/closed with columns | `kdSecW_<key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Schreibfehler closed | global |
 | Volume (Klang & Musik) | `kanjiSoundLevel` | `--default-sound-level` | `low` (upstream: `off`) | global |
 | Music style | `kanjiSoundMusic` | `--default-sound-music` | `lofi` (upstream: `off`) | global |
