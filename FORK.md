@@ -5,7 +5,7 @@ KanjiDraw note type to a German Heisig deck (*„Die Kanji lernen und behalten�
 and some extra features. Everything else is upstream's work and documentation; the [README](README.md) is upstream's
 text with only a fork note at the top.
 
-> **Status (2026-11-12).** Based on upstream **v3.0.0** (`b853acf`) plus the changes below. This version is
+> **Status (2026-11-23).** Based on upstream **v3.0.0** (`b853acf`) plus the changes below. This version is
 > installed in the deck's study profile.
 
 **Contents:** [How the fork is organised](#how-the-fork-is-organised) · [Fields](#fields) ·
@@ -118,10 +118,10 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
 ### Back side
 
 - **Inline sections instead of the info modal.** The back shows everything as collapsible sections, by default in
-  this order: Elemente, Eselsbrücken, Strichfolge, Notiz, Schreibfehler, Wortbeispiele, Lesungen, Externe Links. Each
-  section remembers whether it is open. Strichfolge and Schreibfehler start closed and load on first open. The header
-  shows JLPT, frequency and the book number. Dragging vertically over the tree scrolls the page.
-  *Code:* `src/back/kd-fork-sections.js` (`KD_SECTIONS` sets order, titles, icons and default state),
+  this order: Elemente, Eselsbrücken, Notiz, Schreibfehler, Strichfolge, Lesungen, Wortbeispiele, Externe Links. Each
+  section remembers whether it is open. Strichfolge starts closed and loads on first open. The header shows JLPT,
+  frequency and the book number. Dragging vertically over the tree scrolls the page.
+  *Code:* `src/back/kd-fork-sections.js` (`KD_SECTIONS` sets the one-column order, titles, icons and default state),
   `#kd-info-inline` / `.kd-section` in both back templates, one fork line in `src/back/primitive-tree.js`
   (`treeModalEl`).
 - **Several mnemonic sources.** "Eselsbrücken" groups the texts by source:
@@ -135,32 +135,29 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   `src/front/kd-fork-source-settings.js`.
 - **Custom section order and hiding.** "Layout bearbeiten" on the new "Abschnitte" settings page switches the back
   into an edit mode. The card looks as usual, plus a grab handle, arrow buttons and an eye button on each section
-  header, a bar with "Zurücksetzen", "Fertig" and the column counts 1–7 with the one being edited highlighted in the
-  theme accent, and an "Ausgeblendet" area below the sections. The columns being edited show as accent-tinted dashed
-  drop areas; on wide screens ←/→ move a section between columns.
-  Sections are dragged by the handle (mouse, touch or pen; the page scrolls near the screen edges) or moved
-  with the arrows. Sections without content on the current card show as a bare header ("leer auf dieser Karte") so
-  they can still be placed. Every change is saved at once; answering the card ends the edit mode. Hiding is global
-  on the device; the order is saved per column count. "Alle Layouts zurücksetzen" (two taps) restores the defaults.
+  header, a bar with "Zurücksetzen", "Fertig" and the column counts 1–7 (the one being edited highlighted in the
+  theme accent), and an "Ausgeblendet" area below the sections. The columns being edited show as accent-tinted dashed
+  drop areas; on wide screens ←/→ move a section between columns. Sections are dragged by the handle (mouse, touch or
+  pen; the page scrolls near the screen edges) or moved with the arrows. Sections without content on the current card
+  show as a bare header ("leer auf dieser Karte") so they can still be placed. Every change is saved at once;
+  answering the card ends the edit mode. Hiding is global on the device; the order is saved per column count. "Alle
+  Layouts zurücksetzen" (two taps) restores the defaults.
   *Code:* `src/back/kd-fork-layout.js` (`window._kdLayout`), `src/front/kd-fork-sections-settings.html`,
   `src/front/kd-fork-sections-settings.js`, the "Abschnitte" category card in both fronts, `.kd-cols` / `.kd-edit-*`.
-- **Columns on wide screens.** With room for more than one column, the sections spread over 2 to 7 columns,
-  each as wide as the drawing area (`--dynamic-size`). Odd counts put a centre column under the drawings; even
-  counts are symmetric, with the gap between the two middle columns under the drawings. "Spalten" on
-  "Abschnitte": Auto (default: 1 on phones, otherwise as many as fit the window), or a fixed maximum of 1–7; a
-  narrower window always lowers the count. Each column count keeps its own arrangement; one that was never arranged
-  starts from the nearest larger arranged count, its outer columns added below the outermost remaining ones (from
-  odd to even the centre goes on top of the left middle column; from even to odd the middle pair becomes the
-  centre), or from
-  the defaults in `DEFAULT_WIDE` (writing on the left, Elemente under the drawings, Eselsbrücken and language on the
-  right; one column follows the `KD_SECTIONS` order: Elemente, Eselsbrücken, Notiz, Schreibfehler, Strichfolge,
-  Lesungen, Wortbeispiele, Externe Links). Outer column
-  pairs without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside the
-  header, level with the top of the drawing box (with even counts the two middle columns stay below the header). Columns that fit the window stay in view while the page scrolls;
-  longer ones scroll with the page until their end is visible. Open/closed states are kept
-  separately for one column and for several.
-  *Code:* `src/back/kd-fork-layout.js` (`core.count`, `core.arrangement`, `place()`), `.kd-wide`, `.kd-even`, `.kd-side-top`,
-  `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide` in both fronts.
+- **Columns on wide screens.** With room for more than one column, the sections spread over 2 to 7 columns, each as
+  wide as the drawing area (`--dynamic-size`). Odd counts put a centre column under the drawings; even counts are
+  symmetric, with the gap between the two middle columns under the drawings. "Spalten" on "Abschnitte": Auto
+  (default: 1 on phones, otherwise as many as fit the window), or a fixed maximum of 1–7; a narrower window always
+  lowers the count. Each column count keeps its own arrangement. One that was never arranged starts from the nearest
+  larger arranged count, its outer columns added below the outermost remaining ones (from odd to even the centre goes
+  on top of the left middle column; from even to odd the middle pair becomes the centre), or else from the defaults
+  (writing on the left, Elemente under the drawings, Eselsbrücken and language on the right). Outer column pairs
+  without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside it, level with
+  the top of the drawing box (with even counts the two middle columns stay below the header). Columns that fit the
+  window stay in view while the page scrolls; longer ones scroll with the page until their end is visible.
+  Open/closed states are kept separately for one column and for several.
+  *Code:* `src/back/kd-fork-layout.js` (`DEFAULT_WIDE`, `core.count`, `core.arrangement`, `place()`), `.kd-wide`,
+  `.kd-even`, `.kd-side-top`, `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide` in both fronts.
 - **Notiz.** A free-form note section, hidden when the field is empty or holds only line breaks.
   *Code:* `.kd-note-box`, section key `notiz`.
 - **Nanori.** A third reading row with a muted outlined `NANORI` label. Can be switched on or off per card type;
