@@ -1,0 +1,12 @@
+{
+    "shortcuts": {
+        "k": "Alt+0",
+        "c1": "Alt+1",
+        "c2": "Alt+2",
+        "c3": "Alt+3",
+        "c4": "Alt+4",
+        "c5": "Alt+5",
+        "c6": "Alt+6",
+        "erase": "Alt+Del"
+    }
+}

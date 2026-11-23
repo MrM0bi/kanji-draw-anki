@@ -425,7 +425,7 @@ class SyncTest(unittest.TestCase):
 
 class PackageTest(unittest.TestCase):
     def test_committed_package_is_current(self):
-        out = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "Tools", "build_migration_addon.py"), "--check"],
+        out = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "Tools", "build_addons.py"), "--check"],
                              capture_output=True, text=True)
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
 
