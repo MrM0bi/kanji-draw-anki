@@ -413,31 +413,55 @@
     // the headers and L.start() after. Everything is global per device (persistence.js); '' counts as unset.
     //   kdSecHidden   hidden section keys, comma-separated (all column counts)
     //   kdLayout1     order for one column, comma-separated
-    //   kdLayout<n>   arrangement for n columns (3–9), e.g. "L1:strichfolge|C:elemente,eselsbruecken|R1:lesungen"
-    //   kdLayoutCols  auto | 1 | 3 | 5 | 7 | 9   kdLayoutSide  below | top
+    //   kdLayout<n>   arrangement for n columns (2–7), e.g. "L1:strichfolge|C:elemente,eselsbruecken|R1:lesungen".
+    //                 Odd counts have a centre column C under the drawings; even ones are symmetric around the gap
+    //                 between L1 and R1, which sits under the drawings.
+    //   kdLayoutCols  auto | 1 … 7   kdLayoutSide  below | top
     //                 (deck defaults: --default-layout-cols / -side in Styling.css)
     // Open/closed state: kdSec_<key> for one column, kdSecW_<key> for several.
     (function () {
-        var SLOTS = ['L4', 'L3', 'L2', 'L1', 'C', 'R1', 'R2', 'R3', 'R4'];
-        var BY_DISTANCE = ['C', 'L1', 'R1', 'L2', 'R2', 'L3', 'R3', 'L4', 'R4'];
-        var COUNTS = [1, 3, 5, 7, 9];
-        var GAP = 16, EDGE = 16;
+        var SLOTS = ['L3', 'L2', 'L1', 'C', 'R1', 'R2', 'R3'];
+        var BY_DISTANCE = ['C', 'L1', 'R1', 'L2', 'R2', 'L3', 'R3'];
+        var COUNTS = [1, 2, 3, 4, 5, 6, 7];
+        var MAX = 7, GAP = 16, EDGE = 16;
+        // Defaults per count (3 is 5 folded). Preliminary: the user sends the final ones after testing.
         var DEFAULT_WIDE = {
+            2: { L1: ['elemente', 'strichfolge', 'schreibfehler', 'links'], R1: ['eselsbruecken', 'lesungen', 'wortbeispiele', 'notiz'] },
+            4: { L2: ['strichfolge', 'schreibfehler', 'links'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele', 'notiz'] },
             5: { L2: ['links'], L1: ['strichfolge', 'schreibfehler'], C: ['elemente', 'eselsbruecken'], R1: ['lesungen', 'wortbeispiele'], R2: ['notiz'] },
+            6: { L3: ['links'], L2: ['strichfolge', 'schreibfehler'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['notiz'] },
             7: { L3: ['links'], L2: ['schreibfehler'], L1: ['strichfolge'], C: ['elemente', 'eselsbruecken'], R1: ['lesungen'], R2: ['wortbeispiele'], R3: ['notiz'] }
         };
 
         // --- Pure helpers (Tests/js/test_fork_layout.js) ---
         var core = {};
-        core.slotsFor = function (n) { var h = (n - 1) / 2; return SLOTS.slice(4 - h, 5 + h); };
-        // Columns beyond n go below the outermost remaining column on the same side (or the centre for n = 1).
-        core.fold = function (arr, n) {
-            var out = {}, h = (n - 1) / 2;
+        // Columns per side: n = 5 → L2 L1 C R1 R2, n = 4 → L2 L1 R1 R2.
+        var half = function (n) { return Math.floor(n / 2); };
+        core.slotsFor = function (n) {
+            var h = half(n);
+            return SLOTS.slice(3 - h, 4 + h).filter(function (s) { return s !== 'C' || n % 2; });
+        };
+        // Arrangement for `from` columns → n columns (from >= n, default n). Between odd and even counts the middle
+        // changes: an odd centre goes on top of L1; an even pair L1 + R1 becomes the centre and the outer columns move
+        // in by one. Then columns beyond n go below the outermost remaining column on the same side.
+        core.fold = function (arr, n, from) {
+            from = from || n;
+            var src = {};
+            BY_DISTANCE.forEach(function (s) { src[s] = (arr[s] || []).slice(); });
+            if (from % 2 && !(n % 2)) {
+                src.L1 = src.C.concat(src.L1);
+                src.C = [];
+            } else if (!(from % 2) && n % 2) {
+                src.C = src.C.concat(src.L1, src.R1);
+                for (var i = 1; i < 3; i++) { src['L' + i] = src['L' + (i + 1)]; src['R' + i] = src['R' + (i + 1)]; }
+                src.L3 = []; src.R3 = [];
+            }
+            var out = {}, h = half(n);
             core.slotsFor(n).forEach(function (s) { out[s] = []; });
             BY_DISTANCE.forEach(function (s) {
-                var list = arr[s];
-                if (!list || !list.length) return;
-                var target = s === 'C' || +s.slice(1) <= h ? s : (h ? s.charAt(0) + h : 'C');
+                var list = src[s];
+                if (!list.length) return;
+                var target = s === 'C' ? (n % 2 ? 'C' : 'L1') : +s.slice(1) <= h ? s : (h ? s.charAt(0) + h : 'C');
                 out[target] = out[target].concat(list);
             });
             return out;
@@ -451,14 +475,14 @@
             });
             return out;
         };
-        core.parseCols = function (str, n, keys) {
+        core.parseCols = function (str, n, keys, from) {
             var raw = {}, seen = {};
             String(str || '').split('|').forEach(function (part) {
                 var i = part.indexOf(':');
                 var slot = i < 0 ? '' : part.slice(0, i).trim();
                 if (SLOTS.indexOf(slot) >= 0) raw[slot] = (raw[slot] || []).concat(core.parseList(part.slice(i + 1), keys, seen));
             });
-            return core.fold(raw, n);
+            return core.fold(raw, n, from);
         };
         core.serialize = function (arr, n) {
             if (n === 1) return (arr.C || []).join(',');
@@ -466,7 +490,9 @@
         };
         core.defaultFor = function (n, keys) {
             if (n === 1) return { C: keys.slice() };
-            var def = core.fold(DEFAULT_WIDE[n >= 7 ? 7 : 5], n);
+            var m = n;
+            while (!DEFAULT_WIDE[m] && m < MAX) m++;
+            var def = core.fold(DEFAULT_WIDE[m], n, m);
             Object.keys(def).forEach(function (s) { def[s] = def[s].filter(function (k) { return keys.indexOf(k) >= 0; }); });
             return def;
         };
@@ -476,7 +502,7 @@
             Object.keys(arr).forEach(function (s) { arr[s].forEach(function (k) { have[k] = 1; }); });
             keys.forEach(function (k) {
                 if (have[k]) return;
-                var slot = 'C';
+                var slot = arr.C ? 'C' : 'L1';
                 Object.keys(def).forEach(function (s) { if (def[s].indexOf(k) >= 0 && arr[s]) slot = s; });
                 var list = arr[slot], order = def[slot] || keys, at = list.length;
                 for (var i = 0, known = false; i < list.length; i++) {
@@ -497,24 +523,24 @@
                 var one = read('kdLayout1');
                 if (one) arr = { C: core.parseList(one, keys) };
             } else {
-                for (var m = n; m <= 9 && !arr; m += 2) {
+                for (var m = n; m <= MAX && !arr; m++) {
                     var saved = read('kdLayout' + m);
-                    if (saved) arr = core.parseCols(saved, n, keys);
+                    if (saved) arr = core.parseCols(saved, n, keys, m);
                 }
             }
             return core.complete(arr || core.defaultFor(n, keys), keys, core.defaultFor(n, keys));
         };
         core.fits = function (n, size, width) { return n * size + (n - 1) * GAP + 2 * EDGE <= width; };
-        // Column count: the setting (auto = 1 on phones, otherwise up to 9) capped by what fits the window.
+        // Column count: the setting (auto = 1 on phones, otherwise up to 7) capped by what fits the window.
         core.count = function (setting, size, width, phone) {
-            var max = setting === 'auto' || !(+setting) ? (phone ? 1 : 9) : +setting, best = 1;
+            var max = setting === 'auto' || !(+setting) ? (phone ? 1 : MAX) : +setting, best = 1;
             COUNTS.forEach(function (n) { if (n <= max && core.fits(n, size, width)) best = n; });
             return best;
         };
         // Outside the edit mode, outer column pairs without a shown section are dropped.
         core.shownCount = function (arr, n, hidden) {
             var used = function (s) { return (arr[s] || []).some(function (k) { return hidden.indexOf(k) < 0; }); };
-            while (n > 1 && !used('L' + (n - 1) / 2) && !used('R' + (n - 1) / 2)) n -= 2;
+            while (n > (n % 2 ? 1 : 2) && !used('L' + half(n)) && !used('R' + half(n))) n -= 2;
             return n;
         };
         // Move key to slot before beforeKey (or to the end).
@@ -658,6 +684,7 @@
             Object.keys(S.cols).forEach(function (s) { if (slots.indexOf(s) < 0 && S.cols[s].parentNode) S.cols[s].remove(); });
             S.host.classList.toggle('kd-editing', S.editing);
             S.host.classList.toggle('kd-wide', shown > 1);
+            S.host.classList.toggle('kd-even', shown > 1 && shown % 2 === 0);
             S.host.classList.toggle('kd-side-top', shown > 1 && option('side') === 'top');
             S.host.classList.toggle('kd-sticky', shown > 1 && !S.editing);
             S.host.style.setProperty('--kd-cols', shown);
@@ -707,7 +734,7 @@
             set('kdSecHidden', S.hidden.join(','));
         }
         function slotOf(key) {
-            var found = 'C';
+            var found = S.arr.C ? 'C' : 'L1';
             Object.keys(S.arr).forEach(function (s) { if (S.arr[s].indexOf(key) >= 0) found = s; });
             return found;
         }
@@ -827,7 +854,7 @@
                 if (parent === S.strip) setHidden(key, true);
                 else {
                     setHidden(key, false);
-                    core.move(S.arr, key, parent.getAttribute('data-slot') || 'C', next ? next.getAttribute('data-sec') : null);
+                    core.move(S.arr, key, parent.getAttribute('data-slot'), next ? next.getAttribute('data-sec') : null);
                 }
                 apply();
                 if (typeof _kdSnd === 'function') _kdSnd('fx', 'tick');

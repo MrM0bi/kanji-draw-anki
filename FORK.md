@@ -135,7 +135,7 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   `src/front/kd-fork-source-settings.js`.
 - **Custom section order and hiding.** "Layout bearbeiten" on the new "Abschnitte" settings page switches the back
   into an edit mode. The card looks as usual, plus a grab handle, arrow buttons and an eye button on each section
-  header, a bar with "Zurücksetzen", "Fertig" and the column counts 1–9 with the one being edited highlighted in the
+  header, a bar with "Zurücksetzen", "Fertig" and the column counts 1–7 with the one being edited highlighted in the
   theme accent, and an "Ausgeblendet" area below the sections. The columns being edited show as accent-tinted dashed
   drop areas; on wide screens ←/→ move a section between columns.
   Sections are dragged by the handle (mouse, touch or pen; the page scrolls near the screen edges) or moved
@@ -144,17 +144,20 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   on the device; the order is saved per column count. "Alle Layouts zurücksetzen" (two taps) restores the defaults.
   *Code:* `src/back/kd-fork-layout.js` (`window._kdLayout`), `src/front/kd-fork-sections-settings.html`,
   `src/front/kd-fork-sections-settings.js`, the "Abschnitte" category card in both fronts, `.kd-cols` / `.kd-edit-*`.
-- **Columns on wide screens.** With room for more than one column, the sections spread over 3, 5, 7 or 9 columns,
-  each as wide as the drawing area (`--dynamic-size`), the centre one under the drawings. "Spalten" on
-  "Abschnitte": Auto (default: 1 on phones, otherwise as many as fit the window), or a fixed maximum of 1–9; a
+- **Columns on wide screens.** With room for more than one column, the sections spread over 2 to 7 columns,
+  each as wide as the drawing area (`--dynamic-size`). Odd counts put a centre column under the drawings; even
+  counts are symmetric, with the gap between the two middle columns under the drawings. "Spalten" on
+  "Abschnitte": Auto (default: 1 on phones, otherwise as many as fit the window), or a fixed maximum of 1–7; a
   narrower window always lowers the count. Each column count keeps its own arrangement; one that was never arranged
-  starts from the nearest larger arranged count, its outer columns added below the outermost remaining ones, or from
+  starts from the nearest larger arranged count, its outer columns added below the outermost remaining ones (from
+  odd to even the centre goes on top of the left middle column; from even to odd the middle pair becomes the
+  centre), or from
   the defaults (writing on the left, Elemente and Eselsbrücken in the middle, language on the right). Outer column
   pairs without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside the
-  header, level with the top of the drawing box. Columns that fit the window stay in view while the page scrolls;
+  header, level with the top of the drawing box (with even counts the two middle columns stay below the header). Columns that fit the window stay in view while the page scrolls;
   longer ones scroll with the page until their end is visible. Open/closed states are kept
   separately for one column and for several (Strichfolge starts open with columns).
-  *Code:* `src/back/kd-fork-layout.js` (`core.count`, `core.arrangement`, `place()`), `.kd-wide`, `.kd-side-top`,
+  *Code:* `src/back/kd-fork-layout.js` (`core.count`, `core.arrangement`, `place()`), `.kd-wide`, `.kd-even`, `.kd-side-top`,
   `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide` in both fronts.
 - **Notiz.** A free-form note section, hidden when the field is empty or holds only line breaks.
   *Code:* `.kd-note-box`, section key `notiz`.
@@ -264,8 +267,8 @@ always win over the CSS defaults; deck defaults are the `--default-*` variables 
 | Section open/closed | `kdSec_<key>` | `collapsed` in `KD_SECTIONS` | Strichfolge, Schreibfehler closed | global |
 | Hidden sections (Abschnitte) | `kdSecHidden` | – | none (comma-separated keys) | global |
 | Section order, 1 column (Abschnitte) | `kdLayout1` | `KD_SECTIONS` order | comma-separated keys | global |
-| Arrangement per column count (Abschnitte) | `kdLayout3` … `kdLayout9` | defaults in `kd-fork-layout.js` | `L1:a,b\|C:c\|R1:d` | global |
-| Spalten (Abschnitte) | `kdLayoutCols` | `--default-layout-cols` | `auto`; `1`, `3`, `5`, `7`, `9` | global |
+| Arrangement per column count (Abschnitte) | `kdLayout2` … `kdLayout7` | defaults in `kd-fork-layout.js` | `L1:a,b\|C:c\|R1:d` | global |
+| Spalten (Abschnitte) | `kdLayoutCols` | `--default-layout-cols` | `auto`; `1` … `7` | global |
 | Seitenspalten beginnen (Abschnitte) | `kdLayoutSide` | `--default-layout-side` | `below`; `top` | global |
 | Section open/closed with columns | `kdSecW_<key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Schreibfehler closed | global |
 | Volume (Klang & Musik) | `kanjiSoundLevel` | `--default-sound-level` | `low` (upstream: `off`) | global |

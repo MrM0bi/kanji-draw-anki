@@ -16,8 +16,21 @@ const store = saved => key => saved[key] || '';
 
 test('slots are symmetric around the centre', () => {
     assert.deepEqual(plain(core.slotsFor(1)), ['C']);
+    assert.deepEqual(plain(core.slotsFor(2)), ['L1', 'R1']);
+    assert.deepEqual(plain(core.slotsFor(4)), ['L2', 'L1', 'R1', 'R2']);
     assert.deepEqual(plain(core.slotsFor(5)), ['L2', 'L1', 'C', 'R1', 'R2']);
-    assert.deepEqual(plain(core.slotsFor(9)), ['L4', 'L3', 'L2', 'L1', 'C', 'R1', 'R2', 'R3', 'R4']);
+    assert.deepEqual(plain(core.slotsFor(7)), ['L3', 'L2', 'L1', 'C', 'R1', 'R2', 'R3']);
+});
+
+test('folding between odd and even counts', () => {
+    const odd = {L2: ['a'], L1: ['b'], C: ['c'], R1: ['d'], R2: ['e']};
+    assert.deepEqual(plain(core.fold(odd, 4, 5)), {L2: ['a'], L1: ['c', 'b'], R1: ['d'], R2: ['e']}); // centre on top of L1
+    assert.deepEqual(plain(core.fold(odd, 2, 5)), {L1: ['c', 'b', 'a'], R1: ['d', 'e']});
+    const even = {L3: ['a'], L2: ['b'], L1: ['c'], R1: ['d'], R2: ['e'], R3: ['f']};
+    assert.deepEqual(plain(core.fold(even, 5, 6)), {L2: ['a'], L1: ['b'], C: ['c', 'd'], R1: ['e'], R2: ['f']}); // middle pair → centre
+    assert.deepEqual(plain(core.fold(even, 3, 6)), {L1: ['b', 'a'], C: ['c', 'd'], R1: ['e', 'f']});
+    assert.deepEqual(plain(core.fold(even, 4, 6)), {L2: ['b', 'a'], L1: ['c'], R1: ['d'], R2: ['e', 'f']});
+    assert.deepEqual(plain(core.fold(even, 1, 6)), {C: ['c', 'd', 'b', 'e', 'a', 'f']});
 });
 
 test('folding adds outer columns below the outermost remaining one', () => {
@@ -27,7 +40,7 @@ test('folding adds outer columns below the outermost remaining one', () => {
 });
 
 test('every arrangement holds every section exactly once', () => {
-    for (const n of [1, 3, 5, 7, 9]) {
+    for (const n of [1, 2, 3, 4, 5, 6, 7]) {
         assert.deepEqual(all(plain(core.arrangement(n, store({}), KEYS))), [...KEYS].sort(), `n=${n}`);
     }
 });
@@ -54,14 +67,21 @@ test('an unarranged count folds the nearest larger saved one, a saved one wins',
     assert.deepEqual(plain(core.arrangement(3, store(saved), KEYS).C), ['links', 'elemente', 'eselsbruecken']);
     assert.equal(core.serialize({C: ['a', 'b']}, 1), 'a,b');
     assert.equal(core.serialize({L1: ['a'], C: [], R1: ['b']}, 3), 'L1:a|R1:b');
+    // the nearest larger saved count wins, whatever its parity
+    const four = core.arrangement(4, store({kdLayout5: 'C:links|R2:notiz', kdLayout6: 'L3:notiz'}), KEYS);
+    assert.equal(four.L1[0], 'links');
+    assert.ok(four.R2.includes('notiz'));
 });
 
 test('column count: setting, window width and phones', () => {
-    assert.equal(core.count('auto', 400, 2000, false), 3);   // 5 columns need 2096 px
+    assert.equal(core.count('auto', 400, 2000, false), 4);   // 5 columns need 2096 px
     assert.equal(core.count('auto', 400, 2200, false), 5);
+    assert.equal(core.count('auto', 400, 9000, false), 7);
+    assert.equal(core.count('2', 400, 9000, false), 2);
     assert.equal(core.count('auto', 300, 1000, true), 1);    // phone in landscape
     assert.equal(core.count('3', 400, 3000, false), 3);
-    assert.equal(core.count('9', 400, 1000, false), 1);
+    assert.equal(core.count('7', 400, 1000, false), 2);
+    assert.equal(core.count('9', 400, 9000, false), 7);      // old saved value
     assert.equal(core.count('1', 400, 3000, false), 1);
 });
 
@@ -70,4 +90,6 @@ test('empty outer pairs are dropped, inner gaps stay', () => {
     assert.equal(core.shownCount(arr, 5, []), 5);
     assert.equal(core.shownCount(arr, 5, ['c']), 3);
     assert.equal(core.shownCount({L1: ['a'], C: ['b'], R1: []}, 3, ['a']), 1);
+    assert.equal(core.shownCount({L2: [], L1: ['a'], R1: [], R2: []}, 4, []), 2);
+    assert.equal(core.shownCount({L1: [], R1: []}, 2, []), 2);
 });

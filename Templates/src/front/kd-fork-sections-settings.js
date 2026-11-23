@@ -40,7 +40,7 @@ function kdLayoutResetAll(e) {
         return;
     }
     if (window._kdLayout && window._kdLayout.resetAll) window._kdLayout.resetAll();
-    else ['kdLayout1', 'kdLayout3', 'kdLayout5', 'kdLayout7', 'kdLayout9', 'kdSecHidden'].forEach(function (k) { safeSetItem(k, ''); });
+    else ['kdLayout1', 'kdLayout2', 'kdLayout3', 'kdLayout4', 'kdLayout5', 'kdLayout6', 'kdLayout7', 'kdSecHidden'].forEach(function (k) { safeSetItem(k, ''); });
     kdSectionsPageSync();
     if (btn) btn.textContent = 'Zurückgesetzt';
 }

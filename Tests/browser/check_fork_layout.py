@@ -186,6 +186,18 @@ with sync_playwright() as pw:
     c = p.evaluate("document.querySelector('.kd-col[data-slot=C]').getBoundingClientRect().top")
     assert 0 <= r1 <= 14 and c < -100, (r1, c)
     p.screenshot(path=str(OUT / 'wide-3-sticky.png'))
+    # even count: symmetric, the middle pair stays below the head, the outer pair starts beside it
+    p.evaluate("document.querySelector('[data-sec=eselsbruecken] .kd-section-body').style.minHeight = ''")
+    p.set_viewport_size({'width': 3000, 'height': 1300})
+    p.evaluate("_kdLayout.resetAll(); _kdLayout.setOption('kdLayoutCols', '4'); window.scrollTo(0, 0)")
+    p.wait_for_timeout(500)
+    assert p.evaluate('_kdLayout.count()') == 4
+    tops = dict(p.evaluate("[...document.querySelectorAll('.kd-col')].map(c => [c.dataset.slot, Math.round(c.getBoundingClientRect().top)])"))
+    assert sorted(tops) == ['L1', 'L2', 'R1', 'R2'], tops
+    assert tops['L1'] == tops['R1'] and tops['L2'] == tops['R2'] < tops['L1'] - 100, tops
+    mid = p.evaluate("(() => { const a = document.querySelector('.kd-col[data-slot=L1]').getBoundingClientRect(), b = document.querySelector('.kd-col[data-slot=R1]').getBoundingClientRect(); return (a.right + b.left) / 2 - innerWidth / 2; })()")
+    assert abs(mid) <= 2, ('gap between L1 and R1 is centred', mid)
+    p.screenshot(path=str(OUT / 'wide-4-top.png'))
     assert not p._errors, p._errors
     ctx.close()
     browser.close()
