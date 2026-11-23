@@ -11,7 +11,7 @@ function kdSectionsPageSync() {
     var gc = typeof getGlobalConfig === 'function' ? getGlobalConfig() : {};
     [['cols', 'auto'], ['side', 'below']].forEach(function (o) {
         var cap = o[0].charAt(0).toUpperCase() + o[0].slice(1);
-        var val = safeGetItem('kdLayout' + cap, '') || gc['layout' + cap] || o[1];
+        var val = safeGetItem('kanjiKdLayout' + cap, '') || safeGetItem('kdLayout' + cap, '') || gc['layout' + cap] || o[1];
         document.querySelectorAll('input[name="opt-kd-layout-' + o[0] + '"]').forEach(function (r) { r.checked = r.value === val; });
     });
     var reset = document.getElementById('kd-layout-reset');
@@ -40,7 +40,14 @@ function kdLayoutResetAll(e) {
         return;
     }
     if (window._kdLayout && window._kdLayout.resetAll) window._kdLayout.resetAll();
-    else ['kdLayout1', 'kdLayout2', 'kdLayout3', 'kdLayout4', 'kdLayout5', 'kdLayout6', 'kdLayout7', 'kdSecHidden'].forEach(function (k) { safeSetItem(k, ''); });
+    else { // stored and old names, see the kd-fork-layout.js header
+        ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'].forEach(function (w, i) {
+            safeSetItem('kanjiKdLayout' + w, '');
+            safeSetItem('kdLayout' + (i + 1), '');
+        });
+        safeSetItem('kanjiKdSecHidden', '');
+        safeSetItem('kdSecHidden', '');
+    }
     kdSectionsPageSync();
     if (btn) btn.textContent = 'Zurückgesetzt';
 }
@@ -48,5 +55,6 @@ function kdLayoutResetAll(e) {
 function kdLayoutSetOption(input) {
     var name = input.name.replace('opt-kd-layout-', ''), key = 'kdLayout' + name.charAt(0).toUpperCase() + name.slice(1);
     var L = kdLayoutLive();
-    if (L) L.setOption(key, input.value); else safeSetItem(key, input.value);
+    if (L) L.setOption(key, input.value);
+    else { safeSetItem('kanjiK' + key.slice(1), input.value); safeSetItem(key, ''); } // stored name, see kd-fork-layout.js
 }

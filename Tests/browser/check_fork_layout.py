@@ -99,9 +99,9 @@ with sync_playwright() as pw:
         p.screenshot(path=str(OUT / f'c{card}-edit-1col.png'))
         p.click('.kd-edit-done')
         assert not p.evaluate('_kdLayout.editing()')
-        saved = p.evaluate("safeGetItem('kdLayout1')")
+        saved = p.evaluate("_kdLayout.get('kdLayout1', '')")
         assert saved.split(',')[:3] == ['eselsbruecken', 'elemente', 'notiz'], saved
-        assert p.evaluate("safeGetItem('kdSecHidden')") == 'links'
+        assert p.evaluate("_kdLayout.get('kdSecHidden', '')") == 'links'
         p.reload()
         p.wait_for_timeout(500)
         assert p.evaluate(ORDER) == [k for k in saved.split(',') if k != 'links'], p.evaluate(ORDER)
@@ -147,8 +147,8 @@ with sync_playwright() as pw:
     assert cols['L1'][:2] == ['notiz', 'strichfolge'] and 'lesungen' in cols['C'], cols
     p.screenshot(path=str(OUT / 'wide-3-edit.png'))
     p.click('.kd-edit-done')
-    assert p.evaluate("safeGetItem('kdLayout3')").startswith('L1:notiz,strichfolge')
-    assert p.evaluate("safeGetItem('kdLayout5')") in ('', None)
+    assert p.evaluate("_kdLayout.get('kdLayout3', '')").startswith('L1:notiz,strichfolge')
+    assert p.evaluate("_kdLayout.get('kdLayout5', '')") in ('', None)
     # one column via the setting: the 1-column order and open state
     p.evaluate("_kdLayout.setOption('kdLayoutCols', '1')")
     assert p.evaluate('_kdLayout.count()') == 1 and p.evaluate(ORDER) == DEFAULT
@@ -198,6 +198,28 @@ with sync_playwright() as pw:
     mid = p.evaluate("(() => { const a = document.querySelector('.kd-col[data-slot=L1]').getBoundingClientRect(), b = document.querySelector('.kd-col[data-slot=R1]').getBoundingClientRect(); return (a.right + b.left) / 2 - innerWidth / 2; })()")
     assert abs(mid) <= 2, ('gap between L1 and R1 is centred', mid)
     p.screenshot(path=str(OUT / 'wide-4-top.png'))
+    assert not p._errors, p._errors
+    ctx.close()
+
+    # --- Values under the old kd… names move to names the Desktop add-on keeps (kanji[A-Za-z], <= 64 chars) ---
+    ctx, p = context(browser, 2000, 1100)
+    ctx.add_init_script("""if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1');
+        localStorage.setItem('kdLayout3', 'L1:notiz,strichfolge|C:elemente|R1:lesungen');
+        localStorage.setItem('kdLayout6', 'L3:links|R3:notiz');
+        localStorage.setItem('kdSecHidden', 'links');
+        localStorage.setItem('kdSecW_lesungen', '1'); }""")
+    p.goto(url)
+    p.wait_for_timeout(500)
+    cols = p.evaluate(COLS)
+    assert cols['L1'][:2] == ['notiz', 'strichfolge'] and 'links' not in sum(cols.values(), []), cols
+    stored = p.evaluate("Object.fromEntries(['kanjiKdLayoutThree', 'kanjiKdLayoutSix', 'kanjiKdSecHidden', 'kanjiKdSecWLesungen', 'kdLayout3', 'kdLayout6', 'kdSecHidden', 'kdSecW_lesungen'].map(k => [k, safeGetItem(k, '')]))")
+    assert stored['kanjiKdLayoutThree'].startswith('L1:n,s|C:e') and stored['kanjiKdLayoutSix'] == 'L3:x|R3:n', stored
+    assert stored['kanjiKdSecHidden'] == 'x' and stored['kanjiKdSecWLesungen'] == '1', stored
+    assert not any(stored[k] for k in ('kdLayout3', 'kdLayout6', 'kdSecHidden', 'kdSecW_lesungen')), stored
+    assert p.evaluate("document.querySelector('[data-sec=lesungen]').classList.contains('collapsed')")
+    p.reload()
+    p.wait_for_timeout(500)
+    assert p.evaluate(COLS)['L1'][:2] == ['notiz', 'strichfolge'], 'migrated values survive a reload'
     assert not p._errors, p._errors
     ctx.close()
     browser.close()

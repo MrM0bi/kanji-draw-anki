@@ -93,3 +93,19 @@ test('empty outer pairs are dropped, inner gaps stay', () => {
     assert.equal(core.shownCount({L2: [], L1: ['a'], R1: [], R2: []}, 4, []), 2);
     assert.equal(core.shownCount({L1: [], R1: []}, 2, []), 2);
 });
+
+test('stored names and values fit the Desktop add-on filter', () => {
+    const KEY_RE = /^(?:c1_|c2_|c2f_)?kanji[A-Za-z]{1,40}$/; // Addon/__init__.py
+    for (const k of ['kdLayout1', 'kdLayout7', 'kdSecHidden', 'kdLayoutCols', 'kdLayoutSide', 'kdSec_eselsbruecken', 'kdSecW_wortbeispiele']) {
+        assert.match(core.storeKey(k), KEY_RE, k);
+    }
+    assert.equal(core.storeKey('kdLayout3'), 'kanjiKdLayoutThree');
+    assert.equal(core.storeKey('kdSecW_notiz'), 'kanjiKdSecWNotiz');
+    const full = core.serialize(core.arrangement(7, store({}), KEYS), 7);
+    const enc = core.encode('kdLayout7', full);
+    assert.ok(enc.length <= 64, enc);
+    assert.equal(core.decode('kdLayout7', enc), full);
+    assert.equal(core.decode('kdLayout7', full), full); // old values with full names still read
+    assert.equal(core.encode('kdSecHidden', KEYS.join(',')).length, 15);
+    assert.equal(core.encode('kdLayoutCols', 'auto'), 'auto');
+});

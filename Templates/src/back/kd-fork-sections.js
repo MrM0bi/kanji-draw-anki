@@ -58,8 +58,9 @@
     ];
     window._kdSections = KD_SECTIONS;
 
-    var get = function (k, d) { try { return typeof safeGetItem === 'function' ? safeGetItem(k, d) : d; } catch (e) { return d; } };
-    var set = function (k, v) { try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
+    // kdSec_<key> state goes through the layout module's storage names (kd-fork-layout.js header)
+    var get = function (k, d) { var L = window._kdLayout; if (L && L.get) return L.get(k, d); try { return typeof safeGetItem === 'function' ? safeGetItem(k, d) : d; } catch (e) { return d; } };
+    var set = function (k, v) { var L = window._kdLayout; if (L && L.set) return L.set(k, v); try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
     var buzz = function () { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); };
     var isOpen = function (sec) { return sec && !sec.classList.contains('collapsed') && !sec.classList.contains('kd-sec-empty') && sec.style.display !== 'none'; };
 

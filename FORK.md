@@ -264,18 +264,23 @@ always win over the CSS defaults; deck defaults are the `--default-*` variables 
 | Nanori (Rückseite) | `kanjiOptNanori` | `--default-opt-nanori` | `off` | per card |
 | Handschriftbeispiele (Rückseite) | `kanjiOptHandwriting` | `--default-opt-handwriting` | `on` | per card |
 | Comparison (Rückseite) | `kanjiOptSideBySide` | `--default-opt-side-by-side` | `on` (Nebeneinander) | Card 1 |
-| Section open/closed | `kdSec_<key>` | `collapsed` in `KD_SECTIONS` | Strichfolge, Schreibfehler closed | global |
-| Hidden sections (Abschnitte) | `kdSecHidden` | – | none (comma-separated keys) | global |
-| Section order, 1 column (Abschnitte) | `kdLayout1` | `KD_SECTIONS` order | comma-separated keys | global |
-| Arrangement per column count (Abschnitte) | `kdLayout2` … `kdLayout7` | defaults in `kd-fork-layout.js` | `L1:a,b\|C:c\|R1:d` | global |
-| Spalten (Abschnitte) | `kdLayoutCols` | `--default-layout-cols` | `auto`; `1` … `7` | global |
-| Seitenspalten beginnen (Abschnitte) | `kdLayoutSide` | `--default-layout-side` | `below`; `top` | global |
-| Section open/closed with columns | `kdSecW_<key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Schreibfehler closed | global |
+| Section open/closed | `kanjiKdSec<Key>` (e.g. `kanjiKdSecNotiz`) | `collapsed` in `KD_SECTIONS` | Strichfolge, Schreibfehler closed | global |
+| Hidden sections (Abschnitte) | `kanjiKdSecHidden` | – | none (comma-separated codes) | global |
+| Section order, 1 column (Abschnitte) | `kanjiKdLayoutOne` | `KD_SECTIONS` order | comma-separated codes | global |
+| Arrangement per column count (Abschnitte) | `kanjiKdLayoutTwo` … `kanjiKdLayoutSeven` | defaults in `kd-fork-layout.js` | `L1:s,f\|C:e,m\|R1:l` | global |
+| Spalten (Abschnitte) | `kanjiKdLayoutCols` | `--default-layout-cols` | `auto`; `1` … `7` | global |
+| Seitenspalten beginnen (Abschnitte) | `kanjiKdLayoutSide` | `--default-layout-side` | `below`; `top` | global |
+| Section open/closed with columns | `kanjiKdSecW<Key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Schreibfehler closed | global |
 | Volume (Klang & Musik) | `kanjiSoundLevel` | `--default-sound-level` | `low` (upstream: `off`) | global |
 | Music style | `kanjiSoundMusic` | `--default-sound-music` | `lofi` (upstream: `off`) | global |
 | Music volume | `kanjiSoundMusicLevel` | `--default-sound-music-level` | `low` (upstream: `mid`) | global |
 | Reaction | `kanjiSoundImmersion` | `--default-sound-immersion` | `low` | global |
 | Stroke / effect sounds | `kanjiSoundStroke`, `kanjiSoundFx` | `--default-sound-stroke`, `--default-sound-fx` | `on` | global |
+
+The section keys use letters only and the layouts one-letter section codes (`e` Elemente, `m` Eselsbrücken,
+`s` Strichfolge, `f` Schreibfehler, `n` Notiz, `w` Wortbeispiele, `l` Lesungen, `x` Externe Links), because the
+Desktop add-on keeps only keys matching `kanji[A-Za-z]{1,40}` with values up to 64 characters. Values saved under
+the earlier names (`kdLayout3`, `kdSecHidden`, `kdSec_<key>`, …) are moved over the first time a back is shown.
 
 Music still needs a first tap where the browser blocks autoplay.
 

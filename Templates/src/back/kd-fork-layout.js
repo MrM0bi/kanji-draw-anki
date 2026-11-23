@@ -1,6 +1,7 @@
 // fork: section layout on the back: order, hiding, columns and the edit mode ("Abschnitte", FORK.md).
 // Runs before kd-fork-sections.js, which calls window._kdLayout.attach(host, KD_SECTIONS) before it builds
 // the headers and L.start() after. Everything is global per device (persistence.js); '' counts as unset.
+// The code uses the logical names below; core.storeKey/encode/decode map them to what is stored.
 //   kdSecHidden   hidden section keys, comma-separated (all column counts)
 //   kdLayout1     order for one column, comma-separated
 //   kdLayout<n>   arrangement for n columns (2–7), e.g. "L1:strichfolge|C:elemente,eselsbruecken|R1:lesungen".
@@ -8,7 +9,11 @@
 //                 between L1 and R1, which sits under the drawings.
 //   kdLayoutCols  auto | 1 … 7   kdLayoutSide  below | top
 //                 (deck defaults: --default-layout-cols / -side in Styling.css)
-// Open/closed state: kdSec_<key> for one column, kdSecW_<key> for several.
+//   kdSec_<key>   open/closed state with one column, kdSecW_<key> with several
+// Stored form: the Anki Desktop add-on (Addon/__init__.py) keeps only keys matching kanji[A-Za-z]{1,40} with
+// values of at most 64 characters, so kdLayout3 is stored as kanjiKdLayoutThree, kdSec_notiz as
+// kanjiKdSecNotiz, and section keys as one-letter codes ("L1:s,f|C:e,m"). Values under the old names are
+// moved over on first read.
 (function () {
     var SLOTS = ['L3', 'L2', 'L1', 'C', 'R1', 'R2', 'R3'];
     var BY_DISTANCE = ['C', 'L1', 'R1', 'L2', 'R2', 'L3', 'R3'];
@@ -141,11 +146,44 @@
         return arr;
     };
 
+    // --- Storage names and codes (see the header) ---
+    var CODES = { elemente: 'e', eselsbruecken: 'm', strichfolge: 's', notiz: 'n', schreibfehler: 'f', wortbeispiele: 'w', lesungen: 'l', links: 'x' };
+    var NAMES = {};
+    Object.keys(CODES).forEach(function (k) { NAMES[CODES[k]] = k; });
+    var WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'];
+    var cap = function (w) { return w.charAt(0).toUpperCase() + w.slice(1); };
+    core.storeKey = function (k) {
+        var m = /^kdLayout(\d)$/.exec(k);
+        if (m) return 'kanjiKdLayout' + WORDS[+m[1]];
+        m = /^kdSec(W?)_([a-z]+)$/.exec(k);
+        if (m) return 'kanjiKdSec' + m[1] + cap(m[2]);
+        return /^kd[A-Z]/.test(k) ? 'kanjiK' + k.slice(1) : k;
+    };
+    var coded = function (k) { return /^kdLayout\d$|^kdSecHidden$/.test(k); };
+    core.encode = function (k, v) { return coded(k) ? String(v).replace(/[a-z]+/g, function (t) { return CODES[t] || t; }) : v; };
+    core.decode = function (k, v) { return coded(k) ? String(v).replace(/[a-z]+/g, function (t) { return NAMES[t] || t; }) : v; };
+
     var api = window._kdLayout = { core: core, gap: GAP };
     if (typeof document === 'undefined') return;
 
-    var get = function (k, d) { try { var v = typeof safeGetItem === 'function' ? safeGetItem(k, d) : d; return v == null ? d : v; } catch (e) { return d; } };
-    var set = function (k, v) { try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
+    var rawGet = function (k) { try { var v = typeof safeGetItem === 'function' ? safeGetItem(k, '') : ''; return v == null ? '' : String(v); } catch (e) { return ''; } };
+    var rawSet = function (k, v) { try { if (typeof safeSetItem === 'function') safeSetItem(k, v); } catch (e) { } };
+    // Read by logical name; a value still under the old name is moved to the stored name.
+    var get = function (k, d) {
+        var sk = core.storeKey(k), v = rawGet(sk);
+        if (v === '' && sk !== k) {
+            var old = rawGet(k);
+            if (old !== '') { rawSet(sk, core.encode(k, old)); rawSet(k, ''); return old; }
+        }
+        return v === '' ? d : core.decode(k, v);
+    };
+    var set = function (k, v) {
+        var sk = core.storeKey(k);
+        rawSet(sk, v === '' ? '' : core.encode(k, v));
+        if (sk !== k && rawGet(k) !== '') rawSet(k, ''); // an old value must not come back after a reset
+    };
+    api.get = get;
+    api.set = set;
     var el = function (tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e; };
     var SVG = function (inner) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '<' + '/svg>'; };
     var ICONS = {
@@ -161,6 +199,10 @@
     api.attach = function (host, sections) {
         var keys = sections.map(function (c) { return c.key; });
         if (S && S.ro) S.ro.disconnect(); // Anki Desktop keeps the document between cards
+        // Move every value still under an old name now, so the Desktop add-on saves all of them
+        ['kdSecHidden', 'kdLayoutCols', 'kdLayoutSide'].concat(COUNTS.map(function (n) { return 'kdLayout' + n; }),
+            keys.map(function (k) { return 'kdSec_' + k; }), keys.map(function (k) { return 'kdSecW_' + k; }))
+            .forEach(function (k) { get(k, ''); });
         S = {
             host: host, keys: keys, secs: {}, cols: {}, editing: false, n: 1,
             hidden: core.parseList(get('kdSecHidden', ''), keys)
