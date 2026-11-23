@@ -51,7 +51,7 @@ def page(name, card, fields, back=True):
 
 
 ORDER = "() => [...document.querySelectorAll('#kd-info-inline .kd-col .kd-section')].filter(s => s.getClientRects().length).map(s => s.dataset.sec)"
-DEFAULT = ['elemente', 'eselsbruecken', 'strichfolge', 'notiz', 'schreibfehler', 'wortbeispiele', 'lesungen', 'links']
+DEFAULT = ['elemente', 'eselsbruecken', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']  # KD_SECTIONS order
 
 
 def context(browser, width, height=860):
@@ -87,11 +87,11 @@ with sync_playwright() as pw:
         assert p.evaluate(ORDER) == DEFAULT, p.evaluate(ORDER)
         assert p.evaluate('_kdLayout.edit(true)')
         p.wait_for_timeout(900)  # the edit mode scrolls the sections into view
-        p.click('[data-sec=notiz] .kd-edit-up')
-        p.click('[data-sec=notiz] .kd-edit-up')
+        p.click('[data-sec=lesungen] .kd-edit-up')
+        p.click('[data-sec=lesungen] .kd-edit-up')
         p.click('[data-sec=links] .kd-edit-eye')
         order = p.evaluate(ORDER)
-        assert order[1] == 'notiz' and 'links' not in order, order
+        assert order[3] == 'lesungen' and 'links' not in order, order
         p.evaluate("document.querySelector('.kd-cols').scrollIntoView()")
         t = p.locator('[data-sec=elemente] .kd-section-header').bounding_box()
         drag(p, '[data-sec=eselsbruecken] .kd-edit-grip', t['x'] + 40, t['y'] + 4)
@@ -135,19 +135,20 @@ with sync_playwright() as pw:
     p.wait_for_timeout(500)
     assert p.evaluate('_kdLayout.count()') == 3
     cols = p.evaluate(COLS)
-    assert cols == {'L1': ['strichfolge', 'schreibfehler', 'links'], 'C': ['elemente', 'eselsbruecken'], 'R1': ['lesungen', 'wortbeispiele', 'notiz']}, cols
-    assert not p.evaluate("document.querySelector('[data-sec=strichfolge]').classList.contains('collapsed')"), 'Strichfolge open with columns'
+    assert cols == {'L1': ['schreibfehler', 'strichfolge'], 'C': ['elemente', 'lesungen', 'links'], 'R1': ['eselsbruecken', 'notiz', 'wortbeispiele']}, cols
+    assert p.evaluate("document.querySelector('[data-sec=strichfolge]').classList.contains('collapsed')"), 'Strichfolge closed by default'
+    assert not p.evaluate("document.querySelector('[data-sec=schreibfehler]').classList.contains('collapsed')"), 'Schreibfehler open by default'
     p.screenshot(path=str(OUT / 'wide-3.png'))
     p.evaluate('_kdLayout.edit(true)')
     p.wait_for_timeout(900)
-    t = p.locator('[data-sec=strichfolge] .kd-section-header').bounding_box()
+    t = p.locator('[data-sec=schreibfehler] .kd-section-header').bounding_box()
     drag(p, '[data-sec=notiz] .kd-edit-grip', t['x'] + 60, t['y'] + 4)
-    p.click('[data-sec=lesungen] .kd-edit-left')
+    p.click('[data-sec=eselsbruecken] .kd-edit-left')
     cols = p.evaluate(COLS)
-    assert cols['L1'][:2] == ['notiz', 'strichfolge'] and 'lesungen' in cols['C'], cols
+    assert cols['L1'][:2] == ['notiz', 'schreibfehler'] and 'eselsbruecken' in cols['C'], cols
     p.screenshot(path=str(OUT / 'wide-3-edit.png'))
     p.click('.kd-edit-done')
-    assert p.evaluate("_kdLayout.get('kdLayout3', '')").startswith('L1:notiz,strichfolge')
+    assert p.evaluate("_kdLayout.get('kdLayout3', '')").startswith('L1:notiz,schreibfehler')
     assert p.evaluate("_kdLayout.get('kdLayout5', '')") in ('', None)
     # one column via the setting: the 1-column order and open state
     p.evaluate("_kdLayout.setOption('kdLayoutCols', '1')")
@@ -160,15 +161,16 @@ with sync_playwright() as pw:
     p.wait_for_timeout(500)
     assert p.evaluate('_kdLayout.count()') == 5
     cols = p.evaluate(COLS)
-    assert cols['L2'] == ['links'] and cols['R2'] == ['notiz'], cols
+    assert cols['L2'] == ['strichfolge'] and cols['R2'] == ['lesungen', 'wortbeispiele'], cols
     p.evaluate("_kdLayout.edit(true)")
-    p.click('[data-sec=links] .kd-edit-eye')
-    p.click('[data-sec=notiz] .kd-edit-eye')
+    for k in ('strichfolge', 'lesungen', 'wortbeispiele'):
+        p.click(f'[data-sec={k}] .kd-edit-eye')
     p.click('.kd-edit-done')
     assert sorted(p.evaluate(COLS)) == ['C', 'L1', 'R1'], p.evaluate(COLS)
     p.set_viewport_size({'width': 2000, 'height': 1100})
     p.wait_for_timeout(500)
-    assert p.evaluate(COLS)['L1'][0] == 'strichfolge', 'kdLayout3 kept, Notiz hidden everywhere'
+    cols = p.evaluate(COLS)
+    assert cols['L1'] == ['notiz', 'schreibfehler'], ('kdLayout3 kept, Strichfolge hidden everywhere', cols)
     # side columns beside the drawings; sticky columns while the page scrolls
     p.evaluate("_kdLayout.setOption('kdLayoutSide', 'top'); window.scrollTo(0, 0)")
     p.wait_for_timeout(300)
@@ -211,7 +213,7 @@ with sync_playwright() as pw:
     p.goto(url)
     p.wait_for_timeout(500)
     cols = p.evaluate(COLS)
-    assert cols['L1'][:2] == ['notiz', 'strichfolge'] and 'links' not in sum(cols.values(), []), cols
+    assert cols['L1'][-2:] == ['notiz', 'strichfolge'] and 'links' not in sum(cols.values(), []), cols  # Schreibfehler filled in from the defaults
     stored = p.evaluate("Object.fromEntries(['kanjiKdLayoutThree', 'kanjiKdLayoutSix', 'kanjiKdSecHidden', 'kanjiKdSecWLesungen', 'kdLayout3', 'kdLayout6', 'kdSecHidden', 'kdSecW_lesungen'].map(k => [k, safeGetItem(k, '')]))")
     assert stored['kanjiKdLayoutThree'].startswith('L1:n,s|C:e') and stored['kanjiKdLayoutSix'] == 'L3:x|R3:n', stored
     assert stored['kanjiKdSecHidden'] == 'x' and stored['kanjiKdSecWLesungen'] == '1', stored
@@ -219,7 +221,7 @@ with sync_playwright() as pw:
     assert p.evaluate("document.querySelector('[data-sec=lesungen]').classList.contains('collapsed')")
     p.reload()
     p.wait_for_timeout(500)
-    assert p.evaluate(COLS)['L1'][:2] == ['notiz', 'strichfolge'], 'migrated values survive a reload'
+    assert p.evaluate(COLS)['L1'][-2:] == ['notiz', 'strichfolge'], 'migrated values survive a reload'
     assert not p._errors, p._errors
     ctx.close()
     browser.close()

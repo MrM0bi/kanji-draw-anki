@@ -152,11 +152,13 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   starts from the nearest larger arranged count, its outer columns added below the outermost remaining ones (from
   odd to even the centre goes on top of the left middle column; from even to odd the middle pair becomes the
   centre), or from
-  the defaults (writing on the left, Elemente and Eselsbrücken in the middle, language on the right). Outer column
+  the defaults in `DEFAULT_WIDE` (writing on the left, Elemente under the drawings, Eselsbrücken and language on the
+  right; one column follows the `KD_SECTIONS` order: Elemente, Eselsbrücken, Notiz, Schreibfehler, Strichfolge,
+  Lesungen, Wortbeispiele, Externe Links). Outer column
   pairs without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside the
   header, level with the top of the drawing box (with even counts the two middle columns stay below the header). Columns that fit the window stay in view while the page scrolls;
   longer ones scroll with the page until their end is visible. Open/closed states are kept
-  separately for one column and for several (Strichfolge starts open with columns).
+  separately for one column and for several.
   *Code:* `src/back/kd-fork-layout.js` (`core.count`, `core.arrangement`, `place()`), `.kd-wide`, `.kd-even`, `.kd-side-top`,
   `.kd-sticky`, `getGlobalConfig().layoutCols / layoutSide` in both fronts.
 - **Notiz.** A free-form note section, hidden when the field is empty or holds only line breaks.
@@ -264,13 +266,13 @@ always win over the CSS defaults; deck defaults are the `--default-*` variables 
 | Nanori (Rückseite) | `kanjiOptNanori` | `--default-opt-nanori` | `off` | per card |
 | Handschriftbeispiele (Rückseite) | `kanjiOptHandwriting` | `--default-opt-handwriting` | `on` | per card |
 | Comparison (Rückseite) | `kanjiOptSideBySide` | `--default-opt-side-by-side` | `on` (Nebeneinander) | Card 1 |
-| Section open/closed | `kanjiKdSec<Key>` (e.g. `kanjiKdSecNotiz`) | `collapsed` in `KD_SECTIONS` | Strichfolge, Schreibfehler closed | global |
+| Section open/closed | `kanjiKdSec<Key>` (e.g. `kanjiKdSecNotiz`) | `collapsed` in `KD_SECTIONS` | Strichfolge closed | global |
 | Hidden sections (Abschnitte) | `kanjiKdSecHidden` | – | none (comma-separated codes) | global |
 | Section order, 1 column (Abschnitte) | `kanjiKdLayoutOne` | `KD_SECTIONS` order | comma-separated codes | global |
 | Arrangement per column count (Abschnitte) | `kanjiKdLayoutTwo` … `kanjiKdLayoutSeven` | defaults in `kd-fork-layout.js` | `L1:s,f\|C:e,m\|R1:l` | global |
 | Spalten (Abschnitte) | `kanjiKdLayoutCols` | `--default-layout-cols` | `auto`; `1` … `7` | global |
 | Seitenspalten beginnen (Abschnitte) | `kanjiKdLayoutSide` | `--default-layout-side` | `below`; `top` | global |
-| Section open/closed with columns | `kanjiKdSecW<Key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Schreibfehler closed | global |
+| Section open/closed with columns | `kanjiKdSecW<Key>` | `wideCollapsed` / `collapsed` in `KD_SECTIONS` | Strichfolge closed | global |
 | Volume (Klang & Musik) | `kanjiSoundLevel` | `--default-sound-level` | `low` (upstream: `off`) | global |
 | Music style | `kanjiSoundMusic` | `--default-sound-music` | `lofi` (upstream: `off`) | global |
 | Music volume | `kanjiSoundMusicLevel` | `--default-sound-music-level` | `low` (upstream: `mid`) | global |

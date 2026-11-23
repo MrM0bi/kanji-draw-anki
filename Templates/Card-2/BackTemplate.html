@@ -360,13 +360,14 @@
         var BY_DISTANCE = ['C', 'L1', 'R1', 'L2', 'R2', 'L3', 'R3'];
         var COUNTS = [1, 2, 3, 4, 5, 6, 7];
         var MAX = 7, GAP = 16, EDGE = 16;
-        // Defaults per count (3 is 5 folded). Preliminary: the user sends the final ones after testing.
+        // Defaults per count, set by the user on 2026-11-23 (one column: the KD_SECTIONS order in kd-fork-sections.js)
         var DEFAULT_WIDE = {
-            2: { L1: ['elemente', 'strichfolge', 'schreibfehler', 'links'], R1: ['eselsbruecken', 'lesungen', 'wortbeispiele', 'notiz'] },
-            4: { L2: ['strichfolge', 'schreibfehler', 'links'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele', 'notiz'] },
-            5: { L2: ['links'], L1: ['strichfolge', 'schreibfehler'], C: ['elemente', 'eselsbruecken'], R1: ['lesungen', 'wortbeispiele'], R2: ['notiz'] },
-            6: { L3: ['links'], L2: ['strichfolge', 'schreibfehler'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['notiz'] },
-            7: { L3: ['links'], L2: ['schreibfehler'], L1: ['strichfolge'], C: ['elemente', 'eselsbruecken'], R1: ['lesungen'], R2: ['wortbeispiele'], R3: ['notiz'] }
+            2: { L1: ['elemente', 'schreibfehler', 'strichfolge'], R1: ['eselsbruecken', 'notiz', 'lesungen', 'wortbeispiele', 'links'] },
+            3: { L1: ['schreibfehler', 'strichfolge'], C: ['elemente', 'lesungen', 'links'], R1: ['eselsbruecken', 'notiz', 'wortbeispiele'] },
+            4: { L2: ['schreibfehler', 'strichfolge'], L1: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
+            5: { L2: ['strichfolge'], L1: ['schreibfehler'], C: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
+            6: { L3: ['strichfolge'], L2: ['schreibfehler'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['notiz', 'links'] },
+            7: { L3: ['notiz'], L2: ['strichfolge'], L1: ['schreibfehler'], C: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['links'] }
         };
 
         // --- Pure helpers (Tests/js/test_fork_layout.js) ---
@@ -957,11 +958,11 @@
         var KD_SECTIONS = [
             { key: 'elemente', title: 'Elemente' },
             { key: 'eselsbruecken', title: 'Eselsbrücken' },
-            { key: 'strichfolge', title: 'Strichfolge', collapsed: true, wideCollapsed: false, onOpen: openOrder, onClose: closeOrder },
             { key: 'notiz', title: 'Notiz' },
-            { key: 'schreibfehler', title: 'Schreibfehler', collapsed: true, onOpen: openPitfalls },
-            { key: 'wortbeispiele', title: 'Wortbeispiele' },
+            { key: 'schreibfehler', title: 'Schreibfehler', onOpen: openPitfalls },
+            { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
             { key: 'lesungen', title: 'Lesungen' },
+            { key: 'wortbeispiele', title: 'Wortbeispiele' },
             { key: 'links', title: 'Externe Links' }
         ];
         window._kdSections = KD_SECTIONS;

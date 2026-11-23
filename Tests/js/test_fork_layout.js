@@ -9,7 +9,7 @@ const context = {window: {}};
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../../Templates/src/back/kd-fork-layout.js'), 'utf8'), context);
 const core = context.window._kdLayout.core;
-const KEYS = ['elemente', 'eselsbruecken', 'strichfolge', 'notiz', 'schreibfehler', 'wortbeispiele', 'lesungen', 'links'];
+const KEYS = ['elemente', 'eselsbruecken', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']; // KD_SECTIONS order
 const plain = v => JSON.parse(JSON.stringify(v));
 const all = arr => Object.values(arr).flat().sort();
 const store = saved => key => saved[key] || '';
@@ -55,7 +55,7 @@ test('broken or partial saved strings are repaired', () => {
     assert.deepEqual(all(plain(one)), [...KEYS].sort());
     const five = core.arrangement(5, store({kdLayout5: 'X9:links|C:elemente,elemente|R2:notiz|garbage'}), KEYS);
     assert.deepEqual(all(plain(five)), [...KEYS].sort());
-    assert.deepEqual(plain(five.R2), ['notiz']);
+    assert.deepEqual(plain(five.R2), ['notiz', 'lesungen', 'wortbeispiele']); // missing ones go to their default column
 });
 
 test('an unarranged count folds the nearest larger saved one, a saved one wins', () => {
@@ -64,13 +64,13 @@ test('an unarranged count folds the nearest larger saved one, a saved one wins',
     assert.ok(three.L1.includes('links'));
     assert.deepEqual(plain(three.R1).filter(k => k === 'lesungen' || k === 'notiz'), ['lesungen', 'notiz']);
     saved.kdLayout3 = 'C:links';
-    assert.deepEqual(plain(core.arrangement(3, store(saved), KEYS).C), ['links', 'elemente', 'eselsbruecken']);
+    assert.deepEqual(plain(core.arrangement(3, store(saved), KEYS).C), ['elemente', 'lesungen', 'links']); // after their default predecessors
     assert.equal(core.serialize({C: ['a', 'b']}, 1), 'a,b');
     assert.equal(core.serialize({L1: ['a'], C: [], R1: ['b']}, 3), 'L1:a|R1:b');
     // the nearest larger saved count wins, whatever its parity
     const four = core.arrangement(4, store({kdLayout5: 'C:links|R2:notiz', kdLayout6: 'L3:notiz'}), KEYS);
-    assert.equal(four.L1[0], 'links');
-    assert.ok(four.R2.includes('notiz'));
+    assert.deepEqual(plain(four.L1), ['elemente', 'links']); // the 5-column centre on top of L1
+    assert.ok(four.R2.includes('notiz') && !four.L2.includes('notiz')); // not the 6-column one
 });
 
 test('column count: setting, window width and phones', () => {

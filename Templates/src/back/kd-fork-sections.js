@@ -49,11 +49,11 @@
     var KD_SECTIONS = [
         { key: 'elemente', title: 'Elemente' },
         { key: 'eselsbruecken', title: 'Eselsbrücken' },
-        { key: 'strichfolge', title: 'Strichfolge', collapsed: true, wideCollapsed: false, onOpen: openOrder, onClose: closeOrder },
         { key: 'notiz', title: 'Notiz' },
-        { key: 'schreibfehler', title: 'Schreibfehler', collapsed: true, onOpen: openPitfalls },
-        { key: 'wortbeispiele', title: 'Wortbeispiele' },
+        { key: 'schreibfehler', title: 'Schreibfehler', onOpen: openPitfalls },
+        { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
         { key: 'lesungen', title: 'Lesungen' },
+        { key: 'wortbeispiele', title: 'Wortbeispiele' },
         { key: 'links', title: 'Externe Links' }
     ];
     window._kdSections = KD_SECTIONS;
