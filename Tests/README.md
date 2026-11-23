@@ -30,6 +30,7 @@ Ausführen mit `cd Tests/js && npm test` (entspricht `node --test "test_*.js"`).
 | `test_display.js` | Layout bei verschiedenen Bildschirm- und Schriftgrößen | **liest die echte** `Styling.css` |
 | `test_stroke_features.js` | Strichfarben-Palette, Korrekturfarben | **liest die echten** FrontTemplates und CSS |
 | `test_stroke_styles_v2.js` | Strichstile Standard, Gel, Tusche, Neon | **liest die echten** FrontTemplates und CSS |
+| `test_highlighter.js` | Markieren, Umfärben, Teilen und Entfernen der `kd-kw`-Spans | **lädt den echten** Kern aus [Highlighter/editor.js](../Highlighter/editor.js) |
 
 ## live_stress_test.py
 

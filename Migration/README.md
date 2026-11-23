@@ -74,7 +74,7 @@ Wer zurückwechselt, behält seine Texte im Mobi-Deck (oder in der Sicherung).
 Nach jeder Änderung an den Dateien oben das Paket neu bauen und mit committen:
 
 ```sh
-python3 Tools/build_migration_addon.py
+python3 Tools/build_addons.py
 uv run --no-project --with anki==26.5 python -I -m unittest discover -s Tests/migration -v
 ```
 

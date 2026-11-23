@@ -10,7 +10,7 @@ text with only a fork note at the top.
 
 **Contents:** [How the fork is organised](#how-the-fork-is-organised) · [Fields](#fields) ·
 [Deck data](#deck-data) · [Changes](#changes) · [Settings and defaults](#settings-and-defaults) ·
-[Switching from upstream's deck](#switching-from-upstreams-deck) · [Fork files](#fork-files) · [Upstream candidates](#upstream-candidates)
+[Switching from upstream's deck](#switching-from-upstreams-deck) · [Editor buttons for highlights](#editor-buttons-for-highlights) · [Fork files](#fork-files) · [Upstream candidates](#upstream-candidates)
 
 ## How the fork is organised
 
@@ -289,7 +289,7 @@ The add-on in [`Migration/`](Migration/README.md) ("KanjiDraw: Lernfortschritt �
 people who studied with upstream's deck and import this one, or the other way round. It moves their progress onto the
 other deck's cards in one go, so they keep their reviews. It's a one-time tool, separate from the persistence add-on.
 The ready package is [`Migration/dist/kanji_draw_migration.ankiaddon`](Migration/dist/kanji_draw_migration.ankiaddon),
-built by `Tools/build_migration_addon.py` (a test fails if it is stale).
+built by `Tools/build_addons.py` (a test fails if it is stale).
 
 - **Matching:** same glyph in `Kanji` (upstream's 篭 = this deck's 籠), Card 1 → Card 1, Card 2 → Card 2. Note types
   are found by their fields, so renamed ones work, and upstream v1's old field names too.
@@ -311,6 +311,24 @@ built by `Tools/build_migration_addon.py` (a test fails if it is stale).
   deletion, filtered decks, older versions and the way back. It also syncs to a second device through Anki's own sync
   server, there and back, and checks that a normal sync is enough each time.
 
+## Editor buttons for highlights
+
+The optional add-on in [`Highlighter/`](Highlighter/README.md) ("KanjiDraw: Eselsbrücken markieren", Anki Desktop
+23.10+) adds buttons to the note editor of KanjiDraw notes for the highlight spans of the mnemonic texts: **K**
+(`kd-kw kd-k`), **1**–**6** (`kd-kw kd-c1` … `kd-c6`) and an eraser, with the shortcuts Alt+0, Alt+1–6 and Alt+Del
+(configurable). The cards don't need it.
+
+- **Both editors:** the rich-text editor and the HTML editor behave the same. A selection is highlighted (without
+  surrounding spaces); a cursor recolours the highlight it is in, or highlights the word under it. Selecting part of a
+  highlight splits it; a selection that cuts through another element is widened so the HTML stays valid. The eraser
+  removes the highlight at the cursor or every highlight the selection touches; the text stays.
+- **Visible while editing:** the rich-text fields show the highlights in the card colours (light and dark).
+- **Undo:** each click is one Ctrl+Z step in the HTML editor; in the rich-text editor the eraser undoes a highlight.
+- **Code:** a DOM-free core in `Highlighter/editor.js` works on the field HTML as text plus a selection; the rich-text
+  side serialises the field with markers at the selection and writes it back. Built into
+  [`Highlighter/dist/kanji_draw_highlighter.ankiaddon`](Highlighter/dist/kanji_draw_highlighter.ankiaddon) by
+  `Tools/build_addons.py`; tests in `Tests/js/test_highlighter.js`.
+
 ## Fork files
 
 New files (everything else is a marked edit of an upstream file):
@@ -326,10 +344,11 @@ New files (everything else is a marked edit of an upstream file):
 | `src/front/kd-fork-back-settings.html`, `kd-fork-source-settings.js` | "Rückseite" settings: source chips, Nanori |
 | `src/front/kd-fork-svg-paths.js` | Inert stroke source → SVG paths |
 | `src/front/kd-fork-pen-scroll.js` | Pen scrolling on Anki Desktop |
-| `Tests/js/test_fork_settings.js`, `test_audio_scheduling.js`, `test_fork_layout.js` | Node tests: settings/defaults resolution, audio scheduling, section layout helpers |
+| `Tests/js/test_fork_settings.js`, `test_audio_scheduling.js`, `test_fork_layout.js`, `test_highlighter.js` | Node tests: settings/defaults resolution, audio scheduling, section layout helpers, highlighter add-on core |
 | `Tests/browser/check_fork_*.py` | Playwright checks against Anki-rendered cards (back options, mobile title, strokes, reveal timing); `check_fork_layout.py` renders the templates itself; see [Tests/browser/README.md](Tests/browser/README.md) |
 | `Migration/` | Add-on to switch between upstream's deck and this one (see [above](#switching-from-upstreams-deck)); the built package is in `Migration/dist/` |
-| `Tools/build_migration_addon.py` | Builds `Migration/dist/kanji_draw_migration.ankiaddon`; `--check` verifies it |
+| `Highlighter/` | Optional add-on with editor buttons for the highlights (see [above](#editor-buttons-for-highlights)); the built package is in `Highlighter/dist/` |
+| `Tools/build_addons.py` | Builds `Migration/dist/kanji_draw_migration.ankiaddon` and `Highlighter/dist/kanji_draw_highlighter.ankiaddon`; `--check` verifies them |
 | `Tools/make_migration_hashes.py` | Builds `Migration/upstream_v3_hashes.json` from upstream's v3 deck |
 | `Tests/migration/test_migration.py` | Tests for the migration add-on, incl. a sync round trip (needs `anki` from PyPI) |
 | `FORK.md` | This file |
