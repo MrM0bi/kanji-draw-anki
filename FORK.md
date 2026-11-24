@@ -98,6 +98,20 @@ Component names and keywords in the book-based texts are marked with upstream's 
 e.g. "Worte" for the part "sagen" (言). Two AI models proposed the spans independently, and every field was
 approved by hand. `Merksatz-Custom` is unchanged.
 
+### Corrections after v3 (2026-11)
+
+Cards flagged while studying, then a check of the whole deck for the same problems. Every change was approved by
+hand.
+
+- **Upstream names in `Merksatz-KI` and `Merkhilfe`.** About 60 more of upstream's component names were changed to
+  this deck's names (e.g. "Felszacke" → "Zinne", "Kescher" → "Auge", "Fiesta" → "Straßenfest"). Where the gender or
+  the picture changed, the sentence was rewritten.
+- **Component trees.** Some part names now follow the book (e.g. 禾 Weizen, 辶 Straße, 彳 Menschenschlange,
+  犭 Wildhunde). Intermediate parts the book names were added (e.g. 辻 in 迅, Schulhaus in 蛍 and 営, Ferkel in 昜).
+- **Book texts.** Where the OCR left an unrelated kanji in place of a primitive's variant form, the real form is used
+  (e.g. 耂, 覀, 虍). Forms with no Unicode character use the placeholder 〓. Typos and a few unmarked keywords were
+  fixed, and `Stolperfallen` got some extra stroke-order rules.
+
 ### Earlier cleanup of this deck (before v3)
 
 - **Stroke paths (`SVGPfade`).** Broken paths replaced with KanjiVG. Where the book prints a different form,
