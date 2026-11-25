@@ -4923,6 +4923,12 @@ ruby rt {
     -webkit-user-select: none;
 }
 
+/* fork: the tree is cut off below (minimum node size in primitive-tree.js); fade the last 36px. */
+.tree-viewport.tree-clip-bottom .primitive-tree {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+}
+
 /* Transparent HTML overlay that receives touch/pointer events instead of the SVG primitive-tree.
    Workaround for WebKit Bug 200610: touch-action:none is ignored on SVG elements on iOS/WKWebView,
    causing AnkiMobile's native swipe gestures to fire during tree gestures. */
