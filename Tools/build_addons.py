@@ -26,6 +26,7 @@ ADDONS = {
         "kanji_draw_highlighter.ankiaddon",
         ("__init__.py", "config.json", "config.md", "editor.js", "manifest.json"),
     ),
+    "StrokeUndo": ("kanji_draw_stroke_undo.ankiaddon", ("__init__.py", "manifest.json")),
 }
 
 

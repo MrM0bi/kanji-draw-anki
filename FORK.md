@@ -268,6 +268,14 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   text instead of scrolling. A pen swipe now scrolls the card or the settings dialog, with a short glide. It
   respects `touch-action` like a browser, so the drawing pad and the tree keep their own pen handling. Mouse
   input and other platforms are unchanged. *Code:* `src/front/kd-fork-pen-scroll.js`, `html.kd-pen-panning`.
+- **Pen eraser** (Card 1, free drawing). The eraser end of a Windows Ink pen, or a pen button set to "Erase", deletes
+  every stroke it touches, like Windows Ink's stroke eraser. In guided drawing it does nothing, so it can't add a
+  graded stroke. *Code:* `src/front/kd-fork-erase.js`.
+- **Ctrl+Z undoes the last stroke** (Card 1, free drawing, front side). With strokes in the box, Ctrl+Z removes the
+  last one (like the undo button); with an empty box, on the back and outside the deck it stays Anki's undo. Anki's
+  Ctrl+Z is a menu shortcut the card never sees, so this needs the small add-on in [`StrokeUndo/`](StrokeUndo/README.md)
+  ("KanjiDraw: Strg+Z für Striche", package in `StrokeUndo/dist/`). Without it, Ctrl+Z only reaches the card when Anki
+  has nothing to undo. *Code:* `window._kdUndoStroke` in `src/front/kd-fork-erase.js`, `StrokeUndo/__init__.py`.
 
 ## Settings and defaults
 
@@ -368,13 +376,16 @@ New files (everything else is a marked edit of an upstream file):
 | `src/front/kd-fork-back-settings.html`, `kd-fork-source-settings.js` | "Rückseite" settings: source chips, Nanori |
 | `src/front/kd-fork-svg-paths.js` | Inert stroke source → SVG paths |
 | `src/front/kd-fork-pen-scroll.js` | Pen scrolling on Anki Desktop |
+| `src/front/kd-fork-erase.js` | Pen eraser and Ctrl+Z stroke undo in free drawing |
 | `Tests/js/test_fork_settings.js`, `test_audio_scheduling.js`, `test_fork_layout.js`, `test_highlighter.js` | Node tests: settings/defaults resolution, audio scheduling, section layout helpers, highlighter add-on core |
-| `Tests/browser/check_fork_*.py` | Playwright checks against Anki-rendered cards (back options, mobile title, strokes, reveal timing); `check_fork_layout.py` renders the templates itself; see [Tests/browser/README.md](Tests/browser/README.md) |
+| `Tests/browser/check_fork_*.py` | Playwright checks against Anki-rendered cards (back options, mobile title, strokes, reveal timing, eraser/undo); `check_fork_layout.py` renders the templates itself; see [Tests/browser/README.md](Tests/browser/README.md) |
 | `Migration/` | Add-on to switch between upstream's deck and this one (see [above](#switching-from-upstreams-deck)); the built package is in `Migration/dist/` |
 | `Highlighter/` | Optional add-on with editor buttons for the highlights (see [above](#editor-buttons-for-highlights)); the built package is in `Highlighter/dist/` |
-| `Tools/build_addons.py` | Builds `Migration/dist/kanji_draw_migration.ankiaddon` and `Highlighter/dist/kanji_draw_highlighter.ankiaddon`; `--check` verifies them |
+| `Tools/build_addons.py` | Builds `Migration/dist/kanji_draw_migration.ankiaddon`, `Highlighter/dist/kanji_draw_highlighter.ankiaddon` and `StrokeUndo/dist/kanji_draw_stroke_undo.ankiaddon`; `--check` verifies them |
 | `Tools/make_migration_hashes.py` | Builds `Migration/upstream_v3_hashes.json` from upstream's v3 deck |
 | `Tests/migration/test_migration.py` | Tests for the migration add-on, incl. a sync round trip (needs `anki` from PyPI) |
+| `StrokeUndo/` | Add-on: Ctrl+Z undoes the last stroke on KanjiDraw cards, otherwise Anki's undo; package in `StrokeUndo/dist/` |
+| `Tests/stroke_undo/test_stroke_undo.py` | Tests for the StrokeUndo add-on (stdlib, `aqt` stubbed) |
 | `FORK.md` | This file |
 
 Paths under `src/` are relative to `Templates/`. `.gitignore` additionally ignores the local agent instruction files

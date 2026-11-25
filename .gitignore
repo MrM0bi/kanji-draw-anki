@@ -11,6 +11,7 @@ Desktop.ini
 *.ankiaddon
 !Migration/dist/kanji_draw_migration.ankiaddon
 !Highlighter/dist/kanji_draw_highlighter.ankiaddon
+!StrokeUndo/dist/kanji_draw_stroke_undo.ankiaddon
 
 # Backups
 Backup/
