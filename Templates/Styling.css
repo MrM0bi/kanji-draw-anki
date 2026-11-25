@@ -5561,6 +5561,14 @@ html:has(.kd-info-inline .tree-fullscreen) {
     overflow: hidden !important;
 }
 
+/* The fixed tree only stacks within its ancestors' stacking contexts: .kd-info-inline (z-index 2, below the
+   gear button's 50) and, in widescreen, its sticky .kd-col (later columns paint over it). Lift both while
+   it is fullscreen, so the tree covers the other columns and the gear instead of hiding its zoom buttons. */
+.kd-info-inline:has(.tree-fullscreen),
+.kd-info-inline .kd-col:has(.tree-fullscreen) {
+    z-index: 1000 !important;
+}
+
 /* ==========================================================================
    fork: section layout (src/back/kd-fork-layout.js): columns, hidden sections and the edit mode.
    Markup: .kd-info-inline > .kd-info-tags + .kd-cols > .kd-col[data-slot] > .kd-section, then .kd-hidden-strip

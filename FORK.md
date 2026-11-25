@@ -229,6 +229,9 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   590 px) so their nodes stay readable. *Code:* `boxH` in `src/back/primitive-tree.js`. *Upstream candidate.*
 - **Esc closes fullscreen.** *Code:* one document `keydown` listener (`window._kdTreeEscBound`) in
   `src/back/primitive-tree.js`. *Upstream candidate.*
+- **Fullscreen above everything.** While the tree is fullscreen, its column and the sections area move to the
+  top layer. Before this, sections in later columns and the settings gear covered the tree, the gear hiding
+  the + button. *Code:* `.kd-col:has(.tree-fullscreen)` in `Styling.css`.
 - **Larger tool buttons.** Zoom and fullscreen buttons are 36 px in Verspielt (42 px on touch screens). Minimal
   uses 40 / 44 px.
 
