@@ -227,6 +227,16 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   (override, else `Bedeutung-DE`). *Code:* `.kd-tree-root-keyword`; fork lines in `src/back/primitive-tree.js`.
 - **Height by depth.** Trees with four or more levels get a taller box (+90 px per level beyond three, up to
   590 px) so their nodes stay readable. *Code:* `boxH` in `src/back/primitive-tree.js`. *Upstream candidate.*
+- **Minimum node size.** The tree shrinks to fit only down to a minimum (nodes about 23 px in radius, clearly
+  larger than 拾 used to get). Beyond that it starts at the root and cuts off the deepest rows, with a faded
+  bottom edge; panning or fullscreen shows the rest. *Code:* `MIN_PX_PER_UNIT` in `src/back/primitive-tree.js`,
+  `.tree-clip-bottom` in `Styling.css`. *Upstream candidate.*
+- **Wheel zoom in fullscreen.** The mouse wheel (or a trackpad pinch) zooms smoothly around the pointer while
+  the tree is fullscreen; outside fullscreen the wheel still scrolls the page. *Code:* `wheel` listener on the
+  touch shield in `src/back/primitive-tree.js`. *Upstream candidate.*
+- **Zoom out in fullscreen.** Fullscreen can zoom out below its starting size, down to about half the design
+  size, so a tree that opens huge on a big monitor can be made smaller. Below the start, − and + step by x1.4.
+  *Code:* `minZoom()` in `src/back/primitive-tree.js`.
 - **Esc closes fullscreen.** *Code:* one document `keydown` listener (`window._kdTreeEscBound`) in
   `src/back/primitive-tree.js`. *Upstream candidate.*
 - **Fullscreen above everything.** While the tree is fullscreen, its column and the sections area move to the

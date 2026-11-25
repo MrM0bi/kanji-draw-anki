@@ -1409,6 +1409,9 @@
         const NS = 'http://www.w3.org/2000/svg';
         const PALETTE = ['#2aa7e0', '#d46be8', '#f0a030', '#3fbf86', '#e8625c', '#8a7cf0'];
         const R = 26, R_ROOT = 33, LINE_MAX = 12;
+        // fork: smallest drawing scale (px per layout unit) before the tree is cut instead of shrunk further.
+        // 0.9 gives non-root nodes a radius of about 23px; 拾 (four layers) was drawn at about 0.71 / 18.5px.
+        const MIN_PX_PER_UNIT = 0.9;
         const wrapLabel = (rawKw) => {
             const clean = (rawKw || '').replace(/\u00ad/g, '').trim();
             if (!clean) return [];
@@ -1788,7 +1791,10 @@
 
         // --- Interactive +/- Zoom, Fullscreen & Focus-Gated Pan (Double-Tap to Navigate, Tap Outside to Scroll) ---
         let zoom = 1;
-        const minZoom = 1;
+        // fork: fullscreen may zoom out below the starting size, down to about half the design size (nodes
+        // about 13px in radius), so a tree that opens huge on a big monitor can be made smaller. Elsewhere
+        // the starting size stays the limit.
+        const minZoom = () => isFullscreen ? Math.min(1, Math.max(0.15, 0.5 * getBaseBox().unitsPerPx)) : 1;
         const maxZoom = 3.0;
         let vx = 0, vy = 0, vw = width, vh = height;
         let panDragged = false;
@@ -1824,7 +1830,7 @@
         btnFs.innerHTML = ICON_EXPAND;
 
         const updateZoomBtns = () => {
-            btnOut.classList.toggle('disabled', zoom <= 1.02);
+            btnOut.classList.toggle('disabled', zoom <= minZoom() + 0.02);
             btnIn.classList.toggle('disabled', zoom >= maxZoom - 0.02);
         };
 
@@ -1892,6 +1898,7 @@
                 viewport.style.height = boxH + 'px';
                 svg.style.height = boxH + 'px';
                 btnFs.innerHTML = ICON_EXPAND;
+                if (zoom < 1) zoom = 1;
                 if (zoom <= 1.02) {
                     hasPanned = false;
                     setNavActive(false);
@@ -1925,12 +1932,17 @@
             const topSafePx = isFullscreen ? 46 : (((root.x + root.halfW) / width > 0.72) ? 36 : 12);
             const innerW = Math.max(120, bW - leftSafePx - rightSafePx);
             const innerH = Math.max(100, bH - topSafePx - botSafePx);
-            const unitsPerPx = Math.max(width / innerW, height / innerH);
+            // fork: fit the whole tree, but never draw it smaller than MIN_PX_PER_UNIT. A tree that would need
+            // more shrinking keeps that size, starts at the root and cuts off the deepest rows (and the outer
+            // edges of a very wide tree); pan or fullscreen shows the rest.
+            const unitsPerPx = Math.min(1 / MIN_PX_PER_UNIT, Math.max(width / innerW, height / innerH));
             const bVw = bW * unitsPerPx;
             const bVh = bH * unitsPerPx;
             const baseVx = (width - bVw) / 2;
-            const baseVy = height / 2 - (topSafePx + innerH / 2) * unitsPerPx;
-            return { bVw: bVw, bVh: bVh, baseVx: baseVx, baseVy: baseVy };
+            const baseVy = height > innerH * unitsPerPx + 0.5
+                ? -topSafePx * unitsPerPx
+                : height / 2 - (topSafePx + innerH / 2) * unitsPerPx;
+            return { bVw: bVw, bVh: bVh, baseVx: baseVx, baseVy: baseVy, unitsPerPx: unitsPerPx };
         };
 
         const clientToSvg = (clientX, clientY) => {
@@ -1962,7 +1974,7 @@
             const base = getBaseBox();
             vw = base.bVw / zoom;
             vh = base.bVh / zoom;
-            if (zoom <= 1.02 && !hasPanned) {
+            if (Math.abs(zoom - 1) <= 0.02 && !hasPanned) {
                 zoom = 1;
                 vx = base.baseVx;
                 vy = base.baseVy;
@@ -1972,14 +1984,16 @@
                 clampPan();
             }
             svg.setAttribute('viewBox', `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
+            // fork: fade the bottom edge while nodes below it are cut off.
+            viewport.classList.toggle('tree-clip-bottom', vy + vh < height - 4);
             updateZoomBtns();
         };
         window._kanjiRefreshTreeViewport = applyViewBox;
 
         const setZoomAround = (newZoom, focusSvgX, focusSvgY, resetPan) => {
-            const targetZoom = Math.max(minZoom, Math.min(maxZoom, Math.round(newZoom * 100) / 100));
+            const targetZoom = Math.max(minZoom(), Math.min(maxZoom, Math.round(newZoom * 100) / 100));
             const base = getBaseBox();
-            if (targetZoom <= 1.02 && resetPan) {
+            if (Math.abs(targetZoom - 1) <= 0.02 && resetPan) {
                 zoom = 1;
                 hasPanned = false;
                 applyViewBox();
@@ -2044,12 +2058,15 @@
 
         bindTreeBtn(btnIn, () => {
             setNavActive(true);
-            const next = Math.round((zoom + 0.25) * 4) / 4;
+            // fork: below the starting size (fullscreen only) each step is x1.4 and stops at 1 on the way up.
+            const next = zoom < 0.98 ? Math.min(1, zoom * 1.4) : Math.round((zoom + 0.25) * 4) / 4;
             setZoomAround(next);
         });
         bindTreeBtn(btnOut, () => {
             const next = Math.round((zoom - 0.25) * 4) / 4;
-            if (next <= 1.02) {
+            if (isFullscreen && zoom <= 1.02) {
+                setZoomAround(zoom / 1.4, null, null, false); // fork: below the starting size (fullscreen only)
+            } else if (next <= 1.02) {
                 setZoomAround(1, null, null, true);
                 if (!isFullscreen) setNavActive(false);
             } else {
@@ -2060,6 +2077,34 @@
         bindTreeBtn(btnFs, () => {
             setFullscreen(!isFullscreen);
         });
+
+        // fork: in fullscreen the mouse wheel (and a trackpad pinch, which arrives as ctrl+wheel) zooms around the
+        // pointer. Each event moves a target zoom; an animation frame loop eases the view toward it, so wheel
+        // notches glide instead of jumping. Outside fullscreen the wheel keeps scrolling the page.
+        let wheelTarget = null, wheelFx = 0, wheelFy = 0, wheelRaf = 0;
+        const wheelStep = () => {
+            wheelRaf = 0;
+            if (!isFullscreen || wheelTarget == null) { wheelTarget = null; return; }
+            let next = zoom + (wheelTarget - zoom) * 0.3;
+            if (Math.abs(wheelTarget - next) < 0.015) next = wheelTarget;
+            setZoomAround(next, wheelFx, wheelFy, false);
+            if (next === wheelTarget) wheelTarget = null;
+            else wheelRaf = requestAnimationFrame(wheelStep);
+        };
+        shield.addEventListener('wheel', function (e) {
+            if (!isFullscreen) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const px = e.deltaMode === 1 ? e.deltaY * 16 : (e.deltaMode === 2 ? e.deltaY * 400 : e.deltaY);
+            const k = e.ctrlKey ? 0.01 : 0.0015;
+            // The view now follows the pointer, so passing the starting size must not snap it back to the centre.
+            hasPanned = true;
+            const from = wheelTarget != null ? wheelTarget : zoom;
+            wheelTarget = Math.max(minZoom(), Math.min(maxZoom, from * Math.exp(-px * k)));
+            const p = clientToSvg(e.clientX, e.clientY);
+            wheelFx = p.x; wheelFy = p.y;
+            if (!wheelRaf) wheelRaf = requestAnimationFrame(wheelStep);
+        }, { passive: false });
 
         let selectedNode = null;
         const applyNodeSelection = (selNode) => {
