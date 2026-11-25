@@ -111,6 +111,13 @@ hand.
 - **Book texts.** Where the OCR left an unrelated kanji in place of a primitive's variant form, the real form is used
   (e.g. 耂, 覀, 虍). Forms with no Unicode character use the placeholder 〓. Typos and a few unmarked keywords were
   fixed, and `Stolperfallen` got some extra stroke-order rules.
+- **Colour spans, second review (2026-11-25).** All text fields of all notes were checked again after the name
+  changes. The keyword mark now sits on the keyword itself, not on a paraphrase. Missing primitive marks (italic)
+  were added, colour numbers updated after tree changes, and parts the texts name were marked.
+- **Component trees, follow-up (2026-11-25).** Some wrong parts were fixed (e.g. 走 and 喪 Erde, 声 Samurai) and
+  parts the book treats as one were combined (e.g. 仙 Einsiedler, Spruchband, 甬 Landvermesser). Primitives such as
+  扌 Finger now carry their star everywhere, and some primitive notes got their parts in the tree. A few stories
+  that still used upstream names (里 "ri" → Computer) or didn't match the tree were rewritten.
 
 ### Earlier cleanup of this deck (before v3)
 
