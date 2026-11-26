@@ -19,14 +19,14 @@
     var BY_DISTANCE = ['C', 'L1', 'R1', 'L2', 'R2', 'L3', 'R3'];
     var COUNTS = [1, 2, 3, 4, 5, 6, 7];
     var MAX = 7, GAP = 16, EDGE = 16;
-    // Defaults per count, set by the user on 2026-11-23 (one column: the KD_SECTIONS order in kd-fork-sections.js)
+    // Defaults per count, set by the user on 2026-11-26 (one column: the KD_SECTIONS order in kd-fork-sections.js).
     var DEFAULT_WIDE = {
-        2: { L1: ['elemente', 'schreibfehler', 'strichfolge'], R1: ['eselsbruecken', 'notiz', 'lesungen', 'wortbeispiele', 'links'] },
-        3: { L1: ['schreibfehler', 'strichfolge'], C: ['elemente', 'lesungen', 'links'], R1: ['eselsbruecken', 'notiz', 'wortbeispiele'] },
-        4: { L2: ['schreibfehler', 'strichfolge'], L1: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
-        5: { L2: ['strichfolge'], L1: ['schreibfehler'], C: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
-        6: { L3: ['strichfolge'], L2: ['schreibfehler'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['notiz', 'links'] },
-        7: { L3: ['notiz'], L2: ['strichfolge'], L1: ['schreibfehler'], C: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['links'] }
+        2: { L1: ['elemente', 'varianten', 'schreibfehler', 'strichfolge'], R1: ['eselsbruecken', 'notiz', 'lesungen', 'wortbeispiele', 'links'] },
+        3: { L1: ['varianten', 'schreibfehler', 'strichfolge'], C: ['elemente', 'lesungen', 'links'], R1: ['eselsbruecken', 'notiz', 'wortbeispiele'] },
+        4: { L2: ['varianten', 'schreibfehler', 'strichfolge'], L1: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
+        5: { L2: ['varianten', 'strichfolge'], L1: ['schreibfehler'], C: ['elemente', 'links'], R1: ['eselsbruecken', 'notiz'], R2: ['lesungen', 'wortbeispiele'] },
+        6: { L3: ['varianten', 'strichfolge'], L2: ['schreibfehler'], L1: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['notiz', 'links'] },
+        7: { L3: ['varianten', 'notiz'], L2: ['strichfolge'], L1: ['schreibfehler'], C: ['elemente'], R1: ['eselsbruecken'], R2: ['lesungen', 'wortbeispiele'], R3: ['links'] }
     };
 
     // --- Pure helpers (Tests/js/test_fork_layout.js) ---
@@ -148,7 +148,7 @@
     };
 
     // --- Storage names and codes (see the header) ---
-    var CODES = { elemente: 'e', eselsbruecken: 'm', strichfolge: 's', notiz: 'n', schreibfehler: 'f', wortbeispiele: 'w', lesungen: 'l', links: 'x' };
+    var CODES = { elemente: 'e', eselsbruecken: 'm', strichfolge: 's', notiz: 'n', schreibfehler: 'f', wortbeispiele: 'w', lesungen: 'l', links: 'x', varianten: 'v' };
     var NAMES = {};
     Object.keys(CODES).forEach(function (k) { NAMES[CODES[k]] = k; });
     var WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'];

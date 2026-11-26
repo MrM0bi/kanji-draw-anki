@@ -9,7 +9,7 @@ const context = {window: {}};
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../../Templates/src/back/kd-fork-layout.js'), 'utf8'), context);
 const core = context.window._kdLayout.core;
-const KEYS = ['elemente', 'eselsbruecken', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']; // KD_SECTIONS order
+const KEYS = ['elemente', 'eselsbruecken', 'varianten', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']; // KD_SECTIONS order
 const plain = v => JSON.parse(JSON.stringify(v));
 const all = arr => Object.values(arr).flat().sort();
 const store = saved => key => saved[key] || '';
@@ -106,6 +106,6 @@ test('stored names and values fit the Desktop add-on filter', () => {
     assert.ok(enc.length <= 64, enc);
     assert.equal(core.decode('kdLayout7', enc), full);
     assert.equal(core.decode('kdLayout7', full), full); // old values with full names still read
-    assert.equal(core.encode('kdSecHidden', KEYS.join(',')).length, 15);
+    assert.equal(core.encode('kdSecHidden', KEYS.join(',')).length, 17);
     assert.equal(core.encode('kdLayoutCols', 'auto'), 'auto');
 });
