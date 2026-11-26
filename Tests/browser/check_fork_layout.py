@@ -51,7 +51,7 @@ def page(name, card, fields, back=True):
 
 
 ORDER = "() => [...document.querySelectorAll('#kd-info-inline .kd-col .kd-section')].filter(s => s.getClientRects().length).map(s => s.dataset.sec)"
-DEFAULT = ['elemente', 'eselsbruecken', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']  # KD_SECTIONS order
+DEFAULT = ['elemente', 'eselsbruecken', 'varianten', 'notiz', 'schreibfehler', 'strichfolge', 'lesungen', 'wortbeispiele', 'links']  # KD_SECTIONS order
 
 
 def context(browser, width, height=860):

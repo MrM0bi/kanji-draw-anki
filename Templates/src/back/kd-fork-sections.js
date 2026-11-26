@@ -1,7 +1,7 @@
 // fork: inline info sections on the back (replaces upstream's info modal, docs/fork/v3-migration.md D3).
 // KD_SECTIONS is the single source for order, titles, icons and the default collapsed state; the markup
 // in the back templates only holds the section bodies. Each section remembers its state in kdSec_<key>
-// ('1' = collapsed; kdSecW_<key> with several columns). Lazy sections (Strichfolge, Schreibfehler) initialise
+// ('1' = collapsed; kdSecW_<key> with several columns). Varianten renders at once (kd-fork-variants.js). Lazy sections (Strichfolge, Schreibfehler) initialise
 // on first open. Order, hiding, columns and the edit mode live in kd-fork-layout.js.
 (function () {
     var host = document.getElementById('kd-info-inline');
@@ -17,6 +17,8 @@
         notiz: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" class="fi-cream"></path><path d="M14 2v6h6" class="fi-gold"></path>' +
             '<line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
         schreibfehler: '<circle cx="12" cy="12" r="9.5" class="fi-cream"></circle><circle cx="12" cy="12" r="5.6" class="fi-coral"></circle><circle cx="12" cy="12" r="2.2" class="fi-gold"></circle>',
+        varianten: '<rect x="2.5" y="4" width="11" height="15" rx="2.2" class="fi-cream"></rect><rect x="10.5" y="7" width="11" height="13" rx="2.2" class="fi-teal"></rect>' +
+            '<path d="M14 11.5h4.5M14 15.5h3"></path>',
         wortbeispiele: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" class="fi-teal"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" class="fi-cream"></path>',
         lesungen: '<path d="M10.5 4C6.4 4 3 6.7 3 10c0 1.8 1 3.4 2.5 4.5L4.5 17l3.2-1.4c.9.3 1.8.4 2.8.4 4.1 0 7.5-2.7 7.5-6S14.6 4 10.5 4z" class="fi-gold"></path>' +
             '<path d="M16 11.5c-2.8 0-5 2-5 4.4s2.2 4.4 5 4.4c.6 0 1.2-.1 1.8-.3l2.2 1-0.6-2c1-0.8 1.6-1.9 1.6-3.1 0-2.4-2.2-4.4-5-4.4z" class="fi-cream"></path>',
@@ -31,6 +33,7 @@
         eselsbruecken: '<path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>',
         notiz: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
         schreibfehler: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+        varianten: '<rect x="2" y="4" width="11" height="15" rx="2"></rect><path d="M16 7h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-1"></path>',
         wortbeispiele: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>',
         lesungen: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
         links: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>'
@@ -49,6 +52,7 @@
     var KD_SECTIONS = [
         { key: 'elemente', title: 'Elemente' },
         { key: 'eselsbruecken', title: 'Eselsbrücken' },
+        { key: 'varianten', title: 'Varianten' },
         { key: 'notiz', title: 'Notiz' },
         { key: 'schreibfehler', title: 'Schreibfehler', onOpen: openPitfalls },
         { key: 'strichfolge', title: 'Strichfolge', collapsed: true, onOpen: openOrder, onClose: closeOrder },
@@ -105,6 +109,12 @@
     if (note && !note.textContent.replace(/ /g, ' ').trim() && !note.querySelector('img, video, audio, svg')) hide('notiz');
     if (!host.querySelector('.readings-container--backside .reading-row')) hide('lesungen');
     if (!document.querySelector('#svg-bg path')) hide('strichfolge');
+    var varRaw = document.getElementById('kd-raw-variants-data');
+    if (varRaw && window._kdRenderVariants) {
+        var varCount = 0;
+        try { varCount = window._kdRenderVariants(varRaw.innerHTML, document.getElementById('kd-variants-target')); } catch (e) { }
+        if (!varCount) hide('varianten');
+    }
 
     // --- Primitives ("[name]" in Kanji): no font samples; no tree if Radikale only names the primitive itself ---
     var rootEl = host.querySelector('.tree-root-kanji');

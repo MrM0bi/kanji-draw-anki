@@ -47,6 +47,7 @@ Fields only the fork uses:
 | `BuchBeschreibung`, `BuchPrimitivBeschreibung` | Story boxes under `HEISIG` (source "Heisig") |
 | `Nanori` | Third row in "Lesungen" |
 | `Notiz` | Section "Notiz" |
+| `Varianten` | Section "Varianten": short and alternative forms (e.g. 氵 for 水) |
 
 **Primitive notes:** the deck also has notes for primitives. Their `Kanji` field holds a bracketed name such as
 `[Spazierstock]` instead of a glyph. The templates detect them by the leading `[`.
@@ -139,12 +140,19 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
 ### Back side
 
 - **Inline sections instead of the info modal.** The back shows everything as collapsible sections, by default in
-  this order: Elemente, Eselsbrücken, Notiz, Schreibfehler, Strichfolge, Lesungen, Wortbeispiele, Externe Links. Each
+  this order: Elemente, Eselsbrücken, Varianten, Notiz, Schreibfehler, Strichfolge, Lesungen, Wortbeispiele, Externe Links. Each
   section remembers whether it is open. Strichfolge starts closed and loads on first open. The header shows JLPT,
   frequency and the book number. Dragging vertically over the tree scrolls the page.
   *Code:* `src/back/kd-fork-sections.js` (`KD_SECTIONS` sets the one-column order, titles, icons and default state),
   `#kd-info-inline` / `.kd-section` in both back templates, one fork line in `src/back/primitive-tree.js`
   (`treeModalEl`).
+- **Varianten.** A section for the short and alternative forms of a kanji or primitive (e.g. 犭 for 犬, 灬 for 火,
+  木 on the left ending in a dot). Each form shows its strokes (tap to replay), its primitive name, position, a short
+  description and example kanji (`#buch` marks forms the book names; kept for searching, not shown). Filled from the field `Varianten`,
+  in the same style as `Stolperfallen`: `Glyph[Name]@Position#buch{Beispiele}: Beschreibung <path …>`, entries
+  separated by `||`. Hidden when the field is empty.
+  *Code:* `src/back/kd-fork-variants.js`, `.kd-var-*` in `Styling.css`, the `varianten` entry in `KD_SECTIONS` and
+  the layout defaults.
 - **Several mnemonic sources.** "Eselsbrücken" groups the texts by source:
   - Merksätze: `Merksatz-Custom` and `Merksatz-DE`
   - KanjiDraw: upstream's `Merkhilfe` hint and `Merksatz-KI`
@@ -172,7 +180,7 @@ Each entry: what it does, then where the code is. *Upstream candidate* marks gen
   lowers the count. Each column count keeps its own arrangement. One that was never arranged starts from the nearest
   larger arranged count, its outer columns added below the outermost remaining ones (from odd to even the centre goes
   on top of the left middle column; from even to odd the middle pair becomes the centre), or else from the defaults
-  (writing on the left, Elemente under the drawings, Eselsbrücken and language on the right). Outer column pairs
+  (Varianten and writing on the left, Elemente under the drawings, Eselsbrücken and language on the right). Outer column pairs
   without a shown section are left out. "Seitenspalten beginnen": below the header (default) or beside it, level with
   the top of the drawing box (with even counts the two middle columns stay below the header). Columns that fit the
   window stay in view while the page scrolls; longer ones scroll with the page until their end is visible.
